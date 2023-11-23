@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Auth } from 'aws-amplify';
 import {withAuthenticator} from "@aws-amplify/ui-react";
 import Logo from './components/utils/Logo';
 import { CognitoUser } from './types/generalTypes';
@@ -26,7 +25,7 @@ function App({user, signOut}:AppProps) {
 
     if (loading) return <Loader isFullScreen={true}/>
 
-    if (!userData) return <Register/>
+    if (!userData) return <Register setUserData={setUserData}/>
 
     return (
         <>User Has Account</>
