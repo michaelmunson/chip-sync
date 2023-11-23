@@ -18,7 +18,6 @@ function App({user, signOut}:AppProps) {
         console.log(window.exports); 
     }, []); 
 
-
     return (<>
         Chip Sync
     </>);
