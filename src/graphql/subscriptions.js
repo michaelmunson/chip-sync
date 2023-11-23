@@ -10,12 +10,14 @@ export const onCreateOrganization = /* GraphQL */ `
       id
       name
       accessCode
+      location
       users {
         items {
           id
           firstName
           lastName
           role
+          contact
           createdAt
           updatedAt
           organizationUsersId
@@ -30,7 +32,8 @@ export const onCreateOrganization = /* GraphQL */ `
           id
           contact
           address
-          position
+          latitude
+          longitude
           images
           type
           createdAt
@@ -42,7 +45,6 @@ export const onCreateOrganization = /* GraphQL */ `
         nextToken
         __typename
       }
-      notifications
       createdAt
       updatedAt
       owner
@@ -59,12 +61,14 @@ export const onUpdateOrganization = /* GraphQL */ `
       id
       name
       accessCode
+      location
       users {
         items {
           id
           firstName
           lastName
           role
+          contact
           createdAt
           updatedAt
           organizationUsersId
@@ -79,7 +83,8 @@ export const onUpdateOrganization = /* GraphQL */ `
           id
           contact
           address
-          position
+          latitude
+          longitude
           images
           type
           createdAt
@@ -91,7 +96,6 @@ export const onUpdateOrganization = /* GraphQL */ `
         nextToken
         __typename
       }
-      notifications
       createdAt
       updatedAt
       owner
@@ -108,12 +112,14 @@ export const onDeleteOrganization = /* GraphQL */ `
       id
       name
       accessCode
+      location
       users {
         items {
           id
           firstName
           lastName
           role
+          contact
           createdAt
           updatedAt
           organizationUsersId
@@ -128,7 +134,8 @@ export const onDeleteOrganization = /* GraphQL */ `
           id
           contact
           address
-          position
+          latitude
+          longitude
           images
           type
           createdAt
@@ -140,7 +147,6 @@ export const onDeleteOrganization = /* GraphQL */ `
         nextToken
         __typename
       }
-      notifications
       createdAt
       updatedAt
       owner
@@ -158,10 +164,27 @@ export const onCreateUser = /* GraphQL */ `
       firstName
       lastName
       role
+      notifications {
+        items {
+          id
+          timestamp
+          type
+          data
+          opened
+          createdAt
+          updatedAt
+          userNotificationsId
+          owner
+          __typename
+        }
+        nextToken
+        __typename
+      }
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -170,10 +193,27 @@ export const onCreateUser = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
+        __typename
+      }
+      contact
+      markers {
+        items {
+          id
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          userMarkersId
+          owner
+          __typename
+        }
+        nextToken
         __typename
       }
       createdAt
@@ -194,10 +234,27 @@ export const onUpdateUser = /* GraphQL */ `
       firstName
       lastName
       role
+      notifications {
+        items {
+          id
+          timestamp
+          type
+          data
+          opened
+          createdAt
+          updatedAt
+          userNotificationsId
+          owner
+          __typename
+        }
+        nextToken
+        __typename
+      }
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -206,10 +263,27 @@ export const onUpdateUser = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
+        __typename
+      }
+      contact
+      markers {
+        items {
+          id
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          userMarkersId
+          owner
+          __typename
+        }
+        nextToken
         __typename
       }
       createdAt
@@ -230,10 +304,27 @@ export const onDeleteUser = /* GraphQL */ `
       firstName
       lastName
       role
+      notifications {
+        items {
+          id
+          timestamp
+          type
+          data
+          opened
+          createdAt
+          updatedAt
+          userNotificationsId
+          owner
+          __typename
+        }
+        nextToken
+        __typename
+      }
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -242,10 +333,27 @@ export const onDeleteUser = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
+        __typename
+      }
+      contact
+      markers {
+        items {
+          id
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          userMarkersId
+          owner
+          __typename
+        }
+        nextToken
         __typename
       }
       createdAt
@@ -265,13 +373,15 @@ export const onCreateMarker = /* GraphQL */ `
       id
       contact
       address
-      position
+      latitude
+      longitude
       images
       type
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -280,7 +390,6 @@ export const onCreateMarker = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
@@ -303,13 +412,15 @@ export const onUpdateMarker = /* GraphQL */ `
       id
       contact
       address
-      position
+      latitude
+      longitude
       images
       type
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -318,7 +429,6 @@ export const onUpdateMarker = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
@@ -341,13 +451,15 @@ export const onDeleteMarker = /* GraphQL */ `
       id
       contact
       address
-      position
+      latitude
+      longitude
       images
       type
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -356,7 +468,6 @@ export const onDeleteMarker = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
@@ -365,6 +476,303 @@ export const onDeleteMarker = /* GraphQL */ `
       createdAt
       updatedAt
       organizationMarkersId
+      owner
+      __typename
+    }
+  }
+`;
+export const onCreateNotification = /* GraphQL */ `
+  subscription OnCreateNotification(
+    $filter: ModelSubscriptionNotificationFilterInput
+    $owner: String
+  ) {
+    onCreateNotification(filter: $filter, owner: $owner) {
+      id
+      timestamp
+      type
+      data
+      opened
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userNotificationsId
+      owner
+      __typename
+    }
+  }
+`;
+export const onUpdateNotification = /* GraphQL */ `
+  subscription OnUpdateNotification(
+    $filter: ModelSubscriptionNotificationFilterInput
+    $owner: String
+  ) {
+    onUpdateNotification(filter: $filter, owner: $owner) {
+      id
+      timestamp
+      type
+      data
+      opened
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userNotificationsId
+      owner
+      __typename
+    }
+  }
+`;
+export const onDeleteNotification = /* GraphQL */ `
+  subscription OnDeleteNotification(
+    $filter: ModelSubscriptionNotificationFilterInput
+    $owner: String
+  ) {
+    onDeleteNotification(filter: $filter, owner: $owner) {
+      id
+      timestamp
+      type
+      data
+      opened
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userNotificationsId
+      owner
+      __typename
+    }
+  }
+`;
+export const onCreateGardnerMarker = /* GraphQL */ `
+  subscription OnCreateGardnerMarker(
+    $filter: ModelSubscriptionGardnerMarkerFilterInput
+    $owner: String
+  ) {
+    onCreateGardnerMarker(filter: $filter, owner: $owner) {
+      id
+      address
+      latitude
+      longitude
+      images
+      type
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userMarkersId
+      owner
+      __typename
+    }
+  }
+`;
+export const onUpdateGardnerMarker = /* GraphQL */ `
+  subscription OnUpdateGardnerMarker(
+    $filter: ModelSubscriptionGardnerMarkerFilterInput
+    $owner: String
+  ) {
+    onUpdateGardnerMarker(filter: $filter, owner: $owner) {
+      id
+      address
+      latitude
+      longitude
+      images
+      type
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userMarkersId
+      owner
+      __typename
+    }
+  }
+`;
+export const onDeleteGardnerMarker = /* GraphQL */ `
+  subscription OnDeleteGardnerMarker(
+    $filter: ModelSubscriptionGardnerMarkerFilterInput
+    $owner: String
+  ) {
+    onDeleteGardnerMarker(filter: $filter, owner: $owner) {
+      id
+      address
+      latitude
+      longitude
+      images
+      type
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userMarkersId
       owner
       __typename
     }

@@ -6,7 +6,13 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
+import {
+  Button,
+  Flex,
+  Grid,
+  TextAreaField,
+  TextField,
+} from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
 import { createUser } from "../graphql/mutations";
@@ -26,21 +32,25 @@ export default function UserCreateForm(props) {
     firstName: "",
     lastName: "",
     role: "",
+    contact: "",
   };
   const [firstName, setFirstName] = React.useState(initialValues.firstName);
   const [lastName, setLastName] = React.useState(initialValues.lastName);
   const [role, setRole] = React.useState(initialValues.role);
+  const [contact, setContact] = React.useState(initialValues.contact);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setFirstName(initialValues.firstName);
     setLastName(initialValues.lastName);
     setRole(initialValues.role);
+    setContact(initialValues.contact);
     setErrors({});
   };
   const validations = {
     firstName: [{ type: "Required" }],
     lastName: [{ type: "Required" }],
     role: [{ type: "Required" }],
+    contact: [{ type: "JSON" }],
   };
   const runValidationTasks = async (
     fieldName,
@@ -71,6 +81,7 @@ export default function UserCreateForm(props) {
           firstName,
           lastName,
           role,
+          contact,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -136,6 +147,7 @@ export default function UserCreateForm(props) {
               firstName: value,
               lastName,
               role,
+              contact,
             };
             const result = onChange(modelFields);
             value = result?.firstName ?? value;
@@ -162,6 +174,7 @@ export default function UserCreateForm(props) {
               firstName,
               lastName: value,
               role,
+              contact,
             };
             const result = onChange(modelFields);
             value = result?.lastName ?? value;
@@ -188,6 +201,7 @@ export default function UserCreateForm(props) {
               firstName,
               lastName,
               role: value,
+              contact,
             };
             const result = onChange(modelFields);
             value = result?.role ?? value;
@@ -202,6 +216,32 @@ export default function UserCreateForm(props) {
         hasError={errors.role?.hasError}
         {...getOverrideProps(overrides, "role")}
       ></TextField>
+      <TextAreaField
+        label="Contact"
+        isRequired={false}
+        isReadOnly={false}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              firstName,
+              lastName,
+              role,
+              contact: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.contact ?? value;
+          }
+          if (errors.contact?.hasError) {
+            runValidationTasks("contact", value);
+          }
+          setContact(value);
+        }}
+        onBlur={() => runValidationTasks("contact", contact)}
+        errorMessage={errors.contact?.errorMessage}
+        hasError={errors.contact?.hasError}
+        {...getOverrideProps(overrides, "contact")}
+      ></TextAreaField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

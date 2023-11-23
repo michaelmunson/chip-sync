@@ -2,29 +2,56 @@
 # all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
 # input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
 
+# ORGANIZATIONS
+
 type Organization @model @auth(rules: [{ allow: owner }]) {
     id:ID!
     name:String!
     accessCode:String!
+    location:String!
     users: [User] @hasMany
     markers: [Marker] @hasMany
-    notifications: AWSJSON
 }
 
 type User @model @auth(rules: [{ allow: owner }]) {
     id: ID!
     firstName: String!
     lastName: String!
-    role: String!
+    role: String! 
+    notifications: [Notification] @hasMany
     organization: Organization @belongsTo
+    # If Gardner
+    contact: AWSJSON
+    markers: [GardnerMarker] @hasMany
 }
 
 type Marker @model @auth(rules: [{ allow: owner }]) {
     id: ID!
     contact: AWSJSON
     address: String!
-    position: AWSJSON
+    latitude: Float!
+    longitude: Float!
     images: [String]
     type: String!
     organization: Organization @belongsTo
+}
+
+type Notification @model @auth(rules: [{ allow: owner }]) {
+    id: ID!
+    timestamp:Int!
+    type:String!
+    data:AWSJSON
+    opened:Boolean
+    user: User @belongsTo
+}
+
+# GARDNER STUFF
+type GardnerMarker @model @auth(rules: [{ allow: owner }]){
+    id: ID!
+    address: String!
+    latitude: Float!
+    longitude: Float!
+    images: [String]
+    type: String!
+    user: User! @belongsTo
 }

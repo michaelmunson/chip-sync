@@ -192,20 +192,23 @@ export default function MarkerCreateForm(props) {
   const initialValues = {
     contact: "",
     address: "",
-    position: "",
+    latitude: "",
+    longitude: "",
     images: [],
     type: "",
   };
   const [contact, setContact] = React.useState(initialValues.contact);
   const [address, setAddress] = React.useState(initialValues.address);
-  const [position, setPosition] = React.useState(initialValues.position);
+  const [latitude, setLatitude] = React.useState(initialValues.latitude);
+  const [longitude, setLongitude] = React.useState(initialValues.longitude);
   const [images, setImages] = React.useState(initialValues.images);
   const [type, setType] = React.useState(initialValues.type);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setContact(initialValues.contact);
     setAddress(initialValues.address);
-    setPosition(initialValues.position);
+    setLatitude(initialValues.latitude);
+    setLongitude(initialValues.longitude);
     setImages(initialValues.images);
     setCurrentImagesValue("");
     setType(initialValues.type);
@@ -216,7 +219,8 @@ export default function MarkerCreateForm(props) {
   const validations = {
     contact: [{ type: "JSON" }],
     address: [{ type: "Required" }],
-    position: [{ type: "JSON" }],
+    latitude: [{ type: "Required" }],
+    longitude: [{ type: "Required" }],
     images: [],
     type: [{ type: "Required" }],
   };
@@ -248,7 +252,8 @@ export default function MarkerCreateForm(props) {
         let modelFields = {
           contact,
           address,
-          position,
+          latitude,
+          longitude,
           images,
           type,
         };
@@ -314,7 +319,8 @@ export default function MarkerCreateForm(props) {
             const modelFields = {
               contact: value,
               address,
-              position,
+              latitude,
+              longitude,
               images,
               type,
             };
@@ -342,7 +348,8 @@ export default function MarkerCreateForm(props) {
             const modelFields = {
               contact,
               address: value,
-              position,
+              latitude,
+              longitude,
               images,
               type,
             };
@@ -359,33 +366,72 @@ export default function MarkerCreateForm(props) {
         hasError={errors.address?.hasError}
         {...getOverrideProps(overrides, "address")}
       ></TextField>
-      <TextAreaField
-        label="Position"
-        isRequired={false}
+      <TextField
+        label="Latitude"
+        isRequired={true}
         isReadOnly={false}
+        type="number"
+        step="any"
+        value={latitude}
         onChange={(e) => {
-          let { value } = e.target;
+          let value = isNaN(parseFloat(e.target.value))
+            ? e.target.value
+            : parseFloat(e.target.value);
           if (onChange) {
             const modelFields = {
               contact,
               address,
-              position: value,
+              latitude: value,
+              longitude,
               images,
               type,
             };
             const result = onChange(modelFields);
-            value = result?.position ?? value;
+            value = result?.latitude ?? value;
           }
-          if (errors.position?.hasError) {
-            runValidationTasks("position", value);
+          if (errors.latitude?.hasError) {
+            runValidationTasks("latitude", value);
           }
-          setPosition(value);
+          setLatitude(value);
         }}
-        onBlur={() => runValidationTasks("position", position)}
-        errorMessage={errors.position?.errorMessage}
-        hasError={errors.position?.hasError}
-        {...getOverrideProps(overrides, "position")}
-      ></TextAreaField>
+        onBlur={() => runValidationTasks("latitude", latitude)}
+        errorMessage={errors.latitude?.errorMessage}
+        hasError={errors.latitude?.hasError}
+        {...getOverrideProps(overrides, "latitude")}
+      ></TextField>
+      <TextField
+        label="Longitude"
+        isRequired={true}
+        isReadOnly={false}
+        type="number"
+        step="any"
+        value={longitude}
+        onChange={(e) => {
+          let value = isNaN(parseFloat(e.target.value))
+            ? e.target.value
+            : parseFloat(e.target.value);
+          if (onChange) {
+            const modelFields = {
+              contact,
+              address,
+              latitude,
+              longitude: value,
+              images,
+              type,
+            };
+            const result = onChange(modelFields);
+            value = result?.longitude ?? value;
+          }
+          if (errors.longitude?.hasError) {
+            runValidationTasks("longitude", value);
+          }
+          setLongitude(value);
+        }}
+        onBlur={() => runValidationTasks("longitude", longitude)}
+        errorMessage={errors.longitude?.errorMessage}
+        hasError={errors.longitude?.hasError}
+        {...getOverrideProps(overrides, "longitude")}
+      ></TextField>
       <ArrayField
         onChange={async (items) => {
           let values = items;
@@ -393,7 +439,8 @@ export default function MarkerCreateForm(props) {
             const modelFields = {
               contact,
               address,
-              position,
+              latitude,
+              longitude,
               images: values,
               type,
             };
@@ -446,7 +493,8 @@ export default function MarkerCreateForm(props) {
             const modelFields = {
               contact,
               address,
-              position,
+              latitude,
+              longitude,
               images,
               type: value,
             };

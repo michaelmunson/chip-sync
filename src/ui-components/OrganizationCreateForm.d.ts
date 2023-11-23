@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, TextAreaFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -24,19 +24,19 @@ export declare type ValidationFunction<T> = (value: T, validationResponse: Valid
 export declare type OrganizationCreateFormInputValues = {
     name?: string;
     accessCode?: string;
-    notifications?: string;
+    location?: string;
 };
 export declare type OrganizationCreateFormValidationValues = {
     name?: ValidationFunction<string>;
     accessCode?: ValidationFunction<string>;
-    notifications?: ValidationFunction<string>;
+    location?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type OrganizationCreateFormOverridesProps = {
     OrganizationCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
     accessCode?: PrimitiveOverrideProps<TextFieldProps>;
-    notifications?: PrimitiveOverrideProps<TextAreaFieldProps>;
+    location?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type OrganizationCreateFormProps = React.PropsWithChildren<{
     overrides?: OrganizationCreateFormOverridesProps | undefined | null;

@@ -7,12 +7,14 @@ export const getOrganization = /* GraphQL */ `
       id
       name
       accessCode
+      location
       users {
         items {
           id
           firstName
           lastName
           role
+          contact
           createdAt
           updatedAt
           organizationUsersId
@@ -27,7 +29,8 @@ export const getOrganization = /* GraphQL */ `
           id
           contact
           address
-          position
+          latitude
+          longitude
           images
           type
           createdAt
@@ -39,7 +42,6 @@ export const getOrganization = /* GraphQL */ `
         nextToken
         __typename
       }
-      notifications
       createdAt
       updatedAt
       owner
@@ -58,6 +60,7 @@ export const listOrganizations = /* GraphQL */ `
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -66,7 +69,6 @@ export const listOrganizations = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
@@ -84,10 +86,27 @@ export const getUser = /* GraphQL */ `
       firstName
       lastName
       role
+      notifications {
+        items {
+          id
+          timestamp
+          type
+          data
+          opened
+          createdAt
+          updatedAt
+          userNotificationsId
+          owner
+          __typename
+        }
+        nextToken
+        __typename
+      }
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -96,10 +115,27 @@ export const getUser = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
+        __typename
+      }
+      contact
+      markers {
+        items {
+          id
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          userMarkersId
+          owner
+          __typename
+        }
+        nextToken
         __typename
       }
       createdAt
@@ -122,14 +158,23 @@ export const listUsers = /* GraphQL */ `
         firstName
         lastName
         role
+        notifications {
+          nextToken
+          __typename
+        }
         organization {
           id
           name
           accessCode
-          notifications
+          location
           createdAt
           updatedAt
           owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
           __typename
         }
         createdAt
@@ -149,13 +194,15 @@ export const getMarker = /* GraphQL */ `
       id
       contact
       address
-      position
+      latitude
+      longitude
       images
       type
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -164,7 +211,6 @@ export const getMarker = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
@@ -189,14 +235,15 @@ export const listMarkers = /* GraphQL */ `
         id
         contact
         address
-        position
+        latitude
+        longitude
         images
         type
         organization {
           id
           name
           accessCode
-          notifications
+          location
           createdAt
           updatedAt
           owner
@@ -205,6 +252,172 @@ export const listMarkers = /* GraphQL */ `
         createdAt
         updatedAt
         organizationMarkersId
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getNotification = /* GraphQL */ `
+  query GetNotification($id: ID!) {
+    getNotification(id: $id) {
+      id
+      timestamp
+      type
+      data
+      opened
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userNotificationsId
+      owner
+      __typename
+    }
+  }
+`;
+export const listNotifications = /* GraphQL */ `
+  query ListNotifications(
+    $filter: ModelNotificationFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listNotifications(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        timestamp
+        type
+        data
+        opened
+        user {
+          id
+          firstName
+          lastName
+          role
+          contact
+          createdAt
+          updatedAt
+          organizationUsersId
+          owner
+          __typename
+        }
+        createdAt
+        updatedAt
+        userNotificationsId
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getGardnerMarker = /* GraphQL */ `
+  query GetGardnerMarker($id: ID!) {
+    getGardnerMarker(id: $id) {
+      id
+      address
+      latitude
+      longitude
+      images
+      type
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userMarkersId
+      owner
+      __typename
+    }
+  }
+`;
+export const listGardnerMarkers = /* GraphQL */ `
+  query ListGardnerMarkers(
+    $filter: ModelGardnerMarkerFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listGardnerMarkers(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        address
+        latitude
+        longitude
+        images
+        type
+        user {
+          id
+          firstName
+          lastName
+          role
+          contact
+          createdAt
+          updatedAt
+          organizationUsersId
+          owner
+          __typename
+        }
+        createdAt
+        updatedAt
+        userMarkersId
         owner
         __typename
       }

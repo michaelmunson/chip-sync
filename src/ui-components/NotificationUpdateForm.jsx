@@ -10,18 +10,19 @@ import {
   Button,
   Flex,
   Grid,
+  SwitchField,
   TextAreaField,
   TextField,
 } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
-import { getUser } from "../graphql/queries";
-import { updateUser } from "../graphql/mutations";
+import { getNotification } from "../graphql/queries";
+import { updateNotification } from "../graphql/mutations";
 const client = generateClient();
-export default function UserUpdateForm(props) {
+export default function NotificationUpdateForm(props) {
   const {
     id: idProp,
-    user: userModelProp,
+    notification: notificationModelProp,
     onSuccess,
     onError,
     onSubmit,
@@ -31,51 +32,53 @@ export default function UserUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    firstName: "",
-    lastName: "",
-    role: "",
-    contact: "",
+    timestamp: "",
+    type: "",
+    data: "",
+    opened: false,
   };
-  const [firstName, setFirstName] = React.useState(initialValues.firstName);
-  const [lastName, setLastName] = React.useState(initialValues.lastName);
-  const [role, setRole] = React.useState(initialValues.role);
-  const [contact, setContact] = React.useState(initialValues.contact);
+  const [timestamp, setTimestamp] = React.useState(initialValues.timestamp);
+  const [type, setType] = React.useState(initialValues.type);
+  const [data, setData] = React.useState(initialValues.data);
+  const [opened, setOpened] = React.useState(initialValues.opened);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    const cleanValues = userRecord
-      ? { ...initialValues, ...userRecord }
+    const cleanValues = notificationRecord
+      ? { ...initialValues, ...notificationRecord }
       : initialValues;
-    setFirstName(cleanValues.firstName);
-    setLastName(cleanValues.lastName);
-    setRole(cleanValues.role);
-    setContact(
-      typeof cleanValues.contact === "string" || cleanValues.contact === null
-        ? cleanValues.contact
-        : JSON.stringify(cleanValues.contact)
+    setTimestamp(cleanValues.timestamp);
+    setType(cleanValues.type);
+    setData(
+      typeof cleanValues.data === "string" || cleanValues.data === null
+        ? cleanValues.data
+        : JSON.stringify(cleanValues.data)
     );
+    setOpened(cleanValues.opened);
     setErrors({});
   };
-  const [userRecord, setUserRecord] = React.useState(userModelProp);
+  const [notificationRecord, setNotificationRecord] = React.useState(
+    notificationModelProp
+  );
   React.useEffect(() => {
     const queryData = async () => {
       const record = idProp
         ? (
             await client.graphql({
-              query: getUser.replaceAll("__typename", ""),
+              query: getNotification.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
-          )?.data?.getUser
-        : userModelProp;
-      setUserRecord(record);
+          )?.data?.getNotification
+        : notificationModelProp;
+      setNotificationRecord(record);
     };
     queryData();
-  }, [idProp, userModelProp]);
-  React.useEffect(resetStateValues, [userRecord]);
+  }, [idProp, notificationModelProp]);
+  React.useEffect(resetStateValues, [notificationRecord]);
   const validations = {
-    firstName: [{ type: "Required" }],
-    lastName: [{ type: "Required" }],
-    role: [{ type: "Required" }],
-    contact: [{ type: "JSON" }],
+    timestamp: [{ type: "Required" }],
+    type: [{ type: "Required" }],
+    data: [{ type: "JSON" }],
+    opened: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -103,10 +106,10 @@ export default function UserUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          firstName,
-          lastName,
-          role,
-          contact: contact ?? null,
+          timestamp,
+          type,
+          data: data ?? null,
+          opened: opened ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -137,10 +140,10 @@ export default function UserUpdateForm(props) {
             }
           });
           await client.graphql({
-            query: updateUser.replaceAll("__typename", ""),
+            query: updateNotification.replaceAll("__typename", ""),
             variables: {
               input: {
-                id: userRecord.id,
+                id: notificationRecord.id,
                 ...modelFields,
               },
             },
@@ -155,117 +158,121 @@ export default function UserUpdateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "UserUpdateForm")}
+      {...getOverrideProps(overrides, "NotificationUpdateForm")}
       {...rest}
     >
       <TextField
-        label="First name"
+        label="Timestamp"
         isRequired={true}
         isReadOnly={false}
-        value={firstName}
+        type="number"
+        step="any"
+        value={timestamp}
         onChange={(e) => {
-          let { value } = e.target;
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
-              firstName: value,
-              lastName,
-              role,
-              contact,
+              timestamp: value,
+              type,
+              data,
+              opened,
             };
             const result = onChange(modelFields);
-            value = result?.firstName ?? value;
+            value = result?.timestamp ?? value;
           }
-          if (errors.firstName?.hasError) {
-            runValidationTasks("firstName", value);
+          if (errors.timestamp?.hasError) {
+            runValidationTasks("timestamp", value);
           }
-          setFirstName(value);
+          setTimestamp(value);
         }}
-        onBlur={() => runValidationTasks("firstName", firstName)}
-        errorMessage={errors.firstName?.errorMessage}
-        hasError={errors.firstName?.hasError}
-        {...getOverrideProps(overrides, "firstName")}
+        onBlur={() => runValidationTasks("timestamp", timestamp)}
+        errorMessage={errors.timestamp?.errorMessage}
+        hasError={errors.timestamp?.hasError}
+        {...getOverrideProps(overrides, "timestamp")}
       ></TextField>
       <TextField
-        label="Last name"
+        label="Type"
         isRequired={true}
         isReadOnly={false}
-        value={lastName}
+        value={type}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              firstName,
-              lastName: value,
-              role,
-              contact,
+              timestamp,
+              type: value,
+              data,
+              opened,
             };
             const result = onChange(modelFields);
-            value = result?.lastName ?? value;
+            value = result?.type ?? value;
           }
-          if (errors.lastName?.hasError) {
-            runValidationTasks("lastName", value);
+          if (errors.type?.hasError) {
+            runValidationTasks("type", value);
           }
-          setLastName(value);
+          setType(value);
         }}
-        onBlur={() => runValidationTasks("lastName", lastName)}
-        errorMessage={errors.lastName?.errorMessage}
-        hasError={errors.lastName?.hasError}
-        {...getOverrideProps(overrides, "lastName")}
-      ></TextField>
-      <TextField
-        label="Role"
-        isRequired={true}
-        isReadOnly={false}
-        value={role}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              firstName,
-              lastName,
-              role: value,
-              contact,
-            };
-            const result = onChange(modelFields);
-            value = result?.role ?? value;
-          }
-          if (errors.role?.hasError) {
-            runValidationTasks("role", value);
-          }
-          setRole(value);
-        }}
-        onBlur={() => runValidationTasks("role", role)}
-        errorMessage={errors.role?.errorMessage}
-        hasError={errors.role?.hasError}
-        {...getOverrideProps(overrides, "role")}
+        onBlur={() => runValidationTasks("type", type)}
+        errorMessage={errors.type?.errorMessage}
+        hasError={errors.type?.hasError}
+        {...getOverrideProps(overrides, "type")}
       ></TextField>
       <TextAreaField
-        label="Contact"
+        label="Data"
         isRequired={false}
         isReadOnly={false}
-        value={contact}
+        value={data}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              firstName,
-              lastName,
-              role,
-              contact: value,
+              timestamp,
+              type,
+              data: value,
+              opened,
             };
             const result = onChange(modelFields);
-            value = result?.contact ?? value;
+            value = result?.data ?? value;
           }
-          if (errors.contact?.hasError) {
-            runValidationTasks("contact", value);
+          if (errors.data?.hasError) {
+            runValidationTasks("data", value);
           }
-          setContact(value);
+          setData(value);
         }}
-        onBlur={() => runValidationTasks("contact", contact)}
-        errorMessage={errors.contact?.errorMessage}
-        hasError={errors.contact?.hasError}
-        {...getOverrideProps(overrides, "contact")}
+        onBlur={() => runValidationTasks("data", data)}
+        errorMessage={errors.data?.errorMessage}
+        hasError={errors.data?.hasError}
+        {...getOverrideProps(overrides, "data")}
       ></TextAreaField>
+      <SwitchField
+        label="Opened"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={opened}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              timestamp,
+              type,
+              data,
+              opened: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.opened ?? value;
+          }
+          if (errors.opened?.hasError) {
+            runValidationTasks("opened", value);
+          }
+          setOpened(value);
+        }}
+        onBlur={() => runValidationTasks("opened", opened)}
+        errorMessage={errors.opened?.errorMessage}
+        hasError={errors.opened?.hasError}
+        {...getOverrideProps(overrides, "opened")}
+      ></SwitchField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}
@@ -277,7 +284,7 @@ export default function UserUpdateForm(props) {
             event.preventDefault();
             resetStateValues();
           }}
-          isDisabled={!(idProp || userModelProp)}
+          isDisabled={!(idProp || notificationModelProp)}
           {...getOverrideProps(overrides, "ResetButton")}
         ></Button>
         <Flex
@@ -289,7 +296,7 @@ export default function UserUpdateForm(props) {
             type="submit"
             variation="primary"
             isDisabled={
-              !(idProp || userModelProp) ||
+              !(idProp || notificationModelProp) ||
               Object.values(errors).some((e) => e?.hasError)
             }
             {...getOverrideProps(overrides, "SubmitButton")}

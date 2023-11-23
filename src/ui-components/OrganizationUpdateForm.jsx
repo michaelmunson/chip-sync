@@ -6,13 +6,7 @@
 
 /* eslint-disable */
 import * as React from "react";
-import {
-  Button,
-  Flex,
-  Grid,
-  TextAreaField,
-  TextField,
-} from "@aws-amplify/ui-react";
+import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
 import { getOrganization } from "../graphql/queries";
@@ -33,13 +27,11 @@ export default function OrganizationUpdateForm(props) {
   const initialValues = {
     name: "",
     accessCode: "",
-    notifications: "",
+    location: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [accessCode, setAccessCode] = React.useState(initialValues.accessCode);
-  const [notifications, setNotifications] = React.useState(
-    initialValues.notifications
-  );
+  const [location, setLocation] = React.useState(initialValues.location);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = organizationRecord
@@ -47,12 +39,7 @@ export default function OrganizationUpdateForm(props) {
       : initialValues;
     setName(cleanValues.name);
     setAccessCode(cleanValues.accessCode);
-    setNotifications(
-      typeof cleanValues.notifications === "string" ||
-        cleanValues.notifications === null
-        ? cleanValues.notifications
-        : JSON.stringify(cleanValues.notifications)
-    );
+    setLocation(cleanValues.location);
     setErrors({});
   };
   const [organizationRecord, setOrganizationRecord] = React.useState(
@@ -76,7 +63,7 @@ export default function OrganizationUpdateForm(props) {
   const validations = {
     name: [{ type: "Required" }],
     accessCode: [{ type: "Required" }],
-    notifications: [{ type: "JSON" }],
+    location: [{ type: "Required" }],
   };
   const runValidationTasks = async (
     fieldName,
@@ -106,7 +93,7 @@ export default function OrganizationUpdateForm(props) {
         let modelFields = {
           name,
           accessCode,
-          notifications: notifications ?? null,
+          location,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -169,7 +156,7 @@ export default function OrganizationUpdateForm(props) {
             const modelFields = {
               name: value,
               accessCode,
-              notifications,
+              location,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -195,7 +182,7 @@ export default function OrganizationUpdateForm(props) {
             const modelFields = {
               name,
               accessCode: value,
-              notifications,
+              location,
             };
             const result = onChange(modelFields);
             value = result?.accessCode ?? value;
@@ -210,32 +197,32 @@ export default function OrganizationUpdateForm(props) {
         hasError={errors.accessCode?.hasError}
         {...getOverrideProps(overrides, "accessCode")}
       ></TextField>
-      <TextAreaField
-        label="Notifications"
-        isRequired={false}
+      <TextField
+        label="Location"
+        isRequired={true}
         isReadOnly={false}
-        value={notifications}
+        value={location}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
               name,
               accessCode,
-              notifications: value,
+              location: value,
             };
             const result = onChange(modelFields);
-            value = result?.notifications ?? value;
+            value = result?.location ?? value;
           }
-          if (errors.notifications?.hasError) {
-            runValidationTasks("notifications", value);
+          if (errors.location?.hasError) {
+            runValidationTasks("location", value);
           }
-          setNotifications(value);
+          setLocation(value);
         }}
-        onBlur={() => runValidationTasks("notifications", notifications)}
-        errorMessage={errors.notifications?.errorMessage}
-        hasError={errors.notifications?.hasError}
-        {...getOverrideProps(overrides, "notifications")}
-      ></TextAreaField>
+        onBlur={() => runValidationTasks("location", location)}
+        errorMessage={errors.location?.errorMessage}
+        hasError={errors.location?.hasError}
+        {...getOverrideProps(overrides, "location")}
+      ></TextField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

@@ -10,12 +10,14 @@ export const createOrganization = /* GraphQL */ `
       id
       name
       accessCode
+      location
       users {
         items {
           id
           firstName
           lastName
           role
+          contact
           createdAt
           updatedAt
           organizationUsersId
@@ -30,7 +32,8 @@ export const createOrganization = /* GraphQL */ `
           id
           contact
           address
-          position
+          latitude
+          longitude
           images
           type
           createdAt
@@ -42,7 +45,6 @@ export const createOrganization = /* GraphQL */ `
         nextToken
         __typename
       }
-      notifications
       createdAt
       updatedAt
       owner
@@ -59,12 +61,14 @@ export const updateOrganization = /* GraphQL */ `
       id
       name
       accessCode
+      location
       users {
         items {
           id
           firstName
           lastName
           role
+          contact
           createdAt
           updatedAt
           organizationUsersId
@@ -79,7 +83,8 @@ export const updateOrganization = /* GraphQL */ `
           id
           contact
           address
-          position
+          latitude
+          longitude
           images
           type
           createdAt
@@ -91,7 +96,6 @@ export const updateOrganization = /* GraphQL */ `
         nextToken
         __typename
       }
-      notifications
       createdAt
       updatedAt
       owner
@@ -108,12 +112,14 @@ export const deleteOrganization = /* GraphQL */ `
       id
       name
       accessCode
+      location
       users {
         items {
           id
           firstName
           lastName
           role
+          contact
           createdAt
           updatedAt
           organizationUsersId
@@ -128,7 +134,8 @@ export const deleteOrganization = /* GraphQL */ `
           id
           contact
           address
-          position
+          latitude
+          longitude
           images
           type
           createdAt
@@ -140,7 +147,6 @@ export const deleteOrganization = /* GraphQL */ `
         nextToken
         __typename
       }
-      notifications
       createdAt
       updatedAt
       owner
@@ -158,10 +164,27 @@ export const createUser = /* GraphQL */ `
       firstName
       lastName
       role
+      notifications {
+        items {
+          id
+          timestamp
+          type
+          data
+          opened
+          createdAt
+          updatedAt
+          userNotificationsId
+          owner
+          __typename
+        }
+        nextToken
+        __typename
+      }
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -170,10 +193,27 @@ export const createUser = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
+        __typename
+      }
+      contact
+      markers {
+        items {
+          id
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          userMarkersId
+          owner
+          __typename
+        }
+        nextToken
         __typename
       }
       createdAt
@@ -194,10 +234,27 @@ export const updateUser = /* GraphQL */ `
       firstName
       lastName
       role
+      notifications {
+        items {
+          id
+          timestamp
+          type
+          data
+          opened
+          createdAt
+          updatedAt
+          userNotificationsId
+          owner
+          __typename
+        }
+        nextToken
+        __typename
+      }
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -206,10 +263,27 @@ export const updateUser = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
+        __typename
+      }
+      contact
+      markers {
+        items {
+          id
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          userMarkersId
+          owner
+          __typename
+        }
+        nextToken
         __typename
       }
       createdAt
@@ -230,10 +304,27 @@ export const deleteUser = /* GraphQL */ `
       firstName
       lastName
       role
+      notifications {
+        items {
+          id
+          timestamp
+          type
+          data
+          opened
+          createdAt
+          updatedAt
+          userNotificationsId
+          owner
+          __typename
+        }
+        nextToken
+        __typename
+      }
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -242,10 +333,27 @@ export const deleteUser = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
+        __typename
+      }
+      contact
+      markers {
+        items {
+          id
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          userMarkersId
+          owner
+          __typename
+        }
+        nextToken
         __typename
       }
       createdAt
@@ -265,13 +373,15 @@ export const createMarker = /* GraphQL */ `
       id
       contact
       address
-      position
+      latitude
+      longitude
       images
       type
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -280,7 +390,6 @@ export const createMarker = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
@@ -303,13 +412,15 @@ export const updateMarker = /* GraphQL */ `
       id
       contact
       address
-      position
+      latitude
+      longitude
       images
       type
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -318,7 +429,6 @@ export const updateMarker = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
@@ -341,13 +451,15 @@ export const deleteMarker = /* GraphQL */ `
       id
       contact
       address
-      position
+      latitude
+      longitude
       images
       type
       organization {
         id
         name
         accessCode
+        location
         users {
           nextToken
           __typename
@@ -356,7 +468,6 @@ export const deleteMarker = /* GraphQL */ `
           nextToken
           __typename
         }
-        notifications
         createdAt
         updatedAt
         owner
@@ -365,6 +476,303 @@ export const deleteMarker = /* GraphQL */ `
       createdAt
       updatedAt
       organizationMarkersId
+      owner
+      __typename
+    }
+  }
+`;
+export const createNotification = /* GraphQL */ `
+  mutation CreateNotification(
+    $input: CreateNotificationInput!
+    $condition: ModelNotificationConditionInput
+  ) {
+    createNotification(input: $input, condition: $condition) {
+      id
+      timestamp
+      type
+      data
+      opened
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userNotificationsId
+      owner
+      __typename
+    }
+  }
+`;
+export const updateNotification = /* GraphQL */ `
+  mutation UpdateNotification(
+    $input: UpdateNotificationInput!
+    $condition: ModelNotificationConditionInput
+  ) {
+    updateNotification(input: $input, condition: $condition) {
+      id
+      timestamp
+      type
+      data
+      opened
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userNotificationsId
+      owner
+      __typename
+    }
+  }
+`;
+export const deleteNotification = /* GraphQL */ `
+  mutation DeleteNotification(
+    $input: DeleteNotificationInput!
+    $condition: ModelNotificationConditionInput
+  ) {
+    deleteNotification(input: $input, condition: $condition) {
+      id
+      timestamp
+      type
+      data
+      opened
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userNotificationsId
+      owner
+      __typename
+    }
+  }
+`;
+export const createGardnerMarker = /* GraphQL */ `
+  mutation CreateGardnerMarker(
+    $input: CreateGardnerMarkerInput!
+    $condition: ModelGardnerMarkerConditionInput
+  ) {
+    createGardnerMarker(input: $input, condition: $condition) {
+      id
+      address
+      latitude
+      longitude
+      images
+      type
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userMarkersId
+      owner
+      __typename
+    }
+  }
+`;
+export const updateGardnerMarker = /* GraphQL */ `
+  mutation UpdateGardnerMarker(
+    $input: UpdateGardnerMarkerInput!
+    $condition: ModelGardnerMarkerConditionInput
+  ) {
+    updateGardnerMarker(input: $input, condition: $condition) {
+      id
+      address
+      latitude
+      longitude
+      images
+      type
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userMarkersId
+      owner
+      __typename
+    }
+  }
+`;
+export const deleteGardnerMarker = /* GraphQL */ `
+  mutation DeleteGardnerMarker(
+    $input: DeleteGardnerMarkerInput!
+    $condition: ModelGardnerMarkerConditionInput
+  ) {
+    deleteGardnerMarker(input: $input, condition: $condition) {
+      id
+      address
+      latitude
+      longitude
+      images
+      type
+      user {
+        id
+        firstName
+        lastName
+        role
+        notifications {
+          nextToken
+          __typename
+        }
+        organization {
+          id
+          name
+          accessCode
+          location
+          createdAt
+          updatedAt
+          owner
+          __typename
+        }
+        contact
+        markers {
+          nextToken
+          __typename
+        }
+        createdAt
+        updatedAt
+        organizationUsersId
+        owner
+        __typename
+      }
+      createdAt
+      updatedAt
+      userMarkersId
       owner
       __typename
     }

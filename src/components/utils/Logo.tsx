@@ -1,11 +1,11 @@
-import logo from "../images/logo-rounded-200.png";
+import logo from "../../images/logo.png";
 import React from 'react'
 import "../../css/logo.css"
 
 interface LogoProps {
-    style: React.CSSProperties
-    size : string
-    className: string
+    style?: React.CSSProperties
+    size?: string
+    className?: string
 }
 
 export default function Logo({
@@ -18,7 +18,7 @@ export default function Logo({
     return (
         <img 
             id="logo"
-            className={className}
+            className={`${className} ${size}`}
             src={logo} 
             alt="Logo"
             style={{

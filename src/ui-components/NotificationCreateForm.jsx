@@ -6,12 +6,19 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
+import {
+  Button,
+  Flex,
+  Grid,
+  SwitchField,
+  TextAreaField,
+  TextField,
+} from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
-import { createOrganization } from "../graphql/mutations";
+import { createNotification } from "../graphql/mutations";
 const client = generateClient();
-export default function OrganizationCreateForm(props) {
+export default function NotificationCreateForm(props) {
   const {
     clearOnSuccess = true,
     onSuccess,
@@ -23,24 +30,28 @@ export default function OrganizationCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    name: "",
-    accessCode: "",
-    location: "",
+    timestamp: "",
+    type: "",
+    data: "",
+    opened: false,
   };
-  const [name, setName] = React.useState(initialValues.name);
-  const [accessCode, setAccessCode] = React.useState(initialValues.accessCode);
-  const [location, setLocation] = React.useState(initialValues.location);
+  const [timestamp, setTimestamp] = React.useState(initialValues.timestamp);
+  const [type, setType] = React.useState(initialValues.type);
+  const [data, setData] = React.useState(initialValues.data);
+  const [opened, setOpened] = React.useState(initialValues.opened);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setName(initialValues.name);
-    setAccessCode(initialValues.accessCode);
-    setLocation(initialValues.location);
+    setTimestamp(initialValues.timestamp);
+    setType(initialValues.type);
+    setData(initialValues.data);
+    setOpened(initialValues.opened);
     setErrors({});
   };
   const validations = {
-    name: [{ type: "Required" }],
-    accessCode: [{ type: "Required" }],
-    location: [{ type: "Required" }],
+    timestamp: [{ type: "Required" }],
+    type: [{ type: "Required" }],
+    data: [{ type: "JSON" }],
+    opened: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -68,9 +79,10 @@ export default function OrganizationCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          name,
-          accessCode,
-          location,
+          timestamp,
+          type,
+          data,
+          opened,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -101,7 +113,7 @@ export default function OrganizationCreateForm(props) {
             }
           });
           await client.graphql({
-            query: createOrganization.replaceAll("__typename", ""),
+            query: createNotification.replaceAll("__typename", ""),
             variables: {
               input: {
                 ...modelFields,
@@ -121,87 +133,120 @@ export default function OrganizationCreateForm(props) {
           }
         }
       }}
-      {...getOverrideProps(overrides, "OrganizationCreateForm")}
+      {...getOverrideProps(overrides, "NotificationCreateForm")}
       {...rest}
     >
       <TextField
-        label="Name"
+        label="Timestamp"
         isRequired={true}
         isReadOnly={false}
-        value={name}
+        type="number"
+        step="any"
+        value={timestamp}
         onChange={(e) => {
-          let { value } = e.target;
+          let value = isNaN(parseInt(e.target.value))
+            ? e.target.value
+            : parseInt(e.target.value);
           if (onChange) {
             const modelFields = {
-              name: value,
-              accessCode,
-              location,
+              timestamp: value,
+              type,
+              data,
+              opened,
             };
             const result = onChange(modelFields);
-            value = result?.name ?? value;
+            value = result?.timestamp ?? value;
           }
-          if (errors.name?.hasError) {
-            runValidationTasks("name", value);
+          if (errors.timestamp?.hasError) {
+            runValidationTasks("timestamp", value);
           }
-          setName(value);
+          setTimestamp(value);
         }}
-        onBlur={() => runValidationTasks("name", name)}
-        errorMessage={errors.name?.errorMessage}
-        hasError={errors.name?.hasError}
-        {...getOverrideProps(overrides, "name")}
+        onBlur={() => runValidationTasks("timestamp", timestamp)}
+        errorMessage={errors.timestamp?.errorMessage}
+        hasError={errors.timestamp?.hasError}
+        {...getOverrideProps(overrides, "timestamp")}
       ></TextField>
       <TextField
-        label="Access code"
+        label="Type"
         isRequired={true}
         isReadOnly={false}
-        value={accessCode}
+        value={type}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              name,
-              accessCode: value,
-              location,
+              timestamp,
+              type: value,
+              data,
+              opened,
             };
             const result = onChange(modelFields);
-            value = result?.accessCode ?? value;
+            value = result?.type ?? value;
           }
-          if (errors.accessCode?.hasError) {
-            runValidationTasks("accessCode", value);
+          if (errors.type?.hasError) {
+            runValidationTasks("type", value);
           }
-          setAccessCode(value);
+          setType(value);
         }}
-        onBlur={() => runValidationTasks("accessCode", accessCode)}
-        errorMessage={errors.accessCode?.errorMessage}
-        hasError={errors.accessCode?.hasError}
-        {...getOverrideProps(overrides, "accessCode")}
+        onBlur={() => runValidationTasks("type", type)}
+        errorMessage={errors.type?.errorMessage}
+        hasError={errors.type?.hasError}
+        {...getOverrideProps(overrides, "type")}
       ></TextField>
-      <TextField
-        label="Location"
-        isRequired={true}
+      <TextAreaField
+        label="Data"
+        isRequired={false}
         isReadOnly={false}
-        value={location}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              name,
-              accessCode,
-              location: value,
+              timestamp,
+              type,
+              data: value,
+              opened,
             };
             const result = onChange(modelFields);
-            value = result?.location ?? value;
+            value = result?.data ?? value;
           }
-          if (errors.location?.hasError) {
-            runValidationTasks("location", value);
+          if (errors.data?.hasError) {
+            runValidationTasks("data", value);
           }
-          setLocation(value);
+          setData(value);
         }}
-        onBlur={() => runValidationTasks("location", location)}
-        errorMessage={errors.location?.errorMessage}
-        hasError={errors.location?.hasError}
-        {...getOverrideProps(overrides, "location")}
-      ></TextField>
+        onBlur={() => runValidationTasks("data", data)}
+        errorMessage={errors.data?.errorMessage}
+        hasError={errors.data?.hasError}
+        {...getOverrideProps(overrides, "data")}
+      ></TextAreaField>
+      <SwitchField
+        label="Opened"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={opened}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              timestamp,
+              type,
+              data,
+              opened: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.opened ?? value;
+          }
+          if (errors.opened?.hasError) {
+            runValidationTasks("opened", value);
+          }
+          setOpened(value);
+        }}
+        onBlur={() => runValidationTasks("opened", opened)}
+        errorMessage={errors.opened?.errorMessage}
+        hasError={errors.opened?.hasError}
+        {...getOverrideProps(overrides, "opened")}
+      ></SwitchField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

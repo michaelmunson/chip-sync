@@ -6,6 +6,8 @@
 
 export { default as MarkerCreateForm } from "./MarkerCreateForm";
 export { default as MarkerUpdateForm } from "./MarkerUpdateForm";
+export { default as NotificationCreateForm } from "./NotificationCreateForm";
+export { default as NotificationUpdateForm } from "./NotificationUpdateForm";
 export { default as OrganizationCreateForm } from "./OrganizationCreateForm";
 export { default as OrganizationUpdateForm } from "./OrganizationUpdateForm";
 export { default as UserCreateForm } from "./UserCreateForm";

@@ -1,43 +1,52 @@
-export namespace ChipSync {
-    /* SUBTYPES */
-    export interface Contact {
-        name: string
-        phone: string
-    }
-    export interface Position {
-        latitude: number
-        longitude: number
-    }
-    export interface Notification {
+declare global {
+    interface Window { exports: any; }
+}
+
+window.exports = window.exports || {};
+
+/* SUBTYPES */
+export interface Contact {
+    name: string
+    phone: string
+}
+export interface Position {
+    latitude: number
+    longitude: number
+}
+/* MAIN TYPES */
+export interface Marker {
+    id: string
+    contact: Contact
+    address: string
+    position: Position
+    images: string[]
+    type: "wood"|"chips"|"both"
+    organization: Organization
+}
+export namespace Notification {
+    export interface MarkerNotification {
         id:string
         timestamp:number
-        type:"new-marker"|"new-user"
-        data:{[key:string]:any}
+        type:"new-org-marker"
+            |"new-gardner-marker"
+        data:Marker
         opened:boolean
     }
-    /* MAIN TYPES */
-    export interface Organization {
-        id:string
-        name:string
-        accessCode:string
-        users: User[]
-        markers: Marker[]
-        notifications: Notification[]
-    }
-    export interface User {
-        id:string
-        firstName:string
-        lastName:string
-        role: "admin"|"standard"
-        organization: Organization
-    }
-    export interface Marker {
-        id: string
-        contact: Contact
-        address: string
-        position: Position
-        images: string[]
-        type: "wood"|"chips"|"both"
-        organization: Organization
-    }
+
+}
+export interface User {
+    id:string
+    firstName:string
+    lastName:string
+    role: "admin"|"employee"|"gardner"
+    organization: Organization
+    notifications: Notification.MarkerNotification
+}
+export interface Organization {
+    id:string
+    name:string
+
+    accessCode:string
+    users: User[]
+    markers: Marker[]
 }

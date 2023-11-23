@@ -24,14 +24,16 @@ export declare type ValidationFunction<T> = (value: T, validationResponse: Valid
 export declare type MarkerCreateFormInputValues = {
     contact?: string;
     address?: string;
-    position?: string;
+    latitude?: number;
+    longitude?: number;
     images?: string[];
     type?: string;
 };
 export declare type MarkerCreateFormValidationValues = {
     contact?: ValidationFunction<string>;
     address?: ValidationFunction<string>;
-    position?: ValidationFunction<string>;
+    latitude?: ValidationFunction<number>;
+    longitude?: ValidationFunction<number>;
     images?: ValidationFunction<string>;
     type?: ValidationFunction<string>;
 };
@@ -40,7 +42,8 @@ export declare type MarkerCreateFormOverridesProps = {
     MarkerCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
     contact?: PrimitiveOverrideProps<TextAreaFieldProps>;
     address?: PrimitiveOverrideProps<TextFieldProps>;
-    position?: PrimitiveOverrideProps<TextAreaFieldProps>;
+    latitude?: PrimitiveOverrideProps<TextFieldProps>;
+    longitude?: PrimitiveOverrideProps<TextFieldProps>;
     images?: PrimitiveOverrideProps<TextFieldProps>;
     type?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
