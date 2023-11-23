@@ -1,26 +1,36 @@
-import React, { useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import { Auth } from 'aws-amplify';
 import {withAuthenticator} from "@aws-amplify/ui-react";
 import Logo from './components/utils/Logo';
-import { User } from './types/generalTypes';
-
+import { CognitoUser } from './types/generalTypes';
+import { User } from './types/dataTypes';
+import { DB } from './utils/database';
+import Loader from './components/utils/Loader';
+import Register from './components/register/Register';
 
 type AppProps = {
-    user?:User,
+    user?:CognitoUser,
     signOut?:() => void
 }
 
 function App({user, signOut}:AppProps) {
+    const [loading, setLoading] = useState<boolean>(true);
+    const [userData, setUserData] = useState<User>();
     
     useEffect(() => {
-        window.exports = {user,signOut}; 
-        console.log(window.exports); 
-    }, []); 
+        DB.getUser().then(user => {
+            if (user) setUserData(user); 
+            setLoading(false);
+        });
+    });
 
-    return (<>
-        Chip Sync
-    </>);
+    if (loading) return <Loader isFullScreen={true}/>
+
+    if (!userData) return <Register/>
+
+    return (
+        <>User Has Account</>
+    )
 }
 
 export default withAuthenticator(App, {

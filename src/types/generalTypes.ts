@@ -1,5 +1,5 @@
 
-export interface User {
+export interface CognitoUser {
     username:string
     attributes: {
         sub:string

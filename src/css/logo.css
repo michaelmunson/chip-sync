@@ -1,34 +1,34 @@
 
-#logo {
+.logo {
 	height: 50px;
 }
 
-#logo.small {
+.logo.small {
 	height:50px;
 }
 
-#logo.medium {
+.logo.medium {
 	height:75px;
 }
 
-#logo.large {
+.logo.large {
 	height:100px;
 }
 
-#logo.xlarge {
+.logo.xlarge {
 	height:150px;
 }
 
-#logo.xxlarge {
+.logo.xxlarge {
 	height:200px;
 }
 
-#logo.shadow {
+.logo.shadow {
     box-shadow: 1px 0px 14px -1px #9e9e9e;
     border-radius: 25px;
 }
 
-#logo.fadein {
+.logo.fadein {
 	opacity: 0;
 	animation: fadein 2s ease-out forwards;
 }

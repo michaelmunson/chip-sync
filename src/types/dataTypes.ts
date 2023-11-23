@@ -1,7 +1,6 @@
 declare global {
     interface Window { exports: any; }
 }
-
 window.exports = window.exports || {};
 
 /* SUBTYPES */
@@ -9,19 +8,25 @@ export interface Contact {
     name: string
     phone: string
 }
-export interface Position {
-    latitude: number
-    longitude: number
-}
 /* MAIN TYPES */
 export interface Marker {
     id: string
     contact: Contact
     address: string
-    position: Position
+    latitude: Number
+    longitude: Number
     images: string[]
     type: "wood"|"chips"|"both"
     organization: Organization
+}
+export interface GardnerMarker {
+    id: string
+    address: string
+    latitude: number
+    longitude: number
+    images: [string]
+    type: "wood"|"chips"|"both"
+    user: User
 }
 export namespace Notification {
     export interface MarkerNotification {
@@ -32,7 +37,13 @@ export namespace Notification {
         data:Marker
         opened:boolean
     }
-
+    export interface AdminNotification {
+        id:string
+        timestamp:number
+        type:"join-request"
+        data:User
+        opened:boolean
+    }
 }
 export interface User {
     id:string
@@ -40,12 +51,15 @@ export interface User {
     lastName:string
     role: "admin"|"employee"|"gardner"
     organization: Organization
-    notifications: Notification.MarkerNotification
+    notifications: Array<Notification.AdminNotification|Notification.MarkerNotification>
+    // if gardner
+    contact?: Contact
+    markers?: GardnerMarker[]
 }
 export interface Organization {
     id:string
     name:string
-
+    location:string
     accessCode:string
     users: User[]
     markers: Marker[]
