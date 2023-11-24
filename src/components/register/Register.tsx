@@ -83,7 +83,7 @@ function InputAccordian({ summary, children, expanded, handleChange, panelId, ca
                 </Typography>
                 {/* <Typography sx={{ color: 'text.secondary' }}>I am an accordion</Typography> */}
             </AccordionSummary>
-            <AccordionDetails className='col center'>
+            <AccordionDetails className='col h-center'>
                 {children}
             </AccordionDetails>
         </Accordion>
@@ -95,7 +95,10 @@ export default function Register({
 }:{
     setUserData:SetUserData
 }) {
+    // DATA STATE
     const [regType, setRegType] = useState<"gardner"|"arborist">();
+    const [arboristType, setArboristType] = useState<"join"|"create">(); 
+    // ACCORDIAN STATE
     const [canExpand, setCanExpand] = useState(new Set(['panel1']))
     const [isDone, setIsDone] = useState(new Set<string>())
     const [expanded, setExpanded] = useState<string>("panel1");
@@ -115,24 +118,37 @@ export default function Register({
     }
     /* COMPONENTS */
     function AccountTypeSelection(){
-        return <div className='row w-100'>
-            <Button startIcon={<GiChainsaw />}>
+        return <div className='row w100 space-around'>
+            <Button
+                variant={regType==="arborist"?"contained":"outlined"}
+                className='select-type-button'
+                onClick={()=>setRegType('arborist')}>
                 Arborist
             </Button>
-            <Button startIcon={<GiGardeningShears />}>
+            <Button
+                variant={regType==="gardner"?"contained":"outlined"}
+                className='select-type-button'
+                onClick={()=>setRegType('gardner')}>
                 Gardner
             </Button>
         </div>
     }
     function OrgJoinCreateSelection(){
         if (regType === "arborist") return <>
-            <Divider>CENTER</Divider>
-            <div className='row center'>
-                <Button>
-                    Join Organization
+            <Divider
+                style={{margin:'20px 0px', width:'100%'}}>Join or Create Organization</Divider>
+            <div className='row w100 space-around'>
+                <Button 
+                    variant={arboristType==="join"?"contained":"outlined"}
+                    className='select-type-button'
+                    onClick={()=>setArboristType('join')}>
+                    Join
                 </Button>
-                <Button>
-                    Create Organization
+                <Button
+                    variant={arboristType==="create"?"contained":"outlined"}
+                    className='select-type-button'
+                    onClick={()=>setArboristType('create')}>
+                    Create
                 </Button>
             </div>
         </>; else return <></>
@@ -140,7 +156,8 @@ export default function Register({
 
     function NextButton({ isDisabled, panel, callback }: { isDisabled: boolean, panel: string, callback?:()=>any }){
         return <Button
-            variant='outlined'
+            variant='contained'
+            color='success'
             onClick={() => {
                 toNext(panel);
                 if (callback){
@@ -148,8 +165,12 @@ export default function Register({
                 }
             }}
             disabled={isDisabled}
-            style={{ color: "var(--theme-primary-color-fg)", borderColor: "var(--theme-primary-color-fg)" }}
-        >Next</Button>
+            style={{ 
+                marginTop:"30px",
+                width:'100%'
+            }}>
+                Next
+            </Button>
     }
 
     return (
@@ -163,7 +184,11 @@ export default function Register({
                 handleChange={handleChange}>
                 <AccountTypeSelection/>
                 <OrgJoinCreateSelection/>
-                <NextButton isDisabled={false} panel='panel1'/>
+                <NextButton 
+                    isDisabled={
+                        (!regType) || (regType === "arborist" && !arboristType)
+                    }
+                    panel='panel1'/>
             </InputAccordian>
             <InputAccordian
                 summary='Account Details'
