@@ -1,5 +1,6 @@
 import React from 'react';
 import { SetUserData } from '../../types/generalTypes';
+import Container from '../utils/Container';
 
 export default function RegisterGardner({
     setUserData
@@ -7,6 +8,8 @@ export default function RegisterGardner({
     setUserData:SetUserData
 }) {
     return (
-        <div>RegisterGardner</div>
+        <Container>
+            <>Register Gardner</>
+        </Container>
     )
 }
