@@ -1,7 +1,25 @@
+.header-4 {
+    font-size: 1.4rem;
+    margin-bottom: 61px;
+    margin-top: -70px;
+    color: #5e5d5d;
+}
+
 .select-type-button {
-    color: black !important;
+    border: 1px solid black !important;
+    border-radius: 15px !important;
+    padding: 17px !important;
     font-size: 1.7rem !important;
+    background: rgba(0,0,0,.5) !important;
+    color: white !important;
+    transition: 300ms;
+    width: 240px !important;
+
     & svg {
         font-size: 4rem !important;
+    }
+
+    &:hover {
+        background: rgba(0,0,0,.7) !important;
     }
 }

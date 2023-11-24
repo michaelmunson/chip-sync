@@ -4,6 +4,10 @@ import { GiGardeningShears } from "react-icons/gi";
 import { GiChainsaw } from "react-icons/gi";
 import "../../css/register.css"; 
 import { Button } from '@mui/material';
+import Spacer from '../utils/Spacer';
+import RegisterArborist from './RegisterArborist';
+import Container from '../utils/Container';
+import RegisterGardner from './RegisterGardner';
 
 /* 
 Select Arborist or Gardner
@@ -32,20 +36,31 @@ export default function Register({
     const [regType, setRegType] = useState<"gardner"|"arborist">();
     
     if (!regType) return (
-        <div
-            className='col hv-center hw100 fade-in bg-grad'>
+        <Container>
+            <h3 className='header-4'>
+                Select your Account Type 
+            </h3>
             <Button 
                 className='select-type-button'
+                onClick={e => setRegType('arborist')}
                 startIcon={<GiChainsaw/>}>
                 Arborist
             </Button>
+            <Spacer height={50}/>
             <Button 
+                onClick={e => setRegType('gardner')}
                 className='select-type-button'
                 startIcon={<GiGardeningShears/>}>
                 Gardner
             </Button>
-        </div>
-    )
+        </Container>
+    );
+
+    if (regType === "arborist")
+        return <RegisterArborist setUserData={setUserData}/>
+    
+    if (regType === "gardner")
+        return <RegisterGardner setUserData={setUserData}/>
 
     return <></>
 }
