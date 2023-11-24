@@ -10,7 +10,8 @@ import {
     AccordionDetails,
     AccordionSummary,
     Typography,
-    Button
+    Button,
+    Divider
 } from '@mui/material';
 import "../../css/register.css"; 
 import Container from '../utils/Container';
@@ -63,6 +64,8 @@ function InputAccordian({ summary, children, expanded, handleChange, panelId, ca
             style={{
                 borderRadius: "20px",
                 margin: "15px",
+                width:'90%',
+                maxWidth:'500px',
                 opacity: (isDone.has(panelId) && expanded !== panelId) ? ".8" : ""
             }}>
             <AccordionSummary
@@ -71,7 +74,7 @@ function InputAccordian({ summary, children, expanded, handleChange, panelId, ca
                 aria-controls="panel1bh-content"
                 id="panel1bh-header"
             >
-                <Typography sx={{ width: '33%', flexShrink: 0, fontSize: "1.3em", display: "flex", alignItems: "center" }}>
+                <Typography sx={{ width: '100%', flexShrink: 0, fontSize: "1.3em", display: "flex", alignItems: "center" }}>
                     {isDone.has(panelId) ? (
                         <CheckBoxIcon style={{ margin: "0px 5px 1.5px 0px", color: "green" }} />
                     ) : (
@@ -110,6 +113,31 @@ export default function Register({
             setCanSubmit(true); 
         }
     }
+    /* COMPONENTS */
+    function AccountTypeSelection(){
+        return <div className='row w-100'>
+            <Button startIcon={<GiChainsaw />}>
+                Arborist
+            </Button>
+            <Button startIcon={<GiGardeningShears />}>
+                Gardner
+            </Button>
+        </div>
+    }
+    function OrgJoinCreateSelection(){
+        if (regType === "arborist") return <>
+            <Divider>CENTER</Divider>
+            <div className='row center'>
+                <Button>
+                    Join Organization
+                </Button>
+                <Button>
+                    Create Organization
+                </Button>
+            </div>
+        </>; else return <></>
+    }
+
     function NextButton({ isDisabled, panel, callback }: { isDisabled: boolean, panel: string, callback?:()=>any }){
         return <Button
             variant='outlined'
@@ -133,7 +161,18 @@ export default function Register({
                 canExpand={canExpand}
                 isDone={isDone}
                 handleChange={handleChange}>
-                <>Acc 1</>
+                <AccountTypeSelection/>
+                <OrgJoinCreateSelection/>
+                <NextButton isDisabled={false} panel='panel1'/>
+            </InputAccordian>
+            <InputAccordian
+                summary='Account Details'
+                expanded={expanded}
+                panelId='panel2'
+                canExpand={canExpand}
+                isDone={isDone}
+                handleChange={handleChange}>
+                <NextButton isDisabled={false} panel='panel1'/>
             </InputAccordian>
         </Container>
     )
