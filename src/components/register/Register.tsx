@@ -34,10 +34,16 @@ export default function Register({
     if (!regType) return (
         <div
             className='col hv-center hw100 fade-in bg-grad'>
-            <Button startIcon={<GiChainsaw/>}>
+            <Button 
+                className='select-type-button'
+                startIcon={<GiChainsaw/>}>
                 Arborist
             </Button>
-             
+            <Button 
+                className='select-type-button'
+                startIcon={<GiGardeningShears/>}>
+                Gardner
+            </Button>
         </div>
     )
 
