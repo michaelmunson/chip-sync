@@ -24,21 +24,25 @@ export default function OrganizationCreateForm(props) {
   } = props;
   const initialValues = {
     name: "",
+    tier: "",
     accessCode: "",
     location: "",
   };
   const [name, setName] = React.useState(initialValues.name);
+  const [tier, setTier] = React.useState(initialValues.tier);
   const [accessCode, setAccessCode] = React.useState(initialValues.accessCode);
   const [location, setLocation] = React.useState(initialValues.location);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setName(initialValues.name);
+    setTier(initialValues.tier);
     setAccessCode(initialValues.accessCode);
     setLocation(initialValues.location);
     setErrors({});
   };
   const validations = {
     name: [{ type: "Required" }],
+    tier: [{ type: "Required" }],
     accessCode: [{ type: "Required" }],
     location: [{ type: "Required" }],
   };
@@ -69,6 +73,7 @@ export default function OrganizationCreateForm(props) {
         event.preventDefault();
         let modelFields = {
           name,
+          tier,
           accessCode,
           location,
         };
@@ -134,6 +139,7 @@ export default function OrganizationCreateForm(props) {
           if (onChange) {
             const modelFields = {
               name: value,
+              tier,
               accessCode,
               location,
             };
@@ -151,6 +157,33 @@ export default function OrganizationCreateForm(props) {
         {...getOverrideProps(overrides, "name")}
       ></TextField>
       <TextField
+        label="Tier"
+        isRequired={true}
+        isReadOnly={false}
+        value={tier}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              tier: value,
+              accessCode,
+              location,
+            };
+            const result = onChange(modelFields);
+            value = result?.tier ?? value;
+          }
+          if (errors.tier?.hasError) {
+            runValidationTasks("tier", value);
+          }
+          setTier(value);
+        }}
+        onBlur={() => runValidationTasks("tier", tier)}
+        errorMessage={errors.tier?.errorMessage}
+        hasError={errors.tier?.hasError}
+        {...getOverrideProps(overrides, "tier")}
+      ></TextField>
+      <TextField
         label="Access code"
         isRequired={true}
         isReadOnly={false}
@@ -160,6 +193,7 @@ export default function OrganizationCreateForm(props) {
           if (onChange) {
             const modelFields = {
               name,
+              tier,
               accessCode: value,
               location,
             };
@@ -186,6 +220,7 @@ export default function OrganizationCreateForm(props) {
           if (onChange) {
             const modelFields = {
               name,
+              tier,
               accessCode,
               location: value,
             };

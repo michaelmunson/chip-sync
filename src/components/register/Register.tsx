@@ -11,10 +11,14 @@ import {
     AccordionSummary,
     Typography,
     Button,
-    Divider
+    Divider,
+    TextField,
+    Checkbox
 } from '@mui/material';
 import "../../css/register.css"; 
 import Container from '../utils/Container';
+import Spacer from '../utils/Spacer';
+import { DB } from '../../utils/database';
 
 
 /* 
@@ -66,7 +70,7 @@ function InputAccordian({ summary, children, expanded, handleChange, panelId, ca
                 margin: "15px",
                 width:'90%',
                 maxWidth:'500px',
-                opacity: (isDone.has(panelId) && expanded !== panelId) ? ".8" : ""
+                opacity: (isDone.has(panelId) && expanded !== panelId) ? ".7" : ""
             }}>
             <AccordionSummary
                 // onClick={(e:any) => setTimeout(()=>e.target.scrollIntoView(),200)}
@@ -97,7 +101,13 @@ export default function Register({
 }) {
     // DATA STATE
     const [regType, setRegType] = useState<"gardner"|"arborist">();
-    const [arboristType, setArboristType] = useState<"join"|"create">(); 
+    const [arboristType, setArboristType] = useState<"join"|"create">("join"); 
+    const [firstName, setFirstName] = useState<string>("");
+    const [lastName, setLastName] = useState<string>("");
+    const [orgAccessCode, setOrgAccessCode] = useState<string>(""); 
+    const [orgName, setOrgName] = useState<string>(""); 
+    const [orgLocation, setOrgLocation] = useState<string>(""); 
+    const [isAgreed, setIsAgreed] = useState<boolean>(false); 
     // ACCORDIAN STATE
     const [canExpand, setCanExpand] = useState(new Set(['panel1']))
     const [isDone, setIsDone] = useState(new Set<string>())
@@ -116,48 +126,130 @@ export default function Register({
             setCanSubmit(true); 
         }
     }
+    /* ACCOUNT HANDLERS */
+    async function createAccount(){
+        if (regType === "arborist"){
+            if (arboristType === "create") {
+                const createOrgRes = await DB.createOrganization({
+                    name: orgName,
+                    location: orgLocation,
+                    tier: "enterprise"
+                });
+                console.log("Create Org Res: ", createOrgRes); 
+                const organizationId = createOrgRes.id; 
+                const createAdminRes = await DB.createAdmin({
+                    firstName,
+                    lastName,
+                    organizationId
+                });
+                console.log("Create Admin Res: ", createAdminRes)
+                setUserData(createAdminRes); 
+            }
+        } 
+    }
     /* COMPONENTS */
     function AccountTypeSelection(){
-        return <div className='row w100 space-around'>
+        return <div className='row w100 space-evenly'>
             <Button
                 variant={regType==="arborist"?"contained":"outlined"}
+                color="success"
                 className='select-type-button'
-                onClick={()=>setRegType('arborist')}>
+                onClick={()=>{
+                    setRegType('arborist');
+                    toNext('panel1')
+                }}>
                 Arborist
             </Button>
             <Button
+                color="success"
                 variant={regType==="gardner"?"contained":"outlined"}
                 className='select-type-button'
-                onClick={()=>setRegType('gardner')}>
+                onClick={()=>{
+                    setRegType('gardner');
+                    toNext('panel1')
+                }}>
                 Gardner
             </Button>
         </div>
     }
-    function OrgJoinCreateSelection(){
+
+    function accountDetails(){
+        function orgDetails(){
+            if (arboristType==="join") return (
+                <TextField
+                    style={{maxWidth:'390px', width:'100%'}}
+                    type='number'
+                    onChange={(e) => setOrgAccessCode(e.target.value)}
+                    label="Organization Access Code"/>
+            );
+            else if (arboristType === "create") return (<>
+                <TextField
+                    style={{maxWidth:'390px', width:'100%'}}
+                    onChange={(e) => setOrgName(e.target.value)}
+                    label="Organization Name"/>
+                <Spacer height={15}/>
+                <TextField
+                    style={{maxWidth:'390px', width:'100%'}}
+                    type='number'
+                    onChange={(e) => setOrgLocation(e.target.value)}
+                    label="Organization Location (Zip Code)"/>
+            </>);
+
+            else return <></>
+        }
+
         if (regType === "arborist") return <>
+            <div className='row w100 h-center'>
+                <TextField
+                    onChange={e => setFirstName(e.target.value)} 
+                    label="First Name"/>
+                <TextField 
+                    onChange={e => setLastName(e.target.value)}
+                    label="Last Name"/>
+            </div>
+
             <Divider
-                style={{margin:'20px 0px', width:'100%'}}>Join or Create Organization</Divider>
-            <div className='row w100 space-around'>
+                style={{margin:'20px 0px', width:'100%'}}>
+                    Join or Create Organization
+            </Divider>
+            <div className='row w100 space-evenly'>
                 <Button 
+                    color="success"
                     variant={arboristType==="join"?"contained":"outlined"}
                     className='select-type-button'
-                    onClick={()=>setArboristType('join')}>
+                    onClick={()=>{
+                        setArboristType('join');
+                        setOrgName("");
+                    }}>
                     Join
                 </Button>
                 <Button
+                    color="success"
                     variant={arboristType==="create"?"contained":"outlined"}
                     className='select-type-button'
-                    onClick={()=>setArboristType('create')}>
+                    onClick={()=>{
+                        setArboristType('create');
+                        setOrgAccessCode("");
+                        setOrgLocation(""); 
+                    }}>
                     Create
                 </Button>
             </div>
-        </>; else return <></>
+            <Divider
+                style={{width:'100%', margin:'25px 0px'}}>
+                    Organization Details
+            </Divider>
+            {orgDetails()}
+        </>;
+
+        else return <>
+        
+        </>
     }
 
     function NextButton({ isDisabled, panel, callback }: { isDisabled: boolean, panel: string, callback?:()=>any }){
         return <Button
-            variant='contained'
-            color='success'
+            variant={isDisabled?"text":"contained"}
             onClick={() => {
                 toNext(panel);
                 if (callback){
@@ -183,12 +275,7 @@ export default function Register({
                 isDone={isDone}
                 handleChange={handleChange}>
                 <AccountTypeSelection/>
-                <OrgJoinCreateSelection/>
-                <NextButton 
-                    isDisabled={
-                        (!regType) || (regType === "arborist" && !arboristType)
-                    }
-                    panel='panel1'/>
+                <Spacer height={30}/>
             </InputAccordian>
             <InputAccordian
                 summary='Account Details'
@@ -197,8 +284,38 @@ export default function Register({
                 canExpand={canExpand}
                 isDone={isDone}
                 handleChange={handleChange}>
-                <NextButton isDisabled={false} panel='panel1'/>
+                {accountDetails()}
+                <NextButton isDisabled={
+                    !firstName || !lastName || (!orgAccessCode && arboristType==="join") || (arboristType==="create" && (!orgName || !orgLocation))
+                } panel='panel2'/>
             </InputAccordian>
+            <InputAccordian
+                summary='Agreements'
+                expanded={expanded}
+                panelId='panel3'
+                canExpand={canExpand}
+                isDone={isDone}
+                handleChange={handleChange}>
+                <div className='row v-center'>
+                    <Checkbox onChange={e => {
+                        setIsAgreed(e.target.checked);
+                        if (e.target.checked){
+                            toNext('panel3'); 
+                        }
+                    }}/>
+                    <label>
+                        I agree to the <a target="_blank" href="https://www.getchipsync.com/terms-and-conditions">Terms and Conditions</a>
+                    </label>
+                </div>
+                <Spacer height={15}/>
+            </InputAccordian>
+            <Button 
+                variant='contained' 
+                disabled={isDone.size !== 3} 
+                style={{marginTop:'20px'}}
+                onClick={() => createAccount()}>
+                Create Account
+            </Button>
         </Container>
     )
 }

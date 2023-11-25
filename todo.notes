@@ -1,3 +1,6 @@
 Amplify:
     [ ] Create Schema
     
+Registration:
+    [ ] Disable input until location is 5 len
+    [ ] 

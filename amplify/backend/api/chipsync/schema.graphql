@@ -7,6 +7,7 @@
 type Organization @model @auth(rules: [{ allow: owner }]) {
     id:ID!
     name:String!
+    tier: String!
     accessCode:String!
     location:String!
     users: [User] @hasMany

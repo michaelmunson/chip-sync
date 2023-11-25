@@ -23,11 +23,13 @@ export declare type ValidationResponse = {
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type OrganizationUpdateFormInputValues = {
     name?: string;
+    tier?: string;
     accessCode?: string;
     location?: string;
 };
 export declare type OrganizationUpdateFormValidationValues = {
     name?: ValidationFunction<string>;
+    tier?: ValidationFunction<string>;
     accessCode?: ValidationFunction<string>;
     location?: ValidationFunction<string>;
 };
@@ -35,6 +37,7 @@ export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes
 export declare type OrganizationUpdateFormOverridesProps = {
     OrganizationUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
     name?: PrimitiveOverrideProps<TextFieldProps>;
+    tier?: PrimitiveOverrideProps<TextFieldProps>;
     accessCode?: PrimitiveOverrideProps<TextFieldProps>;
     location?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;

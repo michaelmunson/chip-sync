@@ -59,6 +59,7 @@ export interface User {
 export interface Organization {
     id:string
     name:string
+    tier: "basic"|"pro"|"enterprise"
     location:string
     accessCode:string
     users: User[]

@@ -9,6 +9,7 @@ export const onCreateOrganization = /* GraphQL */ `
     onCreateOrganization(filter: $filter, owner: $owner) {
       id
       name
+      tier
       accessCode
       location
       users {
@@ -60,6 +61,7 @@ export const onUpdateOrganization = /* GraphQL */ `
     onUpdateOrganization(filter: $filter, owner: $owner) {
       id
       name
+      tier
       accessCode
       location
       users {
@@ -111,6 +113,7 @@ export const onDeleteOrganization = /* GraphQL */ `
     onDeleteOrganization(filter: $filter, owner: $owner) {
       id
       name
+      tier
       accessCode
       location
       users {
@@ -183,6 +186,7 @@ export const onCreateUser = /* GraphQL */ `
       organization {
         id
         name
+        tier
         accessCode
         location
         users {
@@ -253,6 +257,7 @@ export const onUpdateUser = /* GraphQL */ `
       organization {
         id
         name
+        tier
         accessCode
         location
         users {
@@ -323,6 +328,7 @@ export const onDeleteUser = /* GraphQL */ `
       organization {
         id
         name
+        tier
         accessCode
         location
         users {
@@ -380,6 +386,7 @@ export const onCreateMarker = /* GraphQL */ `
       organization {
         id
         name
+        tier
         accessCode
         location
         users {
@@ -419,6 +426,7 @@ export const onUpdateMarker = /* GraphQL */ `
       organization {
         id
         name
+        tier
         accessCode
         location
         users {
@@ -458,6 +466,7 @@ export const onDeleteMarker = /* GraphQL */ `
       organization {
         id
         name
+        tier
         accessCode
         location
         users {
@@ -504,6 +513,7 @@ export const onCreateNotification = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt
@@ -553,6 +563,7 @@ export const onUpdateNotification = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt
@@ -602,6 +613,7 @@ export const onDeleteNotification = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt
@@ -652,6 +664,7 @@ export const onCreateGardnerMarker = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt
@@ -702,6 +715,7 @@ export const onUpdateGardnerMarker = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt
@@ -752,6 +766,7 @@ export const onDeleteGardnerMarker = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt

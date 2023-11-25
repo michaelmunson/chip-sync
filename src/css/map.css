@@ -1,0 +1,68 @@
+.map {
+    /* position:absolute;
+    overflow: hidden; */
+    height: 100%;
+    width: 100%;
+    position: absolute !important;
+    cursor: crosshair;
+}
+
+.map-spinner-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.map-spinner-container.light {
+    background-color: #f1f3f4;
+}
+
+.map-spinner-container.dark {
+    background-color: #232323;
+}
+
+.map-hold-circle.shrink {
+    animation: grow 1s ease-in;
+}
+
+.map-hold-circle.fall {
+    animation: fall 1s ease-out;
+}
+
+@keyframes fall {
+    0% {
+        transform:translateY(-40px);
+    }
+    100% {
+        transform:translateY(0px);
+    }
+}
+
+
+@keyframes grow {
+    0% {
+        opacity: .7;
+        transform: scale(.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* GOOGLE MAPS OVERRIDE */
+[aria-label="Map"]:nth-child(2){
+    cursor: crosshair !important;
+}
+
+.gmnoprint {
+    display: none !important;
+}
+
+img[alt="Google"],
+button[title="Keyboard shortcuts"],
+button[title="Map Data"] {
+    display: none !important;
+}

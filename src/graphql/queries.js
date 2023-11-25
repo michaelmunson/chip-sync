@@ -6,6 +6,7 @@ export const getOrganization = /* GraphQL */ `
     getOrganization(id: $id) {
       id
       name
+      tier
       accessCode
       location
       users {
@@ -59,6 +60,7 @@ export const listOrganizations = /* GraphQL */ `
       items {
         id
         name
+        tier
         accessCode
         location
         users {
@@ -105,6 +107,7 @@ export const getUser = /* GraphQL */ `
       organization {
         id
         name
+        tier
         accessCode
         location
         users {
@@ -165,6 +168,7 @@ export const listUsers = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt
@@ -201,6 +205,7 @@ export const getMarker = /* GraphQL */ `
       organization {
         id
         name
+        tier
         accessCode
         location
         users {
@@ -242,6 +247,7 @@ export const listMarkers = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt
@@ -280,6 +286,7 @@ export const getNotification = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt
@@ -363,6 +370,7 @@ export const getGardnerMarker = /* GraphQL */ `
         organization {
           id
           name
+          tier
           accessCode
           location
           createdAt
