@@ -12,13 +12,15 @@ export interface Contact {
 export interface Marker {
     id: string
     name: string
+    description:string
     contact: Contact
     address: string
-    latitude: Number
-    longitude: Number
+    latitude: number
+    longitude: number
     images: string[]
     type: "wood"|"chips"|"both"
     organization: Organization
+    distance?:number
 }
 export interface GardnerMarker {
     id: string
