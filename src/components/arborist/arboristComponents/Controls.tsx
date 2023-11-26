@@ -19,16 +19,15 @@ export default function Controls({
 } : ControlsProps
 ){
     const [numNotific, setNumNotific] = useState(0);
+    
     const openFns = {
         settings: () => toggleModal(true, {type:"settings", data:{}}),
         add: () => toggleModal(true, {type:"add-marker", data:{}}),
         list: () => toggleModal(true, {type:"marker-list", data:{}}),
         notif: () => toggleModal(true, {type:"notifications", data:{}})
     }
-    useEffect(() => {
-        const len = userData.notifications.filter(notif => !notif.opened).length;
-        setNumNotific(len); 
-    }, [userData]); 
+    
+    useEffect(()=>{setNumNotific(userData.notifications.filter(notif => !notif.opened).length)},[userData]); 
 
     return (
         <div>

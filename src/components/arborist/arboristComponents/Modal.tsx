@@ -1,22 +1,39 @@
 import React from 'react';
 import { Dialog } from '@mui/material';
-import { ModalConfig, ToggleModal } from '../../../types/generalTypes';
+import { Coordinates, ModalConfig, ToggleModal } from '../../../types/generalTypes';
 import { User } from '../../../types/dataTypes';
+import MarkerList from './modalComponents/MarkerList';
 
 interface ModalProps {
-    open: boolean,
-    userData: User,
-    modalConfig:ModalConfig,
+    open: boolean
+    userData: User
+    modalConfig:ModalConfig
     toggleModal: ToggleModal
+    currentLocation:Coordinates
 }
 
 export default function Modal({
     open,
     userData,
     modalConfig,
-    toggleModal
+    toggleModal,
+    currentLocation
 } : ModalProps) {
 
+    const {type, data, goBack, goBackLocation} = modalConfig; 
+
+    switch(type){
+        case "marker-list": return (
+            <Dialog 
+                open={open}
+                onClose={()=>toggleModal(false)}>
+                <MarkerList
+                    userData={userData}
+                    toggleModal={toggleModal}
+                    currentLocation={currentLocation}/>
+            </Dialog>
+        )
+    }
     return (
         <Dialog 
             open={open}

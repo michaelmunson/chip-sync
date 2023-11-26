@@ -30,7 +30,7 @@ export default function ArboristApp({
 } : ArboristAppProps
 ){
     const [theme, setTheme] = useState<"light"|"dark">("light"); 
-    const [currentLocation, setCurrentLocation] = useState<Coordinates>();
+    const [currentLocation, setCurrentLocation] = useState<Coordinates>(Geo.zipcodeToCoordinates(userData.organization.location));
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [modalConfig, setModalConfig] = useState<ModalConfig>({type:"add-marker"});
     /* USE EFFECTS */
@@ -62,7 +62,8 @@ export default function ArboristApp({
             open={modalOpen}
             userData={userData}
             modalConfig={modalConfig}
-            toggleModal={toggleModal}/>
+            toggleModal={toggleModal}
+            currentLocation={currentLocation}/>
 
         <button style={{zIndex:1000000, position:'relative'}} onClick={e => {
             setCurrentLocation({

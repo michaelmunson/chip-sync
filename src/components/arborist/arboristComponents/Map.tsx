@@ -11,7 +11,7 @@ import { getGoogleMapsApiKey } from '../../../utils/secrets';
 interface MapProps {
     userData: User
     theme: "light"|"dark",
-    currentLocation: Coordinates|undefined
+    currentLocation: Coordinates
 }
 
 export default function Map({
@@ -102,6 +102,7 @@ export default function Map({
 		});
 		MAP.addListener('mouseup', clearHold);
         setMap(MAP); 
+        addLocationMarker(); 
     }
     async function changeMapTheme(){
         if (loader && map){
@@ -180,8 +181,9 @@ export default function Map({
             return markers; 
         });
     }
-    async function addLocationMarker(){
+    async function addLocationMarker(mapElement?:any){
         if (!loader || !currentLocation) return; 
+        const MAP = mapElement || map; 
         // console.log("%cADDING CURRENT LOCATION!","color:blue;background:white"); 
         const { AdvancedMarkerElement, PinElement } = await loader.importLibrary("marker");
 		const glyphImage:any = document.createElement("img");
@@ -199,12 +201,12 @@ export default function Map({
 				lat: currentLocation.latitude,
 				lng: currentLocation.longitude
 			},
-			map,
+			MAP,
 			title: "Your Location",
 			content: pin.element
 		});
         
-        map.panTo({
+        MAP.panTo({
             lat: currentLocation.latitude,
             lng: currentLocation.longitude
         }); 
