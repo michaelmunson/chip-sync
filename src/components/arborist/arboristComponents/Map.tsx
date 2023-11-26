@@ -102,7 +102,7 @@ export default function Map({
 		});
 		MAP.addListener('mouseup', clearHold);
         setMap(MAP); 
-        addLocationMarker(); 
+        addLocationMarker(MAP); 
     }
     async function changeMapTheme(){
         if (loader && map){
@@ -183,7 +183,7 @@ export default function Map({
     }
     async function addLocationMarker(mapElement?:any){
         if (!loader || !currentLocation) return; 
-        const MAP = mapElement || map; 
+        const MAP = mapElement || map;
         // console.log("%cADDING CURRENT LOCATION!","color:blue;background:white"); 
         const { AdvancedMarkerElement, PinElement } = await loader.importLibrary("marker");
 		const glyphImage:any = document.createElement("img");
@@ -201,7 +201,7 @@ export default function Map({
 				lat: currentLocation.latitude,
 				lng: currentLocation.longitude
 			},
-			MAP,
+			map:MAP,
 			title: "Your Location",
 			content: pin.element
 		});

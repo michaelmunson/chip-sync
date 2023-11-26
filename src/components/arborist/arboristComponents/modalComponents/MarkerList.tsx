@@ -110,7 +110,6 @@ function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerA
 
 	return (
 		<div>
-
 			{markerArray.length > 0 ? markerArray.map((marker, index) => (
 				<Accordion key={`accordian#${index}`} style={{ padding: "10px" }}>
 					<AccordionSummary
@@ -143,7 +142,7 @@ function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerA
 					</AccordionDetails>
 				</Accordion>
 			)) : (
-				<Typography style={{ margin: "20px" }}>
+				<Typography style={{ margin: "20px", textAlign:'center' }}>
 					No Markers Currently Set
 				</Typography>
 			)}
@@ -154,7 +153,17 @@ function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerA
 export default function MarkerList({userData, toggleModal, currentLocation}:MarkerListProps) {
 	const [tab, setTab] = useState<"all"|"wood"|"chips"|"both">("all");
 
-	return (
+    return (<>
+        <MarkerTabs 
+            tab={tab}
+            setTab={setTab}/>
+        <MarkerAccordian
+            tab={tab}
+            userData={userData}
+            toggleModal={toggleModal}
+            currentLocation={currentLocation}/>
+    </>)
+	/* return (
 		<>
 			<div className='row'>
 				<ListIcon className="modal-icon" />
@@ -174,5 +183,5 @@ export default function MarkerList({userData, toggleModal, currentLocation}:Mark
 				<Button variant='contained' color='error' size='large' onClick={()=>toggleModal(false)}>Close</Button>
 			</div>
 		</>
-	);
+	); */
 }
