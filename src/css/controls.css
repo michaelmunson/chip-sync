@@ -1,0 +1,74 @@
+.ui-controls {
+    position: absolute;
+    z-index: 100000;
+    padding:10px;
+}
+
+.ui-button-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.ui-controls.right {
+    right:0px;
+}
+
+.ui-button-group-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 100%;
+}
+
+.ui-button-group-row.space-between {
+    justify-content: space-between !important;
+}
+
+.ui-button-group-row.center {
+    justify-content: center !important;
+}
+
+.ui-button {
+    position:relative;
+    min-width: 0px !important;
+    padding:10px !important;
+    background-color: rgba(0,0,0,.5) !important;
+    backdrop-filter: blur(5px);
+    margin:5px !important;
+    color: white !important;
+    border:1px solid lightgray !important;
+    border-radius: 10px !important;
+}
+
+.num-notifications {
+    position: absolute;
+    height:25px;
+    width:25px;
+    border-radius: 50%;
+    background-color: red;
+    top: -7px;
+    left: -8px;
+}
+
+.position-bottom {
+    bottom: 10px;
+}
+
+/* ALT */
+
+.ui-button.small {
+    transform:scale(.8);
+    background-color: rgba(0,0,0,.45) !important;
+}
+
+.ui-button.large {
+    transform:scale(1.1);
+}
+
+.ui-button.darker {
+    background-color: rgba(0,0,0,.6) !important;
+}
+
+.mr-40 {
+    margin-right: 40px !important;
+}

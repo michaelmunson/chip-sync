@@ -111,10 +111,36 @@ export const getUser = /* GraphQL */ `
         accessCode
         location
         users {
+          items {
+            id
+            firstName
+            lastName
+            role
+            contact
+            createdAt
+            updatedAt
+            organizationUsersId
+            owner
+            __typename
+          }
           nextToken
           __typename
         }
         markers {
+          items {
+            id
+            contact
+            address
+            latitude
+            longitude
+            images
+            type
+            createdAt
+            updatedAt
+            organizationMarkersId
+            owner
+            __typename
+          }
           nextToken
           __typename
         }
@@ -434,3 +460,42 @@ export const listGardnerMarkers = /* GraphQL */ `
     }
   }
 `;
+
+
+/*
+users {
+  items {
+    id
+    firstName
+    lastName
+    role
+    contact
+    createdAt
+    updatedAt
+    organizationUsersId
+    owner
+    __typename
+  }
+  nextToken
+  __typename
+}
+markers {
+  items {
+    id
+    contact
+    address
+    latitude
+    longitude
+    images
+    type
+    createdAt
+    updatedAt
+    organizationMarkersId
+    owner
+    __typename
+  }
+  nextToken
+  __typename
+}
+
+*/

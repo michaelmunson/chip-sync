@@ -2,7 +2,8 @@ import { API, Auth } from "aws-amplify";
 import { User, Organization } from "../types/dataTypes";
 import {
     getUser as getUserQuery,
-    listOrganizations as listOrganizationsQuery
+    listOrganizations as listOrganizationsQuery,
+    getOrganization as getOrganizationQuery,
 } from "../graphql/queries";
 import {
     createOrganization as createOrganizationMutation,
@@ -22,6 +23,19 @@ namespace DBTypes {
     }
 }
 
+function cleanData(data:{[key:string]:any}):any{
+    if ("markers" in data && "items" in data?.markers){
+        data.markers = data.markers.items; 
+    }
+    if ("users" in data && "items" in data?.users){
+        data.users = data.users.items; 
+    }
+    if ("notifications" in data && "items" in data?.notifications){
+        data.notifications = data.notifications.items; 
+    }
+    return data; 
+}
+
 export const DB = {
     get userId(){
         const authObj:any = {...Auth}
@@ -34,10 +48,40 @@ export const DB = {
                 id:this.userId
             }
         });
+        const userData = res?.data?.getUser; 
+        userData.organization = cleanData(userData.organization); 
+        return cleanData(userData);
+    },
+    async createAdmin({firstName,lastName,organizationId}:DBTypes.CreateAdmin) : Promise<User> {
+        const res:any = await API.graphql({
+            query: createUserMutation,
+            variables: {
+                input : {
+                    id: this.userId,
+                    firstName,
+                    lastName,
+                    role:'admin',
+                    organizationUsersId: organizationId
+                }   
+            }
+        });
+        return cleanData(res.data.createUser); 
+    },
+    async createUser(){
         
-        if (res?.data?.getUser){
-            return res?.data?.getUser; 
-        } 
+    },
+    async createGardner(){
+    
+    },
+    /* ORGANIZATION */
+    async getOrganization({organizationId}:{organizationId:string}): Promise<Organization|null> {
+        const res:any = await API.graphql({
+            query: getOrganizationQuery,
+            variables: {
+                id: organizationId
+            }
+        });
+        return cleanData(res.data.getOrganization); 
     },
     async getUniqueAccessCode():Promise<string>{
         const accessCode = Math.floor(100000 + Math.random() * 900000);
@@ -73,25 +117,4 @@ export const DB = {
         });
         return res?.data?.createOrganization; 
     },
-    async createAdmin({firstName,lastName,organizationId}:DBTypes.CreateAdmin) : Promise<User> {
-        const res:any = await API.graphql({
-            query: createUserMutation,
-            variables: {
-                input : {
-                    id: this.userId,
-                    firstName,
-                    lastName,
-                    role:'admin',
-                    organizationUsersId: organizationId
-                }   
-            }
-        });
-        return res.data.createUser; 
-    },
-    async createUser(){
-        
-    },
-    async createGardner(){
-    
-    }
 }

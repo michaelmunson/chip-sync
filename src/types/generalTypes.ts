@@ -11,3 +11,11 @@ export interface CognitoUser {
     }
 }
 
+export interface AnyObject {
+    [key:string] : any
+}
+
+export interface Coordinates {
+    latitude: number
+    longitude: number
+}
