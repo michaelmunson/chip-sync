@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Button } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import ListIcon from '@mui/icons-material/List';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 import AddLocationIcon from '@mui/icons-material/AddLocation';
-import SettingsIcon from '@mui/icons-material/Settings';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Button } from '@mui/material';
+import { useEffect, useState } from 'react';
+import "../../../css/controls.css";
 import { User } from '../../../types/dataTypes';
-import { ModalConfig, ToggleModal } from '../../../types/generalTypes';
-import "../../../css/controls.css"; 
+import { ToggleModal } from '../../../types/generalTypes';
 
 interface ControlsProps {
     userData: User,
@@ -25,7 +22,7 @@ export default function Controls({
     const openFns = {
         settings: () => toggleModal(true, {type:"settings", data:{}}),
         add: () => toggleModal(true, {type:"add-marker", data:{}}),
-        list: () => toggleModal(true, {type:"list-markers", data:{}}),
+        list: () => toggleModal(true, {type:"marker-list", data:{}}),
         notif: () => toggleModal(true, {type:"notifications", data:{}})
     }
     useEffect(() => {

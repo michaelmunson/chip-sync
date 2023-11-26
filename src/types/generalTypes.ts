@@ -1,4 +1,4 @@
-import {User} from "./dataTypes"; 
+import { User } from "./dataTypes";
 
 export type SetUserData = React.Dispatch<React.SetStateAction<User|undefined>>
 
@@ -21,7 +21,7 @@ export interface Coordinates {
 }
 
 export interface ModalConfig {
-    type: "add-marker"|"settings"|"list-markers"|"notifications"|"marker-details"
+    type: "add-marker"|"settings"|"marker-list"|"notifications"|"marker-details"
     data?: AnyObject
     goBack?:boolean
     goBackLocation?:ModalConfig["type"]

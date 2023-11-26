@@ -3,9 +3,9 @@ import ListIcon from "@mui/icons-material/List";
 import RoomIcon from '@mui/icons-material/Room';
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, Tab, Tabs, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { Geo } from "../../../../utils/location";
 import { Marker, User } from '../../../../types/dataTypes';
 import { Coordinates, ModalConfig, ToggleModal } from '../../../../types/generalTypes';
+import { Geo } from "../../../../utils/location";
 
 interface MarkerListProps {
     userData: User,
@@ -133,7 +133,7 @@ function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerA
                                         type: "marker-details",
                                         data: marker,
                                         goBack: true,
-                                        goBackLocation: "list-markers"
+                                        goBackLocation: "marker-list"
                                     }
                                     toggleModal(true, config); 
 						        }}>
