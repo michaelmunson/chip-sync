@@ -1,3 +1,21 @@
 .marker-type-row {
     
+    & button {
+        border-radius: 20px;
+        padding: 0px 10px; 
+        font-weight: bold !important;
+        & svg {
+            margin-right: -5px;
+        }
+    }
+}
+
+.add-marker-text-field {
+    width:100%; 
+    & input {
+        border-radius: 10px !important;
+    }
+    & .MuiOutlinedInput-root {
+        border-radius: 15px !important;
+    }
 }
