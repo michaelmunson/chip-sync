@@ -15,7 +15,7 @@ export const Geo = {
             );
         })
     },
-    zipToCoords(zipcode:string){
+    zipcodeToCoordinates(zipcode:string):Coordinates{
         const {LAT,LNG} = zipcodes[zipcode]; 
         return {
             latitude: parseFloat(LAT),

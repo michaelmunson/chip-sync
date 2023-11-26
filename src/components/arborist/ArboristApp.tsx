@@ -50,8 +50,8 @@ export default function ArboristApp({
 
         <button style={{zIndex:1000000, position:'relative'}} onClick={e => {
             setCurrentLocation({
-                latitude: 0,
-                longitude: 0
+                latitude: 40.730610,
+                longitude: -73.935242
             });
         }}>HELLO</button>
     </>

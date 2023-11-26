@@ -1,4 +1,7 @@
 import { AnyObject } from "../types/generalTypes";
+import woodMarkerIcon from "../images/icons/icons_svg/wood_user.svg";
+import chipsMarkerIcon from "../images/icons/icons_svg/chip_user.svg";
+import woodAndChipsMarkerIcon from "../images/icons/icons_svg/wood_and_chip_user.svg"; 
 
 export const lightStyle = [
 	{
@@ -317,4 +320,9 @@ export const clearHold = () => {
         mapHoldData.interval = null;
     }
     holdingArrowAnimation.destroy(); 
+}
+export const icons = {
+    wood: woodMarkerIcon,
+    chips: chipsMarkerIcon,
+    both: woodAndChipsMarkerIcon
 }

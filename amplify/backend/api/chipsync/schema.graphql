@@ -28,6 +28,8 @@ type User @model @auth(rules: [{ allow: owner }]) {
 
 type Marker @model @auth(rules: [{ allow: owner }]) {
     id: ID!
+    name: String!
+    description: String
     contact: AWSJSON
     address: String!
     latitude: Float!
@@ -49,6 +51,7 @@ type Notification @model @auth(rules: [{ allow: owner }]) {
 # GARDNER STUFF
 type GardnerMarker @model @auth(rules: [{ allow: owner }]){
     id: ID!
+    description: String
     address: String!
     latitude: Float!
     longitude: Float!
