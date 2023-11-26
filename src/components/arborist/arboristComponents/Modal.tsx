@@ -40,7 +40,8 @@ export default function Modal({
                 open={open}
                 onClose={()=>toggleModal(false)}>
                 <AddMarker
-                    data={data}/>
+                    data={data}
+                    currentLocation={currentLocation}/>
             </Dialog>
         )
     }

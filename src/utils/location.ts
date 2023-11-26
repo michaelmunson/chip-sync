@@ -1,5 +1,7 @@
 import _zipcodes from "../data/zipcodes.json";
 import { Coordinates } from "../types/generalTypes";
+import { Loader } from '@googlemaps/js-api-loader';
+import { getGoogleMapsApiKey } from "./secrets";
 
 const zipcodes = _zipcodes as {[key:string]:{
     LAT:any,
@@ -30,6 +32,36 @@ export const Geo = {
             const url = new URL(`http://maps.apple.com/?address=${address}`)
             return url.href;
         }
+    },
+    async getPredictionFunction({latitude, longitude}:Coordinates):Promise<()=>Promise<string[]>>{
+        const apiKey = await getGoogleMapsApiKey();
+        const loader = new Loader({
+            apiKey,
+            version:"weekly"
+        });
+        const {AutocompleteService} = await loader.importLibrary("places");
+    
+        const service = new AutocompleteService(); 
+    
+        const fn:any = (input:string) => {
+            const p:any =  new Promise((resolve,reject) => {
+                service.getPlacePredictions({ 
+                    input,
+                    locationBias: {
+                      radius: 100,
+                      center : {
+                        lat : latitude,
+                        lng : longitude
+                      }
+                    }
+                }, (predictions:any, status:any) => {
+                    predictions = predictions.map((pred:any) => pred.description);
+                    resolve(predictions);
+                });
+            });
+            return p; 
+        }
+        return fn; 
     }
 }
 
