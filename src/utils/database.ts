@@ -33,6 +33,9 @@ function cleanData(data:{[key:string]:any}):any{
     if ("notifications" in data && "items" in data?.notifications){
         data.notifications = data.notifications.items; 
     }
+    if ("organization" in data){
+        data.organization = cleanData(data.organization);
+    }
     return data; 
 }
 
@@ -48,9 +51,10 @@ export const DB = {
                 id:this.userId
             }
         });
-        const userData = res?.data?.getUser; 
-        userData.organization = cleanData(userData.organization); 
-        return cleanData(userData);
+        const userData = res?.data?.getUser;
+        if (userData){
+            return cleanData(userData);
+        }
     },
     async createAdmin({firstName,lastName,organizationId}:DBTypes.CreateAdmin) : Promise<User> {
         const res:any = await API.graphql({
@@ -61,11 +65,13 @@ export const DB = {
                     firstName,
                     lastName,
                     role:'admin',
-                    organizationUsersId: organizationId
+                    organizationUsersId: organizationId,
                 }   
             }
         });
-        return cleanData(res.data.createUser); 
+        const data = cleanData(res.data.createUser); 
+        console.log("Create Admin Res Cleaned: ", data); 
+        return data; 
     },
     async createUser(){
         

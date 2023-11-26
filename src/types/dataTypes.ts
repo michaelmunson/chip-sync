@@ -11,6 +11,7 @@ export interface Contact {
 /* MAIN TYPES */
 export interface Marker {
     id: string
+    name: string
     contact: Contact
     address: string
     latitude: Number
@@ -21,6 +22,7 @@ export interface Marker {
 }
 export interface GardnerMarker {
     id: string
+    description:string
     address: string
     latitude: number
     longitude: number
@@ -52,6 +54,7 @@ export interface User {
     role: "admin"|"employee"|"gardner"
     organization: Organization
     notifications: Array<Notification.AdminNotification|Notification.MarkerNotification>
+    mapChoice: "apple"|"google"
     // if gardner
     contact?: Contact
     markers?: GardnerMarker[]

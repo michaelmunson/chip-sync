@@ -21,6 +21,15 @@ export const Geo = {
             latitude: parseFloat(LAT),
             longitude: parseFloat(LNG)
         }
+    },
+    getAddressURL({mapChoice,address}:{mapChoice:"apple"|"google", address:string}){
+        if (mapChoice === "google") {
+            const url = new URL(`https://www.google.com/maps/search/?api=1&query=${address}`)
+            return url.href;
+        } else {
+            const url = new URL(`http://maps.apple.com/?address=${address}`)
+            return url.href;
+        }
     }
 }
 

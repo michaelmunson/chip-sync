@@ -18,6 +18,7 @@ export const createOrganization = /* GraphQL */ `
           firstName
           lastName
           role
+          mapChoice
           contact
           createdAt
           updatedAt
@@ -31,6 +32,8 @@ export const createOrganization = /* GraphQL */ `
       markers {
         items {
           id
+          name
+          description
           contact
           address
           latitude
@@ -70,6 +73,7 @@ export const updateOrganization = /* GraphQL */ `
           firstName
           lastName
           role
+          mapChoice
           contact
           createdAt
           updatedAt
@@ -83,6 +87,8 @@ export const updateOrganization = /* GraphQL */ `
       markers {
         items {
           id
+          name
+          description
           contact
           address
           latitude
@@ -122,6 +128,7 @@ export const deleteOrganization = /* GraphQL */ `
           firstName
           lastName
           role
+          mapChoice
           contact
           createdAt
           updatedAt
@@ -135,6 +142,8 @@ export const deleteOrganization = /* GraphQL */ `
       markers {
         items {
           id
+          name
+          description
           contact
           address
           latitude
@@ -228,10 +237,12 @@ export const createUser = /* GraphQL */ `
         owner
         __typename
       }
+      mapChoice
       contact
       markers {
         items {
           id
+          description
           address
           latitude
           longitude
@@ -325,10 +336,12 @@ export const updateUser = /* GraphQL */ `
         owner
         __typename
       }
+      mapChoice
       contact
       markers {
         items {
           id
+          description
           address
           latitude
           longitude
@@ -396,10 +409,12 @@ export const deleteUser = /* GraphQL */ `
         owner
         __typename
       }
+      mapChoice
       contact
       markers {
         items {
           id
+          description
           address
           latitude
           longitude
@@ -429,6 +444,8 @@ export const createMarker = /* GraphQL */ `
   ) {
     createMarker(input: $input, condition: $condition) {
       id
+      name
+      description
       contact
       address
       latitude
@@ -469,6 +486,8 @@ export const updateMarker = /* GraphQL */ `
   ) {
     updateMarker(input: $input, condition: $condition) {
       id
+      name
+      description
       contact
       address
       latitude
@@ -509,6 +528,8 @@ export const deleteMarker = /* GraphQL */ `
   ) {
     deleteMarker(input: $input, condition: $condition) {
       id
+      name
+      description
       contact
       address
       latitude
@@ -573,6 +594,7 @@ export const createNotification = /* GraphQL */ `
           owner
           __typename
         }
+        mapChoice
         contact
         markers {
           nextToken
@@ -623,6 +645,7 @@ export const updateNotification = /* GraphQL */ `
           owner
           __typename
         }
+        mapChoice
         contact
         markers {
           nextToken
@@ -673,6 +696,7 @@ export const deleteNotification = /* GraphQL */ `
           owner
           __typename
         }
+        mapChoice
         contact
         markers {
           nextToken
@@ -699,6 +723,7 @@ export const createGardnerMarker = /* GraphQL */ `
   ) {
     createGardnerMarker(input: $input, condition: $condition) {
       id
+      description
       address
       latitude
       longitude
@@ -724,6 +749,7 @@ export const createGardnerMarker = /* GraphQL */ `
           owner
           __typename
         }
+        mapChoice
         contact
         markers {
           nextToken
@@ -750,6 +776,7 @@ export const updateGardnerMarker = /* GraphQL */ `
   ) {
     updateGardnerMarker(input: $input, condition: $condition) {
       id
+      description
       address
       latitude
       longitude
@@ -775,6 +802,7 @@ export const updateGardnerMarker = /* GraphQL */ `
           owner
           __typename
         }
+        mapChoice
         contact
         markers {
           nextToken
@@ -801,6 +829,7 @@ export const deleteGardnerMarker = /* GraphQL */ `
   ) {
     deleteGardnerMarker(input: $input, condition: $condition) {
       id
+      description
       address
       latitude
       longitude
@@ -826,6 +855,7 @@ export const deleteGardnerMarker = /* GraphQL */ `
           owner
           __typename
         }
+        mapChoice
         contact
         markers {
           nextToken

@@ -192,6 +192,8 @@ export default function MarkerUpdateForm(props) {
     ...rest
   } = props;
   const initialValues = {
+    name: "",
+    description: "",
     contact: "",
     address: "",
     latitude: "",
@@ -199,6 +201,10 @@ export default function MarkerUpdateForm(props) {
     images: [],
     type: "",
   };
+  const [name, setName] = React.useState(initialValues.name);
+  const [description, setDescription] = React.useState(
+    initialValues.description
+  );
   const [contact, setContact] = React.useState(initialValues.contact);
   const [address, setAddress] = React.useState(initialValues.address);
   const [latitude, setLatitude] = React.useState(initialValues.latitude);
@@ -210,6 +216,8 @@ export default function MarkerUpdateForm(props) {
     const cleanValues = markerRecord
       ? { ...initialValues, ...markerRecord }
       : initialValues;
+    setName(cleanValues.name);
+    setDescription(cleanValues.description);
     setContact(
       typeof cleanValues.contact === "string" || cleanValues.contact === null
         ? cleanValues.contact
@@ -242,6 +250,8 @@ export default function MarkerUpdateForm(props) {
   const [currentImagesValue, setCurrentImagesValue] = React.useState("");
   const imagesRef = React.createRef();
   const validations = {
+    name: [{ type: "Required" }],
+    description: [],
     contact: [{ type: "JSON" }],
     address: [{ type: "Required" }],
     latitude: [{ type: "Required" }],
@@ -275,6 +285,8 @@ export default function MarkerUpdateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
+          name,
+          description: description ?? null,
           contact: contact ?? null,
           address,
           latitude,
@@ -332,6 +344,68 @@ export default function MarkerUpdateForm(props) {
       {...getOverrideProps(overrides, "MarkerUpdateForm")}
       {...rest}
     >
+      <TextField
+        label="Name"
+        isRequired={true}
+        isReadOnly={false}
+        value={name}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name: value,
+              description,
+              contact,
+              address,
+              latitude,
+              longitude,
+              images,
+              type,
+            };
+            const result = onChange(modelFields);
+            value = result?.name ?? value;
+          }
+          if (errors.name?.hasError) {
+            runValidationTasks("name", value);
+          }
+          setName(value);
+        }}
+        onBlur={() => runValidationTasks("name", name)}
+        errorMessage={errors.name?.errorMessage}
+        hasError={errors.name?.hasError}
+        {...getOverrideProps(overrides, "name")}
+      ></TextField>
+      <TextField
+        label="Description"
+        isRequired={false}
+        isReadOnly={false}
+        value={description}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              description: value,
+              contact,
+              address,
+              latitude,
+              longitude,
+              images,
+              type,
+            };
+            const result = onChange(modelFields);
+            value = result?.description ?? value;
+          }
+          if (errors.description?.hasError) {
+            runValidationTasks("description", value);
+          }
+          setDescription(value);
+        }}
+        onBlur={() => runValidationTasks("description", description)}
+        errorMessage={errors.description?.errorMessage}
+        hasError={errors.description?.hasError}
+        {...getOverrideProps(overrides, "description")}
+      ></TextField>
       <TextAreaField
         label="Contact"
         isRequired={false}
@@ -341,6 +415,8 @@ export default function MarkerUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              name,
+              description,
               contact: value,
               address,
               latitude,
@@ -370,6 +446,8 @@ export default function MarkerUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              name,
+              description,
               contact,
               address: value,
               latitude,
@@ -403,6 +481,8 @@ export default function MarkerUpdateForm(props) {
             : parseFloat(e.target.value);
           if (onChange) {
             const modelFields = {
+              name,
+              description,
               contact,
               address,
               latitude: value,
@@ -436,6 +516,8 @@ export default function MarkerUpdateForm(props) {
             : parseFloat(e.target.value);
           if (onChange) {
             const modelFields = {
+              name,
+              description,
               contact,
               address,
               latitude,
@@ -461,6 +543,8 @@ export default function MarkerUpdateForm(props) {
           let values = items;
           if (onChange) {
             const modelFields = {
+              name,
+              description,
               contact,
               address,
               latitude,
@@ -515,6 +599,8 @@ export default function MarkerUpdateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
+              name,
+              description,
               contact,
               address,
               latitude,

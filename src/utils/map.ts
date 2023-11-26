@@ -2,7 +2,13 @@ import { AnyObject } from "../types/generalTypes";
 import woodMarkerIcon from "../images/icons/icons_svg/wood_user.svg";
 import chipsMarkerIcon from "../images/icons/icons_svg/chip_user.svg";
 import woodAndChipsMarkerIcon from "../images/icons/icons_svg/wood_and_chip_user.svg"; 
-
+import { Contact, User } from "../types/dataTypes";
+import { Geo } from "./location";
+export const icons = {
+    wood: woodMarkerIcon,
+    chips: chipsMarkerIcon,
+    both: woodAndChipsMarkerIcon
+}
 export const lightStyle = [
 	{
 		"featureType": "administrative",
@@ -321,8 +327,43 @@ export const clearHold = () => {
     }
     holdingArrowAnimation.destroy(); 
 }
-export const icons = {
-    wood: woodMarkerIcon,
-    chips: chipsMarkerIcon,
-    both: woodAndChipsMarkerIcon
+export const buildMarkerHtml = ({
+    name,
+    contact,
+    address,
+    mapChoice
+}:{
+    name:string,
+    address:string,
+    contact:Contact,
+    mapChoice:User["mapChoice"]
+}) => {
+    const formatPhoneNumber = (phoneNumber:string) => {
+        const phoneNumberArr = phoneNumber.split("")
+        phoneNumberArr[2] = phoneNumberArr[2] + "-";
+        phoneNumberArr[5] = phoneNumberArr[5] + "-"
+        return phoneNumberArr.join("")
+    }
+
+    if (!contact.phone) return `
+        <div class="marker-content">
+            <h2> ${name} </h2>
+            <p> <a href="${Geo.getAddressURL({mapChoice,address})}" target="_blank"> ${address.slice(0, address.indexOf(","))} </a>  </p>
+            <button class="details-button">Details</button>
+        </div>
+    `
+
+    return `
+        <div class="marker-content">
+            <h2> ${name} </h2>
+            <p> <a href="${Geo.getAddressURL({mapChoice,address})}" target="_blank"> ${address.slice(0, address.indexOf(","))} </a>  </p>
+            <hr/>
+            <p>
+                <span style="line-height:1.7">${contact.name}</span>
+                <br/>
+                <a href="tel:${contact.phone}">${formatPhoneNumber(contact.phone)}</a>
+            </p>
+            <button class="details-button">Details</button>
+        </div>
+    `
 }

@@ -22,6 +22,8 @@ export declare type ValidationResponse = {
 };
 export declare type ValidationFunction<T> = (value: T, validationResponse: ValidationResponse) => ValidationResponse | Promise<ValidationResponse>;
 export declare type MarkerUpdateFormInputValues = {
+    name?: string;
+    description?: string;
     contact?: string;
     address?: string;
     latitude?: number;
@@ -30,6 +32,8 @@ export declare type MarkerUpdateFormInputValues = {
     type?: string;
 };
 export declare type MarkerUpdateFormValidationValues = {
+    name?: ValidationFunction<string>;
+    description?: ValidationFunction<string>;
     contact?: ValidationFunction<string>;
     address?: ValidationFunction<string>;
     latitude?: ValidationFunction<number>;
@@ -40,6 +44,8 @@ export declare type MarkerUpdateFormValidationValues = {
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type MarkerUpdateFormOverridesProps = {
     MarkerUpdateFormGrid?: PrimitiveOverrideProps<GridProps>;
+    name?: PrimitiveOverrideProps<TextFieldProps>;
+    description?: PrimitiveOverrideProps<TextFieldProps>;
     contact?: PrimitiveOverrideProps<TextAreaFieldProps>;
     address?: PrimitiveOverrideProps<TextFieldProps>;
     latitude?: PrimitiveOverrideProps<TextFieldProps>;

@@ -34,11 +34,13 @@ export default function UserUpdateForm(props) {
     firstName: "",
     lastName: "",
     role: "",
+    mapChoice: "",
     contact: "",
   };
   const [firstName, setFirstName] = React.useState(initialValues.firstName);
   const [lastName, setLastName] = React.useState(initialValues.lastName);
   const [role, setRole] = React.useState(initialValues.role);
+  const [mapChoice, setMapChoice] = React.useState(initialValues.mapChoice);
   const [contact, setContact] = React.useState(initialValues.contact);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
@@ -48,6 +50,7 @@ export default function UserUpdateForm(props) {
     setFirstName(cleanValues.firstName);
     setLastName(cleanValues.lastName);
     setRole(cleanValues.role);
+    setMapChoice(cleanValues.mapChoice);
     setContact(
       typeof cleanValues.contact === "string" || cleanValues.contact === null
         ? cleanValues.contact
@@ -75,6 +78,7 @@ export default function UserUpdateForm(props) {
     firstName: [{ type: "Required" }],
     lastName: [{ type: "Required" }],
     role: [{ type: "Required" }],
+    mapChoice: [],
     contact: [{ type: "JSON" }],
   };
   const runValidationTasks = async (
@@ -106,6 +110,7 @@ export default function UserUpdateForm(props) {
           firstName,
           lastName,
           role,
+          mapChoice: mapChoice ?? null,
           contact: contact ?? null,
         };
         const validationResponses = await Promise.all(
@@ -170,6 +175,7 @@ export default function UserUpdateForm(props) {
               firstName: value,
               lastName,
               role,
+              mapChoice,
               contact,
             };
             const result = onChange(modelFields);
@@ -197,6 +203,7 @@ export default function UserUpdateForm(props) {
               firstName,
               lastName: value,
               role,
+              mapChoice,
               contact,
             };
             const result = onChange(modelFields);
@@ -224,6 +231,7 @@ export default function UserUpdateForm(props) {
               firstName,
               lastName,
               role: value,
+              mapChoice,
               contact,
             };
             const result = onChange(modelFields);
@@ -239,6 +247,34 @@ export default function UserUpdateForm(props) {
         hasError={errors.role?.hasError}
         {...getOverrideProps(overrides, "role")}
       ></TextField>
+      <TextField
+        label="Map choice"
+        isRequired={false}
+        isReadOnly={false}
+        value={mapChoice}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              firstName,
+              lastName,
+              role,
+              mapChoice: value,
+              contact,
+            };
+            const result = onChange(modelFields);
+            value = result?.mapChoice ?? value;
+          }
+          if (errors.mapChoice?.hasError) {
+            runValidationTasks("mapChoice", value);
+          }
+          setMapChoice(value);
+        }}
+        onBlur={() => runValidationTasks("mapChoice", mapChoice)}
+        errorMessage={errors.mapChoice?.errorMessage}
+        hasError={errors.mapChoice?.hasError}
+        {...getOverrideProps(overrides, "mapChoice")}
+      ></TextField>
       <TextAreaField
         label="Contact"
         isRequired={false}
@@ -251,6 +287,7 @@ export default function UserUpdateForm(props) {
               firstName,
               lastName,
               role,
+              mapChoice,
               contact: value,
             };
             const result = onChange(modelFields);

@@ -15,6 +15,7 @@ export const getOrganization = /* GraphQL */ `
           firstName
           lastName
           role
+          mapChoice
           contact
           createdAt
           updatedAt
@@ -28,6 +29,8 @@ export const getOrganization = /* GraphQL */ `
       markers {
         items {
           id
+          name
+          description
           contact
           address
           latitude
@@ -144,15 +147,17 @@ export const getUser = /* GraphQL */ `
           nextToken
           __typename
         }
-        createdAt
-        updatedAt
-        owner
-        __typename
+          createdAt
+          updatedAt
+          owner
+          __typename
       }
+      mapChoice
       contact
       markers {
         items {
           id
+          description
           address
           latitude
           longitude
@@ -202,6 +207,7 @@ export const listUsers = /* GraphQL */ `
           owner
           __typename
         }
+        mapChoice
         contact
         markers {
           nextToken
@@ -222,6 +228,8 @@ export const getMarker = /* GraphQL */ `
   query GetMarker($id: ID!) {
     getMarker(id: $id) {
       id
+      name
+      description
       contact
       address
       latitude
@@ -264,6 +272,8 @@ export const listMarkers = /* GraphQL */ `
     listMarkers(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        name
+        description
         contact
         address
         latitude
@@ -320,6 +330,7 @@ export const getNotification = /* GraphQL */ `
           owner
           __typename
         }
+        mapChoice
         contact
         markers {
           nextToken
@@ -357,6 +368,7 @@ export const listNotifications = /* GraphQL */ `
           firstName
           lastName
           role
+          mapChoice
           contact
           createdAt
           updatedAt
@@ -379,6 +391,7 @@ export const getGardnerMarker = /* GraphQL */ `
   query GetGardnerMarker($id: ID!) {
     getGardnerMarker(id: $id) {
       id
+      description
       address
       latitude
       longitude
@@ -404,6 +417,7 @@ export const getGardnerMarker = /* GraphQL */ `
           owner
           __typename
         }
+        mapChoice
         contact
         markers {
           nextToken
@@ -432,6 +446,7 @@ export const listGardnerMarkers = /* GraphQL */ `
     listGardnerMarkers(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        description
         address
         latitude
         longitude
@@ -442,6 +457,7 @@ export const listGardnerMarkers = /* GraphQL */ `
           firstName
           lastName
           role
+          mapChoice
           contact
           createdAt
           updatedAt
@@ -460,42 +476,3 @@ export const listGardnerMarkers = /* GraphQL */ `
     }
   }
 `;
-
-
-/*
-users {
-  items {
-    id
-    firstName
-    lastName
-    role
-    contact
-    createdAt
-    updatedAt
-    organizationUsersId
-    owner
-    __typename
-  }
-  nextToken
-  __typename
-}
-markers {
-  items {
-    id
-    contact
-    address
-    latitude
-    longitude
-    images
-    type
-    createdAt
-    updatedAt
-    organizationMarkersId
-    owner
-    __typename
-  }
-  nextToken
-  __typename
-}
-
-*/

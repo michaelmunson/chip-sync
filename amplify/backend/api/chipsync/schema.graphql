@@ -21,6 +21,7 @@ type User @model @auth(rules: [{ allow: owner }]) {
     role: String! 
     notifications: [Notification] @hasMany
     organization: Organization @belongsTo
+    mapChoice: String @default(value: "apple")
     # If Gardner
     contact: AWSJSON
     markers: [GardnerMarker] @hasMany

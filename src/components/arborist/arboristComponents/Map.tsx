@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import {BounceLoader} from "react-spinners"; 
-import "../../../css/map.css"; 
-import { Marker, User } from '../../../types/dataTypes';
-import { getGoogleMapsApiKey } from '../../../utils/secrets';
-import { Geo } from '../../../utils/location';
 import { Loader } from '@googlemaps/js-api-loader';
-import { darkStyle, getMapOptions, lightStyle, clearHold, mapHoldData, holdingArrowAnimation, icons, activeInfoWindow } from '../../../utils/map';
+import { useEffect, useState } from 'react';
+import { BounceLoader } from "react-spinners";
+import "../../../css/map.css";
+import { Marker, User } from '../../../types/dataTypes';
 import { Coordinates } from '../../../types/generalTypes';
+import { Geo } from '../../../utils/location';
+import { activeInfoWindow, buildMarkerHtml, clearHold, darkStyle, getMapOptions, holdingArrowAnimation, icons, lightStyle, mapHoldData } from '../../../utils/map';
+import { getGoogleMapsApiKey } from '../../../utils/secrets';
 
 interface MapProps {
     userData: User
@@ -24,7 +24,7 @@ export default function Map({
     const [map, setMap] = useState<any>(); 
     const [locationMarker, setLocationMarker] = useState<any>();
     const [mapMarkers, setMapMarkers] = useState<any[]>([]); 
-    const getLoader = () => {getGoogleMapsApiKey().then(apiKey => {setLoader(new Loader({apiKey, version:"weekly"})); console.log('set loader')})}
+    const getLoader = () => {getGoogleMapsApiKey().then(apiKey => setLoader(new Loader({apiKey, version:"weekly"})))}
     /* USE EFFECTS */
     useEffect(getLoader, []);
     useEffect(()=>{changeMapTheme()}, [theme]);
@@ -114,8 +114,8 @@ export default function Map({
         }
 	}
     async function addMarkers(){
-        console.log("%cAdd Markers!","color:red;");
         if (!loader) return; 
+        console.log("%cAdd Markers!","color:red;");
         const { InfoWindow } = await loader.importLibrary("maps");
 		const { AdvancedMarkerElement, PinElement } = await loader.importLibrary("marker");
         const markers = userData.organization.markers.map((markerData:Marker) => {
@@ -154,25 +154,35 @@ export default function Map({
 
                 infoWindow.close();
                 infoWindow.setContent(
-                    buildMarkerHtml(markerData)
+                    buildMarkerHtml({
+                        ...markerData,
+                        mapChoice:userData.mapChoice
+                    })
                 );
                 infoWindow.open(marker.map, marker);
                 setTimeout(() => {
-                    const detbtn = document.querySelector(".details-button");
+                    const detbtn:any = document.querySelector(".details-button");
                     detbtn.onclick = function () {
-                        openModal("details", markerData);
+                        console.log("%copen marker details","color:blue;background:yellow"); 
+                        // openModal("details", markerData);
                     }
                 }, 100);
             });
 
             marker.id = markerData.id;
 
-            mapMarkers.push(marker);
-        })
+            return marker; 
+        });
+        setMapMarkers((mrkrs:any[]) => {
+            mrkrs.forEach(mrkr => {
+                mrkr.setMap(null); 
+            });
+            return markers; 
+        });
     }
     async function addLocationMarker(){
-        console.log("%cADDING CURRENT LOCATION!","color:blue;background:white"); 
         if (!loader || !currentLocation) return; 
+        // console.log("%cADDING CURRENT LOCATION!","color:blue;background:white"); 
         const { AdvancedMarkerElement, PinElement } = await loader.importLibrary("marker");
 		const glyphImage:any = document.createElement("img");
 		glyphImage.style = "height:50px;";

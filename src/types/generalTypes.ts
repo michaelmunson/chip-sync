@@ -19,3 +19,10 @@ export interface Coordinates {
     latitude: number
     longitude: number
 }
+
+export interface ModalConfig {
+    type: "add-marker"|"settings"|"list-markers"|"notifications",
+    data?: AnyObject
+}
+
+export type ToggleModal = (isOpen: boolean, config?: ModalConfig) => void; 

@@ -1,6 +1,6 @@
 .ui-controls {
     position: absolute;
-    z-index: 100000;
+    z-index: 1000;
     padding:10px;
 }
 
