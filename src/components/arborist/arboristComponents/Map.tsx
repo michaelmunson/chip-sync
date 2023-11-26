@@ -22,6 +22,7 @@ export default function Map({
 ){
     const [loader, setLoader] = useState<Loader>();
     const [map, setMap] = useState<any>(); 
+    const [locationMarker, setLocationMarker] = useState<any>(); 
     const getLoader = () => {getGoogleMapsApiKey().then(apiKey => setLoader(new Loader({apiKey, version:"weekly"})))}
     /* USE EFFECTS */
     useEffect(getLoader, []);
@@ -96,6 +97,7 @@ export default function Map({
 		});
 		MAP.addListener('mouseup', clearHold);
         setMap(MAP); 
+        addLocationMarker(); 
     }
     async function changeMapTheme(){
         if (loader && map){
@@ -111,7 +113,32 @@ export default function Map({
         console.log("%cAdd Markers!","color:red;")
     }
     async function addLocationMarker(){
-        console.log("%cAdd Location Marker!","color:red;")
+        if (!loader || !currentLocation) return; 
+        const { AdvancedMarkerElement, PinElement } = await loader.importLibrary("marker");
+		const glyphImage:any = document.createElement("img");
+		glyphImage.style = "height:50px;";
+		glyphImage.src = "https://cdn-icons-png.flaticon.com/512/854/854910.png"
+		
+		const pin = new PinElement({
+			glyph: glyphImage,
+			background: "transparent",
+			borderColor: "transparent"
+		});
+
+		const marker = new AdvancedMarkerElement({
+			position: {
+				lat: currentLocation.latitude,
+				lng: currentLocation.longitude
+			},
+			map,
+			title: "Your Location",
+			content: pin.element
+		});
+
+        setLocationMarker((m:any) => {
+            if (m) m.setMap(null);
+            return marker; 
+        })
     }
 
     return (
