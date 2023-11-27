@@ -13,6 +13,28 @@ interface AddMarkerProps {
     currentLocation: Coordinates
 }
 
+function ContactDetails({
+    isAddContact,
+    setIsAddContact,
+    setContactPhone, 
+    setContactName
+}: {
+    isAddContact:boolean,
+    setIsAddContact:React.Dispatch<React.SetStateAction<boolean>>,
+    setContactPhone:React.Dispatch<React.SetStateAction<string>>,
+    setContactName:React.Dispatch<React.SetStateAction<string>>
+}){
+    if (isAddContact) return <>
+        <Divider className='w100 b'>Contact</Divider>
+        <TextField onChange={e=>setContactName(e.target.value)}/>
+    </>; else return <>
+        <Button
+            onClick={()=>setIsAddContact(true)}>
+            Add Contact Details
+        </Button>
+    </>
+}
+
 export default function AddMarker({
     data,
     currentLocation
@@ -22,7 +44,10 @@ export default function AddMarker({
     const [markerName, setMarkerName] = useState<string>("");
     const [markerAddress, setMarkerAddress] = useState<string>("");
     const [addressOptions, setAddressOptions] = useState<string[]>([]); 
-
+    const [isAddContact, setIsAddContact] = useState<boolean>(false); 
+    const [contactName, setContactName] = useState<string>("");
+    const [contactPhone, setContactPhone] = useState<string>("");
+    
     function changeMarkerType(type:"chips"|"wood"){
         setMarkerType(mt => {
             if (mt.has(type)) mt.delete(type);
@@ -88,6 +113,11 @@ export default function AddMarker({
 					)}
 				/>
             </div>
+            <ContactDetails
+                isAddContact={isAddContact}
+                setIsAddContact={setIsAddContact}
+                setContactName={setContactName}
+                setContactPhone={setContactPhone}/>
         </div>
     )
 }
