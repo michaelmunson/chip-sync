@@ -62,6 +62,15 @@ export const Geo = {
             return p; 
         }
         return fn; 
+    },
+    async addressToCoords(address:string):Promise<Coordinates>{
+        const key = await getGoogleMapsApiKey();
+        const url = new URL(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${key}`);
+        const href = url.href;
+        let res:any = await fetch(href);
+        res = await res.json();
+        const {lat:latitude, lng:longitude} = res.results[0].geometry.location;
+        return {latitude, longitude}; 
     }
 }
 

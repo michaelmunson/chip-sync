@@ -8,6 +8,7 @@ import "@aws-amplify/ui-react/styles.css";
 import "./css/auth.css"; 
 import './index.css';
 import './css/animations.css';
+import './css/mui-global.css'; 
 
 Amplify.configure(config); 
 

@@ -1,0 +1,14 @@
+{
+  "resourceName": "chipsyncstorage",
+  "policyUUID": "d81ccb1d",
+  "bucketName": "chip-sync-storage",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

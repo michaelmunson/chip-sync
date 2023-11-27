@@ -1,5 +1,5 @@
 import { API, Auth } from "aws-amplify";
-import { User, Organization } from "../types/dataTypes";
+import { User, Organization, Marker } from "../types/dataTypes";
 import {
     getUser as getUserQuery,
     listOrganizations as listOrganizationsQuery,
@@ -9,6 +9,7 @@ import {
     createOrganization as createOrganizationMutation,
     createUser as createUserMutation
 } from "../graphql/mutations";
+import { Geo } from "./location";
 
 namespace DBTypes {
     export interface CreateOrg {
@@ -19,6 +20,15 @@ namespace DBTypes {
     export interface CreateAdmin {
         firstName:string
         lastName:string
+        organizationId:string
+    }
+    export interface CreateMarker {
+        type:Marker["type"]
+        name:string
+        description:string
+        contact:Marker["contact"]
+        address:string
+        images:File[]
         organizationId:string
     }
 }
@@ -123,4 +133,11 @@ export const DB = {
         });
         return res?.data?.createOrganization; 
     },
-}
+    /* MARKER */
+    async createMarker({name,address,description,contact,organizationId,images}:DBTypes.CreateMarker) : Promise<Marker> {
+        const res:any = {};
+        const coords = await Geo.addressToCoords(address); 
+        console.log("COORDS", coords); 
+        return res; 
+    }
+}   

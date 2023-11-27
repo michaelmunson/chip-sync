@@ -6,10 +6,13 @@
         max-width: 500px;
     }
 
+    & .css-yiavyu-MuiBackdrop-root-MuiDialog-backdrop {
+        background: rgb(0,0,0,.75) !important;
+    }
+
     &.add-marker-modal {
         & .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation24.MuiDialog-paper.MuiDialog-paperScrollPaper.MuiDialog-paperWidthSm.css-1t1j96h-MuiPaper-root-MuiDialog-paper {
             overflow: visible !important;
         }
-       
     }
 }

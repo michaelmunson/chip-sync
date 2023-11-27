@@ -32,6 +32,7 @@ body {
     height: 100% !important;
     width : 100% !important;
 }
+
 .b {
     font-weight: bold !important;
 }
@@ -46,6 +47,22 @@ body {
 }
 .br20 {
     border-radius: 20px !important;
+}
+
+.m0 {
+    margin:0px !important; 
+}
+.mt0 {
+    margin-top: 0px !important;
+}
+.mr0 {
+    margin-right: 0px !important;
+}
+.mb0 {
+    margin-bottom: 0px !important;
+}
+.ml0 {
+    margin-left: 0px !important;
 }
 
 .m1 {
@@ -232,7 +249,15 @@ body {
     background: var(--theme-linear-grad);
 }
 
-
+.text-c {
+    text-align: center !important;
+}
+.text-l {
+    text-align: left !important;
+}
+.text-r {
+    text-align: right !important;
+}
 
 
 

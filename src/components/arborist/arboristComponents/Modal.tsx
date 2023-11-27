@@ -44,6 +44,8 @@ export default function Modal({
                 onClose={()=>toggleModal(false)}>
                 <AddMarker
                     data={data}
+                    userData={userData}
+                    toggleModal={toggleModal}
                     currentLocation={currentLocation}/>
             </Dialog>
         )
