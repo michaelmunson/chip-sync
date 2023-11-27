@@ -26,7 +26,8 @@ export default function Modal({
 
     switch(type){
         case "marker-list": return (
-            <Dialog 
+            <Dialog
+                id="modal"
                 open={open}
                 onClose={()=>toggleModal(false)}>
                 <MarkerList
@@ -36,7 +37,9 @@ export default function Modal({
             </Dialog>
         )
         case "add-marker": return (
-            <Dialog 
+            <Dialog
+                id="modal"
+                className='add-marker-modal' 
                 open={open}
                 onClose={()=>toggleModal(false)}>
                 <AddMarker
