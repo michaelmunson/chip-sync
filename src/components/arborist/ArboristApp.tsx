@@ -8,6 +8,7 @@ import { Coordinates, ModalConfig } from '../../types/generalTypes';
 import { Geo } from '../../utils/location';
 import Modal from './arboristComponents/Modal';
 import { S3 } from '../../utils/storage';
+import { OrganizationGQLSocket } from '../../utils/websocket';
 
 const darkTheme = createTheme({
 	palette: {
@@ -34,19 +35,15 @@ export default function ArboristApp({
     setUserData
 } : ArboristAppProps
 ){
+    const [socket, setSocket] = useState<any>(); 
     const [theme, setTheme] = useState<"light"|"dark">(decideTheme()); 
     const [currentLocation, setCurrentLocation] = useState<Coordinates>(Geo.zipcodeToCoordinates(userData.organization.location));
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [modalConfig, setModalConfig] = useState<ModalConfig>({type:"add-marker"});
     /* USE EFFECTS */
     useEffect(updateCurrentLocation, []);
-    useEffect(() => {
-        const images = userData.organization.markers[0].images; 
-        S3.getImages({images}).then(res => {
-            console.log(res); 
-        }); 
+    useEffect(subscribe, [userData]);
 
-    }, [userData])
     /* Utility Functions */
     function toggleModal(isOpen:boolean, config?:ModalConfig){
         if (config) {
@@ -58,6 +55,23 @@ export default function ArboristApp({
         Geo.getCurrentLocation().then(coords => {
             setCurrentLocation(coords); 
         });
+    }
+    function subscribe(){
+        const organizationId = userData.organization.id; 
+        setSocket((sock:any) => {
+            console.log("SOCK", sock);
+            if (!sock) {
+                const newSock = DB.subscribeToOrganization({
+                    organizationId,
+                    callback: (data) => {
+                        console.log("SOCK DATA", data); 
+                    }
+                });
+                return newSock
+            } else {
+                return sock; 
+            }
+        })
     }
     
     return <>

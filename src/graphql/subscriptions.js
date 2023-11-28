@@ -4,9 +4,8 @@
 export const onCreateOrganization = /* GraphQL */ `
   subscription OnCreateOrganization(
     $filter: ModelSubscriptionOrganizationFilterInput
-    $owner: String
   ) {
-    onCreateOrganization(filter: $filter, owner: $owner) {
+    onCreateOrganization(filter: $filter) {
       id
       name
       tier
@@ -23,7 +22,6 @@ export const onCreateOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationUsersId
-          owner
           __typename
         }
         nextToken
@@ -43,7 +41,6 @@ export const onCreateOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationMarkersId
-          owner
           __typename
         }
         nextToken
@@ -51,7 +48,6 @@ export const onCreateOrganization = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -59,9 +55,8 @@ export const onCreateOrganization = /* GraphQL */ `
 export const onUpdateOrganization = /* GraphQL */ `
   subscription OnUpdateOrganization(
     $filter: ModelSubscriptionOrganizationFilterInput
-    $owner: String
   ) {
-    onUpdateOrganization(filter: $filter, owner: $owner) {
+    onUpdateOrganization(filter: $filter) {
       id
       name
       tier
@@ -78,7 +73,6 @@ export const onUpdateOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationUsersId
-          owner
           __typename
         }
         nextToken
@@ -98,7 +92,6 @@ export const onUpdateOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationMarkersId
-          owner
           __typename
         }
         nextToken
@@ -106,7 +99,6 @@ export const onUpdateOrganization = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -114,9 +106,8 @@ export const onUpdateOrganization = /* GraphQL */ `
 export const onDeleteOrganization = /* GraphQL */ `
   subscription OnDeleteOrganization(
     $filter: ModelSubscriptionOrganizationFilterInput
-    $owner: String
   ) {
-    onDeleteOrganization(filter: $filter, owner: $owner) {
+    onDeleteOrganization(filter: $filter) {
       id
       name
       tier
@@ -133,7 +124,6 @@ export const onDeleteOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationUsersId
-          owner
           __typename
         }
         nextToken
@@ -153,7 +143,6 @@ export const onDeleteOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationMarkersId
-          owner
           __typename
         }
         nextToken
@@ -161,17 +150,13 @@ export const onDeleteOrganization = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
 `;
 export const onCreateUser = /* GraphQL */ `
-  subscription OnCreateUser(
-    $filter: ModelSubscriptionUserFilterInput
-    $owner: String
-  ) {
-    onCreateUser(filter: $filter, owner: $owner) {
+  subscription OnCreateUser($filter: ModelSubscriptionUserFilterInput) {
+    onCreateUser(filter: $filter) {
       id
       firstName
       lastName
@@ -186,7 +171,6 @@ export const onCreateUser = /* GraphQL */ `
           createdAt
           updatedAt
           userNotificationsId
-          owner
           __typename
         }
         nextToken
@@ -208,7 +192,6 @@ export const onCreateUser = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       mapChoice
@@ -225,7 +208,6 @@ export const onCreateUser = /* GraphQL */ `
           createdAt
           updatedAt
           userMarkersId
-          owner
           __typename
         }
         nextToken
@@ -234,17 +216,13 @@ export const onCreateUser = /* GraphQL */ `
       createdAt
       updatedAt
       organizationUsersId
-      owner
       __typename
     }
   }
 `;
 export const onUpdateUser = /* GraphQL */ `
-  subscription OnUpdateUser(
-    $filter: ModelSubscriptionUserFilterInput
-    $owner: String
-  ) {
-    onUpdateUser(filter: $filter, owner: $owner) {
+  subscription OnUpdateUser($filter: ModelSubscriptionUserFilterInput) {
+    onUpdateUser(filter: $filter) {
       id
       firstName
       lastName
@@ -259,7 +237,6 @@ export const onUpdateUser = /* GraphQL */ `
           createdAt
           updatedAt
           userNotificationsId
-          owner
           __typename
         }
         nextToken
@@ -281,7 +258,6 @@ export const onUpdateUser = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       mapChoice
@@ -298,7 +274,6 @@ export const onUpdateUser = /* GraphQL */ `
           createdAt
           updatedAt
           userMarkersId
-          owner
           __typename
         }
         nextToken
@@ -307,17 +282,13 @@ export const onUpdateUser = /* GraphQL */ `
       createdAt
       updatedAt
       organizationUsersId
-      owner
       __typename
     }
   }
 `;
 export const onDeleteUser = /* GraphQL */ `
-  subscription OnDeleteUser(
-    $filter: ModelSubscriptionUserFilterInput
-    $owner: String
-  ) {
-    onDeleteUser(filter: $filter, owner: $owner) {
+  subscription OnDeleteUser($filter: ModelSubscriptionUserFilterInput) {
+    onDeleteUser(filter: $filter) {
       id
       firstName
       lastName
@@ -332,7 +303,6 @@ export const onDeleteUser = /* GraphQL */ `
           createdAt
           updatedAt
           userNotificationsId
-          owner
           __typename
         }
         nextToken
@@ -354,7 +324,6 @@ export const onDeleteUser = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       mapChoice
@@ -371,7 +340,6 @@ export const onDeleteUser = /* GraphQL */ `
           createdAt
           updatedAt
           userMarkersId
-          owner
           __typename
         }
         nextToken
@@ -380,17 +348,13 @@ export const onDeleteUser = /* GraphQL */ `
       createdAt
       updatedAt
       organizationUsersId
-      owner
       __typename
     }
   }
 `;
 export const onCreateMarker = /* GraphQL */ `
-  subscription OnCreateMarker(
-    $filter: ModelSubscriptionMarkerFilterInput
-    $owner: String
-  ) {
-    onCreateMarker(filter: $filter, owner: $owner) {
+  subscription OnCreateMarker($filter: ModelSubscriptionMarkerFilterInput) {
+    onCreateMarker(filter: $filter) {
       id
       name
       description
@@ -416,23 +380,18 @@ export const onCreateMarker = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       createdAt
       updatedAt
       organizationMarkersId
-      owner
       __typename
     }
   }
 `;
 export const onUpdateMarker = /* GraphQL */ `
-  subscription OnUpdateMarker(
-    $filter: ModelSubscriptionMarkerFilterInput
-    $owner: String
-  ) {
-    onUpdateMarker(filter: $filter, owner: $owner) {
+  subscription OnUpdateMarker($filter: ModelSubscriptionMarkerFilterInput) {
+    onUpdateMarker(filter: $filter) {
       id
       name
       description
@@ -458,23 +417,18 @@ export const onUpdateMarker = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       createdAt
       updatedAt
       organizationMarkersId
-      owner
       __typename
     }
   }
 `;
 export const onDeleteMarker = /* GraphQL */ `
-  subscription OnDeleteMarker(
-    $filter: ModelSubscriptionMarkerFilterInput
-    $owner: String
-  ) {
-    onDeleteMarker(filter: $filter, owner: $owner) {
+  subscription OnDeleteMarker($filter: ModelSubscriptionMarkerFilterInput) {
+    onDeleteMarker(filter: $filter) {
       id
       name
       description
@@ -500,13 +454,11 @@ export const onDeleteMarker = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       createdAt
       updatedAt
       organizationMarkersId
-      owner
       __typename
     }
   }
@@ -514,9 +466,8 @@ export const onDeleteMarker = /* GraphQL */ `
 export const onCreateNotification = /* GraphQL */ `
   subscription OnCreateNotification(
     $filter: ModelSubscriptionNotificationFilterInput
-    $owner: String
   ) {
-    onCreateNotification(filter: $filter, owner: $owner) {
+    onCreateNotification(filter: $filter) {
       id
       timestamp
       type
@@ -539,7 +490,6 @@ export const onCreateNotification = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -551,13 +501,11 @@ export const onCreateNotification = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userNotificationsId
-      owner
       __typename
     }
   }
@@ -565,9 +513,8 @@ export const onCreateNotification = /* GraphQL */ `
 export const onUpdateNotification = /* GraphQL */ `
   subscription OnUpdateNotification(
     $filter: ModelSubscriptionNotificationFilterInput
-    $owner: String
   ) {
-    onUpdateNotification(filter: $filter, owner: $owner) {
+    onUpdateNotification(filter: $filter) {
       id
       timestamp
       type
@@ -590,7 +537,6 @@ export const onUpdateNotification = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -602,13 +548,11 @@ export const onUpdateNotification = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userNotificationsId
-      owner
       __typename
     }
   }
@@ -616,9 +560,8 @@ export const onUpdateNotification = /* GraphQL */ `
 export const onDeleteNotification = /* GraphQL */ `
   subscription OnDeleteNotification(
     $filter: ModelSubscriptionNotificationFilterInput
-    $owner: String
   ) {
-    onDeleteNotification(filter: $filter, owner: $owner) {
+    onDeleteNotification(filter: $filter) {
       id
       timestamp
       type
@@ -641,7 +584,6 @@ export const onDeleteNotification = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -653,13 +595,11 @@ export const onDeleteNotification = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userNotificationsId
-      owner
       __typename
     }
   }
@@ -667,9 +607,8 @@ export const onDeleteNotification = /* GraphQL */ `
 export const onCreateGardnerMarker = /* GraphQL */ `
   subscription OnCreateGardnerMarker(
     $filter: ModelSubscriptionGardnerMarkerFilterInput
-    $owner: String
   ) {
-    onCreateGardnerMarker(filter: $filter, owner: $owner) {
+    onCreateGardnerMarker(filter: $filter) {
       id
       description
       address
@@ -694,7 +633,6 @@ export const onCreateGardnerMarker = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -706,13 +644,11 @@ export const onCreateGardnerMarker = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userMarkersId
-      owner
       __typename
     }
   }
@@ -720,9 +656,8 @@ export const onCreateGardnerMarker = /* GraphQL */ `
 export const onUpdateGardnerMarker = /* GraphQL */ `
   subscription OnUpdateGardnerMarker(
     $filter: ModelSubscriptionGardnerMarkerFilterInput
-    $owner: String
   ) {
-    onUpdateGardnerMarker(filter: $filter, owner: $owner) {
+    onUpdateGardnerMarker(filter: $filter) {
       id
       description
       address
@@ -747,7 +682,6 @@ export const onUpdateGardnerMarker = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -759,13 +693,11 @@ export const onUpdateGardnerMarker = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userMarkersId
-      owner
       __typename
     }
   }
@@ -773,9 +705,8 @@ export const onUpdateGardnerMarker = /* GraphQL */ `
 export const onDeleteGardnerMarker = /* GraphQL */ `
   subscription OnDeleteGardnerMarker(
     $filter: ModelSubscriptionGardnerMarkerFilterInput
-    $owner: String
   ) {
-    onDeleteGardnerMarker(filter: $filter, owner: $owner) {
+    onDeleteGardnerMarker(filter: $filter) {
       id
       description
       address
@@ -800,7 +731,6 @@ export const onDeleteGardnerMarker = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -812,13 +742,11 @@ export const onDeleteGardnerMarker = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userMarkersId
-      owner
       __typename
     }
   }

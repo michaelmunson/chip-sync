@@ -20,7 +20,6 @@ export const getOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationUsersId
-          owner
           __typename
         }
         nextToken
@@ -40,7 +39,6 @@ export const getOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationMarkersId
-          owner
           __typename
         }
         nextToken
@@ -48,7 +46,6 @@ export const getOrganization = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -76,7 +73,6 @@ export const listOrganizations = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       nextToken
@@ -101,7 +97,6 @@ export const getUser = /* GraphQL */ `
           createdAt
           updatedAt
           userNotificationsId
-          owner
           __typename
         }
         nextToken
@@ -114,44 +109,43 @@ export const getUser = /* GraphQL */ `
         accessCode
         location
         users {
-          items {
-            id
-            firstName
-            lastName
-            role
-            contact
-            createdAt
-            updatedAt
-            organizationUsersId
-            owner
-            __typename
-          }
-          nextToken
-          __typename
-        }
-        markers {
-          items {
-            id
-            name
-            contact
-            address
-            latitude
-            longitude
-            images
-            type
-            createdAt
-            updatedAt
-            organizationMarkersId
-            owner
-            __typename
-          }
-          nextToken
-          __typename
-        }
+        items {
+          id
+          firstName
+          lastName
+          role
+          mapChoice
+          contact
           createdAt
           updatedAt
-          owner
+          organizationUsersId
           __typename
+        }
+        nextToken
+        __typename
+      }
+      markers {
+        items {
+          id
+          name
+          description
+          contact
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          organizationMarkersId
+          __typename
+        }
+        nextToken
+        __typename
+      }
+        createdAt
+        updatedAt
+        __typename
       }
       mapChoice
       contact
@@ -167,7 +161,6 @@ export const getUser = /* GraphQL */ `
           createdAt
           updatedAt
           userMarkersId
-          owner
           __typename
         }
         nextToken
@@ -176,7 +169,6 @@ export const getUser = /* GraphQL */ `
       createdAt
       updatedAt
       organizationUsersId
-      owner
       __typename
     }
   }
@@ -205,7 +197,6 @@ export const listUsers = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -217,7 +208,6 @@ export const listUsers = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       nextToken
@@ -253,13 +243,11 @@ export const getMarker = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       createdAt
       updatedAt
       organizationMarkersId
-      owner
       __typename
     }
   }
@@ -289,13 +277,11 @@ export const listMarkers = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         createdAt
         updatedAt
         organizationMarkersId
-        owner
         __typename
       }
       nextToken
@@ -328,7 +314,6 @@ export const getNotification = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -340,13 +325,11 @@ export const getNotification = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userNotificationsId
-      owner
       __typename
     }
   }
@@ -374,13 +357,11 @@ export const listNotifications = /* GraphQL */ `
           createdAt
           updatedAt
           organizationUsersId
-          owner
           __typename
         }
         createdAt
         updatedAt
         userNotificationsId
-        owner
         __typename
       }
       nextToken
@@ -415,7 +396,6 @@ export const getGardnerMarker = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -427,13 +407,11 @@ export const getGardnerMarker = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userMarkersId
-      owner
       __typename
     }
   }
@@ -463,13 +441,11 @@ export const listGardnerMarkers = /* GraphQL */ `
           createdAt
           updatedAt
           organizationUsersId
-          owner
           __typename
         }
         createdAt
         updatedAt
         userMarkersId
-        owner
         __typename
       }
       nextToken

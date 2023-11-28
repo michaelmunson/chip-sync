@@ -12,6 +12,7 @@ import {
 } from "../graphql/mutations";
 import { Geo } from "./location";
 import { S3 } from "./storage";
+import { OrganizationGQLSocket } from "./websocket";
 
 namespace DBTypes {
     export interface CreateOrg {
@@ -35,7 +36,12 @@ namespace DBTypes {
     }
 }
 
-function cleanData(data:{[key:string]:any}):any{
+const getIdToken = async () => {
+    const session = await Auth.currentSession();
+    return session.getIdToken().getJwtToken();
+}
+
+export function cleanData(data:{[key:string]:any}):any{
     if ("markers" in data && "items" in data?.markers){
         data.markers = data.markers.items;
         for (const i in data.markers){
@@ -139,6 +145,16 @@ export const DB = {
             }
         });
         return res?.data?.createOrganization; 
+    },
+    async subscribeToOrganization({organizationId, callback}:{organizationId:string, callback:(data:any)=>void}){
+        const idToken = await getIdToken(); 
+        const socket = new OrganizationGQLSocket({
+            idToken,
+            organizationId,
+            callback
+        });
+        socket.init();
+        return socket; 
     },
     /* MARKER */
     async createMarker({type,name,address,description,contact,organizationId,images}:DBTypes.CreateMarker) : Promise<Marker> {

@@ -23,7 +23,6 @@ export const createOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationUsersId
-          owner
           __typename
         }
         nextToken
@@ -43,7 +42,6 @@ export const createOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationMarkersId
-          owner
           __typename
         }
         nextToken
@@ -51,7 +49,6 @@ export const createOrganization = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -78,7 +75,6 @@ export const updateOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationUsersId
-          owner
           __typename
         }
         nextToken
@@ -98,7 +94,6 @@ export const updateOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationMarkersId
-          owner
           __typename
         }
         nextToken
@@ -106,7 +101,6 @@ export const updateOrganization = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -133,7 +127,6 @@ export const deleteOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationUsersId
-          owner
           __typename
         }
         nextToken
@@ -153,7 +146,6 @@ export const deleteOrganization = /* GraphQL */ `
           createdAt
           updatedAt
           organizationMarkersId
-          owner
           __typename
         }
         nextToken
@@ -161,7 +153,6 @@ export const deleteOrganization = /* GraphQL */ `
       }
       createdAt
       updatedAt
-      owner
       __typename
     }
   }
@@ -186,7 +177,6 @@ export const createUser = /* GraphQL */ `
           createdAt
           updatedAt
           userNotificationsId
-          owner
           __typename
         }
         nextToken
@@ -199,42 +189,42 @@ export const createUser = /* GraphQL */ `
         accessCode
         location
         users {
-          items {
-            id
-            firstName
-            lastName
-            role
-            contact
-            createdAt
-            updatedAt
-            organizationUsersId
-            owner
-            __typename
-          }
-          nextToken
+        items {
+          id
+          firstName
+          lastName
+          role
+          mapChoice
+          contact
+          createdAt
+          updatedAt
+          organizationUsersId
           __typename
         }
-        markers {
-          items {
-            id
-            contact
-            address
-            latitude
-            longitude
-            images
-            type
-            createdAt
-            updatedAt
-            organizationMarkersId
-            owner
-            __typename
-          }
-          nextToken
+        nextToken
+        __typename
+      }
+      markers {
+        items {
+          id
+          name
+          description
+          contact
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          organizationMarkersId
           __typename
         }
+        nextToken
+        __typename
+      }
         createdAt
         updatedAt
-        owner
         __typename
       }
       mapChoice
@@ -251,7 +241,6 @@ export const createUser = /* GraphQL */ `
           createdAt
           updatedAt
           userMarkersId
-          owner
           __typename
         }
         nextToken
@@ -260,7 +249,6 @@ export const createUser = /* GraphQL */ `
       createdAt
       updatedAt
       organizationUsersId
-      owner
       __typename
     }
   }
@@ -285,7 +273,6 @@ export const updateUser = /* GraphQL */ `
           createdAt
           updatedAt
           userNotificationsId
-          owner
           __typename
         }
         nextToken
@@ -298,42 +285,42 @@ export const updateUser = /* GraphQL */ `
         accessCode
         location
         users {
-          items {
-            id
-            firstName
-            lastName
-            role
-            contact
-            createdAt
-            updatedAt
-            organizationUsersId
-            owner
-            __typename
-          }
-          nextToken
+        items {
+          id
+          firstName
+          lastName
+          role
+          mapChoice
+          contact
+          createdAt
+          updatedAt
+          organizationUsersId
           __typename
         }
-        markers {
-          items {
-            id
-            contact
-            address
-            latitude
-            longitude
-            images
-            type
-            createdAt
-            updatedAt
-            organizationMarkersId
-            owner
-            __typename
-          }
-          nextToken
+        nextToken
+        __typename
+      }
+      markers {
+        items {
+          id
+          name
+          description
+          contact
+          address
+          latitude
+          longitude
+          images
+          type
+          createdAt
+          updatedAt
+          organizationMarkersId
           __typename
         }
+        nextToken
+        __typename
+      }
         createdAt
         updatedAt
-        owner
         __typename
       }
       mapChoice
@@ -350,7 +337,6 @@ export const updateUser = /* GraphQL */ `
           createdAt
           updatedAt
           userMarkersId
-          owner
           __typename
         }
         nextToken
@@ -359,7 +345,6 @@ export const updateUser = /* GraphQL */ `
       createdAt
       updatedAt
       organizationUsersId
-      owner
       __typename
     }
   }
@@ -384,7 +369,6 @@ export const deleteUser = /* GraphQL */ `
           createdAt
           updatedAt
           userNotificationsId
-          owner
           __typename
         }
         nextToken
@@ -406,7 +390,6 @@ export const deleteUser = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       mapChoice
@@ -423,7 +406,6 @@ export const deleteUser = /* GraphQL */ `
           createdAt
           updatedAt
           userMarkersId
-          owner
           __typename
         }
         nextToken
@@ -432,7 +414,6 @@ export const deleteUser = /* GraphQL */ `
       createdAt
       updatedAt
       organizationUsersId
-      owner
       __typename
     }
   }
@@ -468,13 +449,11 @@ export const createMarker = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       createdAt
       updatedAt
       organizationMarkersId
-      owner
       __typename
     }
   }
@@ -510,13 +489,11 @@ export const updateMarker = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       createdAt
       updatedAt
       organizationMarkersId
-      owner
       __typename
     }
   }
@@ -552,13 +529,11 @@ export const deleteMarker = /* GraphQL */ `
         }
         createdAt
         updatedAt
-        owner
         __typename
       }
       createdAt
       updatedAt
       organizationMarkersId
-      owner
       __typename
     }
   }
@@ -591,7 +566,6 @@ export const createNotification = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -603,13 +577,11 @@ export const createNotification = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userNotificationsId
-      owner
       __typename
     }
   }
@@ -642,7 +614,6 @@ export const updateNotification = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -654,13 +625,11 @@ export const updateNotification = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userNotificationsId
-      owner
       __typename
     }
   }
@@ -693,7 +662,6 @@ export const deleteNotification = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -705,13 +673,11 @@ export const deleteNotification = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userNotificationsId
-      owner
       __typename
     }
   }
@@ -746,7 +712,6 @@ export const createGardnerMarker = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -758,13 +723,11 @@ export const createGardnerMarker = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userMarkersId
-      owner
       __typename
     }
   }
@@ -799,7 +762,6 @@ export const updateGardnerMarker = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -811,13 +773,11 @@ export const updateGardnerMarker = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userMarkersId
-      owner
       __typename
     }
   }
@@ -852,7 +812,6 @@ export const deleteGardnerMarker = /* GraphQL */ `
           location
           createdAt
           updatedAt
-          owner
           __typename
         }
         mapChoice
@@ -864,13 +823,11 @@ export const deleteGardnerMarker = /* GraphQL */ `
         createdAt
         updatedAt
         organizationUsersId
-        owner
         __typename
       }
       createdAt
       updatedAt
       userMarkersId
-      owner
       __typename
     }
   }
