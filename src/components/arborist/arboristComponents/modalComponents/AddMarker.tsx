@@ -180,7 +180,7 @@ export default function AddMarker({
 
     async function createMarker(){
         setIsCreating(true);
-        const type = markerType.size>1 ? "both" : [...markerType][0]; 
+        const type = markerType.size > 1 ? "both" : [...markerType][0]; 
         await DB.createMarker({
             type,
             name: markerName,

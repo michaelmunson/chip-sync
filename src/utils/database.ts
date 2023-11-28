@@ -7,9 +7,11 @@ import {
 } from "../graphql/queries";
 import {
     createOrganization as createOrganizationMutation,
-    createUser as createUserMutation
+    createUser as createUserMutation,
+    createMarker as createMarkerMutation
 } from "../graphql/mutations";
 import { Geo } from "./location";
+import { S3 } from "./storage";
 
 namespace DBTypes {
     export interface CreateOrg {
@@ -134,10 +136,27 @@ export const DB = {
         return res?.data?.createOrganization; 
     },
     /* MARKER */
-    async createMarker({name,address,description,contact,organizationId,images}:DBTypes.CreateMarker) : Promise<Marker> {
-        const res:any = {};
-        const coords = await Geo.addressToCoords(address); 
-        console.log("COORDS", coords); 
-        return res; 
+    async createMarker({type,name,address,description,contact,organizationId,images}:DBTypes.CreateMarker) : Promise<Marker> {
+        const imageKeys = await S3.put({organizationId, images}); 
+        const {latitude, longitude} = await Geo.addressToCoords(address); 
+        const res:any = await API.graphql({
+            query: createMarkerMutation,
+            variables: {
+                input : {
+                    type,
+                    name,
+                    address,
+                    description,
+                    contact: JSON.stringify(contact),
+                    latitude,
+                    longitude,
+                    organizationMarkersId: organizationId,
+                    images: imageKeys
+                }   
+            }
+        });
+        const data = cleanData(res.data.createMarker);
+        console.log("Create Marker Res Cleaned: ", data);
+        return data; 
     }
 }   
