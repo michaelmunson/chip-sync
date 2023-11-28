@@ -7,6 +7,7 @@ import { DB } from '../../utils/database';
 import { Coordinates, ModalConfig } from '../../types/generalTypes';
 import { Geo } from '../../utils/location';
 import Modal from './arboristComponents/Modal';
+import { S3 } from '../../utils/storage';
 
 const darkTheme = createTheme({
 	palette: {
@@ -18,6 +19,10 @@ const lightTheme = createTheme({
 		mode: "light"
 	}
 });
+const decideTheme = () => {
+    const date = new Date();
+    return date.getHours() >= 18 ? "dark" : "light"; 
+}
 
 interface ArboristAppProps {
     userData:User,
@@ -29,12 +34,19 @@ export default function ArboristApp({
     setUserData
 } : ArboristAppProps
 ){
-    const [theme, setTheme] = useState<"light"|"dark">("light"); 
+    const [theme, setTheme] = useState<"light"|"dark">(decideTheme()); 
     const [currentLocation, setCurrentLocation] = useState<Coordinates>(Geo.zipcodeToCoordinates(userData.organization.location));
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [modalConfig, setModalConfig] = useState<ModalConfig>({type:"add-marker"});
     /* USE EFFECTS */
     useEffect(updateCurrentLocation, []);
+    useEffect(() => {
+        const images = userData.organization.markers[0].images; 
+        S3.getImages({images}).then(res => {
+            console.log(res); 
+        }); 
+
+    }, [userData])
     /* Utility Functions */
     function toggleModal(isOpen:boolean, config?:ModalConfig){
         if (config) {

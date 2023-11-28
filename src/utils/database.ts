@@ -37,7 +37,12 @@ namespace DBTypes {
 
 function cleanData(data:{[key:string]:any}):any{
     if ("markers" in data && "items" in data?.markers){
-        data.markers = data.markers.items; 
+        data.markers = data.markers.items;
+        for (const i in data.markers){
+            if (data.markers[i].contact){
+                data.markers[i].contact = JSON.parse(data.markers[i].contact); 
+            }
+        } 
     }
     if ("users" in data && "items" in data?.users){
         data.users = data.users.items; 
@@ -158,5 +163,9 @@ export const DB = {
         const data = cleanData(res.data.createMarker);
         console.log("Create Marker Res Cleaned: ", data);
         return data; 
+    },
+    /* NOTIFICATIONS */
+    async createNotification({}){
+
     }
 }   

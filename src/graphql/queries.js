@@ -132,6 +132,7 @@ export const getUser = /* GraphQL */ `
         markers {
           items {
             id
+            name
             contact
             address
             latitude

@@ -16,5 +16,11 @@ export const S3 = {
             return Storage.put(key, image);
         }));
         return s3Keys; 
+    },
+    async getImages({images}:{images:string[]}):Promise<string[]>{
+        const imageUrls = await Promise.all(images.map(key => {
+            return Storage.get(key); 
+        }));
+        return imageUrls; 
     }
 }

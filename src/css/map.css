@@ -52,6 +52,42 @@
     }
 }
 
+/* MARKERS */
+
+.marker-content {
+    color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    & hr {
+        width:100%;
+    }
+
+    & p {
+        text-align: center;
+    }
+}
+
+.marker-content > h2 {
+    font-size: 1.2em;
+    margin:7px;
+}
+
+.marker-content a {
+    text-decoration: none;
+}
+
+.details-button {
+    background: green;
+    color: white;
+    border-radius: 5px;
+    border: 1px solid gray;
+    padding: 6px 10px;
+    margin: 7px;
+}
+
+
 /* GOOGLE MAPS OVERRIDE */
 [aria-label="Map"]:nth-child(2){
     cursor: crosshair !important;
@@ -66,3 +102,4 @@ button[title="Keyboard shortcuts"],
 button[title="Map Data"] {
     display: none !important;
 }
+
