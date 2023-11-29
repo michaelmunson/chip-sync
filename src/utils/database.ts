@@ -8,11 +8,13 @@ import {
 import {
     createOrganization as createOrganizationMutation,
     createUser as createUserMutation,
-    createMarker as createMarkerMutation
+    createMarker as createMarkerMutation,
+    createNotification as createNotificationMutation
 } from "../graphql/mutations";
 import { Geo } from "./location";
 import { S3 } from "./storage";
-import { OrganizationGQLSocket } from "./websocket";
+import { NotificationGQLSocket } from "./websocket";
+import { AnyObject } from "../types/generalTypes";
 
 namespace DBTypes {
     export interface CreateOrg {
@@ -32,7 +34,7 @@ namespace DBTypes {
         contact:Marker["contact"]
         address:string
         images:File[]
-        organizationId:string
+        userData: User
     }
 }
 
@@ -146,18 +148,9 @@ export const DB = {
         });
         return res?.data?.createOrganization; 
     },
-    async subscribeToOrganization({organizationId, callback}:{organizationId:string, callback:(data:any)=>void}){
-        const idToken = await getIdToken(); 
-        const socket = new OrganizationGQLSocket({
-            idToken,
-            organizationId,
-            callback
-        });
-        socket.init();
-        return socket; 
-    },
     /* MARKER */
-    async createMarker({type,name,address,description,contact,organizationId,images}:DBTypes.CreateMarker) : Promise<Marker> {
+    async createMarker({type,name,address,description,contact,images,userData}:DBTypes.CreateMarker) : Promise<Marker> {
+        const organizationId = userData.organization.id; 
         const imageKeys = await S3.put({organizationId, images}); 
         const {latitude, longitude} = await Geo.addressToCoords(address); 
         const res:any = await API.graphql({
@@ -176,12 +169,54 @@ export const DB = {
                 }   
             }
         });
+        userData.organization.users.forEach(user => {
+            this.createNotification({
+                userId: user.id,
+                type: "new-org-marker",
+                data: {
+                    type,
+                    name,
+                    address,
+                    description,
+                    contact: JSON.stringify(contact),
+                    latitude,
+                    longitude,
+                    organizationMarkersId: organizationId,
+                    images: imageKeys
+                }
+            });
+        })
         const data = cleanData(res.data.createMarker);
         console.log("Create Marker Res Cleaned: ", data);
         return data; 
     },
     /* NOTIFICATIONS */
-    async createNotification({}){
-
-    }
+    async createNotification({data,userId,type}:{data:AnyObject,userId:string,type:string}){
+        const res:any = await API.graphql({
+            query: createNotificationMutation,
+            variables: {
+                input: {
+                    userNotificationsId: userId,
+                    type,
+                    data: JSON.stringify(data),
+                    opened: false,
+                    timestamp: 0
+                }
+            }
+        }); 
+        const resData = res.data.createNotification;
+        console.log("Create Notification Res: ", resData);
+        return resData; 
+    },
+    async subscribeToNotification(callback:(data:any) => void){
+        const idToken = await getIdToken(); 
+        const userId = (await Auth.currentUserInfo()).username; 
+        const socket = new NotificationGQLSocket({
+            idToken,
+            userId,
+            callback
+        });
+        socket.init();
+        return socket; 
+    },
 }   

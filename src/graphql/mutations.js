@@ -285,40 +285,13 @@ export const updateUser = /* GraphQL */ `
         accessCode
         location
         users {
-        items {
-          id
-          firstName
-          lastName
-          role
-          mapChoice
-          contact
-          createdAt
-          updatedAt
-          organizationUsersId
+          nextToken
           __typename
         }
-        nextToken
-        __typename
-      }
-      markers {
-        items {
-          id
-          name
-          description
-          contact
-          address
-          latitude
-          longitude
-          images
-          type
-          createdAt
-          updatedAt
-          organizationMarkersId
+        markers {
+          nextToken
           __typename
         }
-        nextToken
-        __typename
-      }
         createdAt
         updatedAt
         __typename

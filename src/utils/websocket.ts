@@ -12,12 +12,12 @@ const generateUUID = () => {
     return uuid;
 }
 
-export class OrganizationGQLSocket extends WebSocket {
+export class NotificationGQLSocket extends WebSocket {
     wsUrl:string
     hostUrl:string
     token:string; 
     callback:(data:any) => void
-    organizationId:string
+    userId:string
     subscriptionId:string|null
     defaultTimeoutMs:number
     connectionTimeoutMs:number
@@ -27,11 +27,11 @@ export class OrganizationGQLSocket extends WebSocket {
 
     constructor({
         idToken,
-        organizationId,
+        userId,
         callback
     } : {
         idToken:string
-        organizationId:string
+        userId:string
         callback:(data:any) => void
     }){
         const url = "wss://3wbb2yhbkjeetjpozeisw2zhza.appsync-realtime-api.us-east-1.amazonaws.com/graphql"; 
@@ -49,7 +49,7 @@ export class OrganizationGQLSocket extends WebSocket {
         this.hostUrl = "3wbb2yhbkjeetjpozeisw2zhza.appsync-api.us-east-1.amazonaws.com"
         this.token = idToken; 
         this.callback = callback
-        this.organizationId = organizationId;
+        this.userId = userId;
         this.subscriptionId = null;
         this.defaultTimeoutMs = 300000;
         this.connectionTimeoutMs = this.defaultTimeoutMs;
@@ -78,8 +78,8 @@ export class OrganizationGQLSocket extends WebSocket {
             },
             'data' : async (data:any) => {
                 // console.log('Data Recieved: ', data);
-                const orgData = cleanData(data.payload.data.onUpdateOrganization);
-                this.callback(orgData);
+                const notificationId = data.payload.data.onCreateNotification
+                this.callback(notificationId);
             },
             'complete' : (data:any) => {
                 console.log('Subscription Unregistration Complete: ', data);
@@ -107,6 +107,7 @@ export class OrganizationGQLSocket extends WebSocket {
 
     init(){
         this.addEventListener("open", (event) => {
+            this.isInit = true; 
             this.send(JSON.stringify({
                 type: "connection_init"
             }));
@@ -127,56 +128,14 @@ export class OrganizationGQLSocket extends WebSocket {
     registerSubscription(){
         const query = `
             subscription MySubscription {
-                onUpdateOrganization(id: "${this.organizationId}") {
+                onCreateNotification(filter: {userNotificationsId: {eq: "${this.userId}"}}) {
                     id
-                    name
-                    tier
-                    accessCode
-                    location
-                    users {
-                        items {
-                        id
-                        firstName
-                        lastName
-                        role
-                        mapChoice
-                        contact
-                        createdAt
-                        updatedAt
-                        organizationUsersId
-                        __typename
-                        }
-                        nextToken
-                        __typename
-                    }
-                    markers {
-                        items {
-                        id
-                        name
-                        description
-                        contact
-                        address
-                        latitude
-                        longitude
-                        images
-                        type
-                        createdAt
-                        updatedAt
-                        organizationMarkersId
-                        __typename
-                        }
-                        nextToken
-                        __typename
-                    }
-                    createdAt
-                    updatedAt
-                    __typename
                 }
             }
         `;
 
         this.send(JSON.stringify({
-            id: this.organizationId+'-'+generateUUID(),
+            id: this.userId+'-'+generateUUID(),
             payload: {
                 data : JSON.stringify({
                     query,

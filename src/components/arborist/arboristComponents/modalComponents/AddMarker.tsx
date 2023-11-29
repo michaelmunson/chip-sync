@@ -190,8 +190,8 @@ export default function AddMarker({
                 name:contactName,
                 phone:contactPhone
             },
-            organizationId: userData.organization.id,
-            images:markerImages
+            images:markerImages,
+            userData
         }); 
         toggleModal(false); 
         setIsCreating(false);

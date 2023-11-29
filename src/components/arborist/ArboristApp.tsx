@@ -8,7 +8,6 @@ import { Coordinates, ModalConfig } from '../../types/generalTypes';
 import { Geo } from '../../utils/location';
 import Modal from './arboristComponents/Modal';
 import { S3 } from '../../utils/storage';
-import { OrganizationGQLSocket } from '../../utils/websocket';
 
 const darkTheme = createTheme({
 	palette: {
@@ -57,16 +56,17 @@ export default function ArboristApp({
         });
     }
     function subscribe(){
-        const organizationId = userData.organization.id; 
+        console.log({userData}); 
         setSocket((sock:any) => {
-            console.log("SOCK", sock);
             if (!sock) {
-                const newSock = DB.subscribeToOrganization({
-                    organizationId,
-                    callback: (data) => {
-                        console.log("SOCK DATA", data); 
-                    }
+                const newSock = DB.subscribeToNotification((data) => {
+                    console.log("SOCK DATA", data); 
+                    DB.getUser().then(user => {
+                        console.log("Updating User Data...", user); 
+                        if (user) setUserData(user);
+                    });
                 });
+                window.exports = {sock:newSock};
                 return newSock
             } else {
                 return sock; 

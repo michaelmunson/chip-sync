@@ -4,7 +4,7 @@
 
 # ORGANIZATIONS
 
-type Organization @model @auth(rules: [{ allow: public, provider: iam }]) {
+type Organization @model @auth(rules: [{ allow: private }]) {
     id:ID!
     name:String!
     tier: String!
@@ -14,7 +14,7 @@ type Organization @model @auth(rules: [{ allow: public, provider: iam }]) {
     markers: [Marker] @hasMany
 }
 
-type User @model @auth(rules: [{ allow: public, provider: iam }]) {
+type User @model @auth(rules: [{ allow: private }]) {
     id: ID!
     firstName: String!
     lastName: String!
@@ -27,7 +27,7 @@ type User @model @auth(rules: [{ allow: public, provider: iam }]) {
     markers: [GardnerMarker] @hasMany
 }
 
-type Marker @model @auth(rules: [{ allow: public, provider: iam }]) {
+type Marker @model @auth(rules: [{ allow: private }]) {
     id: ID!
     name: String!
     description: String
@@ -40,7 +40,7 @@ type Marker @model @auth(rules: [{ allow: public, provider: iam }]) {
     organization: Organization @belongsTo
 }
 
-type Notification @model @auth(rules: [{ allow: public, provider: iam }]) {
+type Notification @model @auth(rules: [{ allow: private }]) {
     id: ID!
     timestamp:Int!
     type:String!
@@ -50,7 +50,7 @@ type Notification @model @auth(rules: [{ allow: public, provider: iam }]) {
 }
 
 # GARDNER STUFF
-type GardnerMarker @model @auth(rules: [{ allow: public, provider: iam }]){
+type GardnerMarker @model @auth(rules: [{ allow: private }]){
     id: ID!
     description: String
     address: String!
