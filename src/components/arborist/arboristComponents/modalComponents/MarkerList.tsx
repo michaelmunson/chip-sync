@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ListIcon from "@mui/icons-material/List";
 import RoomIcon from '@mui/icons-material/Room';
@@ -52,26 +53,19 @@ function MarkerTabs({tab,setTab}:MarkerTabsProps) {
 
 function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerAccordianProps) {
 	const [markerArray, setMarkerArray] = useState(sortMarkers([...userData.organization.markers]));
-	useEffect(()=>{setMarkerArray(markerFilterMap[tab]())}, [tab]);
-	const markerFilterMap = {
-		chips: () => {
-			const markersMut = [...markerArray];
-			return markersMut.filter(marker => marker.type === "chips")
-		},
-		wood: () => {
-			const markersMut = [...markerArray];
-			return markersMut.filter(marker => marker.type === "wood")
-		},
-		both: () => {
-			const markersMut = [...markerArray];
-			return markersMut.filter(marker => marker.type === "both")
-		},
-		all: () => {
-			return [...markerArray]
-		}
+	
+    const markerFilterMap = {
+		chips: () => [...userData.organization.markers].filter(marker => marker.type === "chips"),
+		wood: () => [...userData.organization.markers].filter(marker => marker.type === "wood"),
+		both: () => [...userData.organization.markers].filter(marker => marker.type === "both"),
+		all: () => [...userData.organization.markers]
 	}
-	const formatMarkerName = (name:string, cutoffIndex=15) => name.length > cutoffIndex ? name.slice(0,cutoffIndex) + "..." : name;
-	function sortMarkers(markers:Marker[]){
+
+    useEffect(()=>{setMarkerArray(markerFilterMap[tab]())}, [tab]);
+	
+    const formatMarkerName = (name:string, cutoffIndex=15) => name.length > cutoffIndex ? name.slice(0,cutoffIndex) + "..." : name;
+	
+    function sortMarkers(markers:Marker[]){
 		const { latitude: cLat, longitude: cLng } = currentLocation;
 		const markersMut = [...markers];
 		// courtesy of https://stackoverflow.com/users/1594823/saikat
