@@ -1,0 +1,47 @@
+
+
+.summary-container {
+    display: flex;
+    flex-direction: row;
+    width:100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.details-container-center {
+    display: flex;
+    justify-content: center;
+    margin: 15px;
+}
+
+.timestamp {
+    color:gray;
+}
+
+.summary-text {
+    width: 100%;
+    text-align: left;
+    margin:10px;
+}
+
+.notification-circle {
+    min-height: 19px;
+    min-width: 19px;
+    margin: 2px;
+    border-radius: 50%;
+    border: 2px solid gray;
+    background-color: transparent;
+    transition: 500ms;
+}
+
+.notification-circle.new-marker.unopened {
+    background-color: #90caf9;
+    border: 2px solid #90caf9
+}
+
+.notification-circle.join-org.unopened {
+    background-color: #f99090;
+    border: 2px solid #f99090
+}
+
+

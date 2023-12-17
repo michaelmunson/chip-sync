@@ -9,12 +9,14 @@ import {
     createOrganization as createOrganizationMutation,
     createUser as createUserMutation,
     createMarker as createMarkerMutation,
-    createNotification as createNotificationMutation
+    createNotification as createNotificationMutation,
+    updateNotification as updateNotificationMutation
 } from "../graphql/mutations";
 import { Geo } from "./location";
 import { S3 } from "./storage";
 import { NotificationGQLSocket } from "./websocket";
 import { AnyObject } from "../types/generalTypes";
+import logger from "./logger";
 
 namespace DBTypes {
     export interface CreateOrg {
@@ -207,6 +209,30 @@ export const DB = {
         const resData = res.data.createNotification;
         console.log("Create Notification Res: ", resData);
         return resData; 
+    },
+    async updateNotification({id}:{id:string}){
+        const res:any = await API.graphql({
+            query: updateNotificationMutation,
+            variables: {
+                input: {
+                    id,
+                    opened: true
+                }
+            } 
+        });
+
+        logger.logRequest(res?.data?.updateNotification, {
+            error: {
+                type: "UpdateNotificationError",
+                message: "Failed to Update Notification"
+            },
+            data: res
+        });
+
+        return res?.data?.updateNotification; 
+    },
+    async deleteNotification({id}:{id:string}){
+        
     },
     async subscribeToNotification(callback:(data:any) => void){
         const idToken = await getIdToken(); 
