@@ -66,7 +66,8 @@ export default function ArboristApp({
             <Map
                 theme={theme}
                 userData={userData}
-                currentLocation={currentLocation}/>
+                currentLocation={currentLocation}
+                toggleModal={toggleModal}/>
             
             <Controls
                 userData={userData}

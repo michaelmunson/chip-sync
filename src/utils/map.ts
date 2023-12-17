@@ -349,7 +349,7 @@ export const buildMarkerHtml = ({
         <div class="marker-content">
             <h2> ${name} </h2>
             <p> <a href="${Geo.getAddressURL({mapChoice,address})}" target="_blank"> ${address.slice(0, address.indexOf(","))} </a>  </p>
-            <button class="details-button">Details</button>
+            <button class="details-button">DETAILS</button>
         </div>
     `
 
@@ -363,7 +363,7 @@ export const buildMarkerHtml = ({
                 <br/>
                 <a href="tel:${contact.phone}">${formatPhoneNumber(contact.phone)}</a>
             </p>
-            <button class="details-button">Details</button>
+            <button class="details-button">DETAILS</button>
         </div>
     `
 }

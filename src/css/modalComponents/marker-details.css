@@ -1,0 +1,51 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* IMAGE EXPANDER */
+.image-expander {
+    opacity: 0;
+    visibility: hidden;
+    transition: 100ms;
+    position: absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.8);
+    backdrop-filter: blur(3px);
+}
+
+.image-expander.open {
+    opacity: 1 !important;
+    visibility: visible;
+}
+
+.image-expander img {
+    max-width: 85%;
+    max-height: 85%;
+    border-radius: 10px;
+}
+
+#internal-image-div {
+    position:relative;
+}
+
+#close-image-expander-btn {
+    position:absolute;
+    top: -2%;
+    right: 6%;
+}

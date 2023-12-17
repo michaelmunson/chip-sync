@@ -3,21 +3,23 @@ import { useEffect, useState } from 'react';
 import { BounceLoader } from "react-spinners";
 import "../../../css/map.css";
 import { Marker, User } from '../../../types/dataTypes';
-import { Coordinates } from '../../../types/generalTypes';
+import { Coordinates, ToggleModal } from '../../../types/generalTypes';
 import { Geo } from '../../../utils/location';
 import { activeInfoWindow, buildMarkerHtml, clearHold, darkStyle, getMapOptions, holdingArrowAnimation, icons, lightStyle, mapHoldData } from '../../../utils/map';
 import { getGoogleMapsApiKey } from '../../../utils/secrets';
 
 interface MapProps {
     userData: User
-    theme: "light"|"dark",
+    theme: "light"|"dark"
     currentLocation: Coordinates
+    toggleModal: ToggleModal
 }
 
 export default function Map({
     userData,
     theme,
-    currentLocation
+    currentLocation,
+    toggleModal
 } : MapProps
 ){
     const [loader, setLoader] = useState<Loader>();
@@ -162,10 +164,12 @@ export default function Map({
                 );
                 infoWindow.open(marker.map, marker);
                 setTimeout(() => {
-                    const detbtn:any = document.querySelector(".details-button");
-                    detbtn.onclick = function () {
-                        console.log("%copen marker details","color:blue;background:yellow"); 
-                        // openModal("details", markerData);
+                    const detailsBtn:any = document.querySelector(".details-button");
+                    detailsBtn.onclick = function () {
+                        toggleModal(true, {
+                            type: "marker-details",
+                            data: markerData
+                        }); 
                     }
                 }, 100);
             });
