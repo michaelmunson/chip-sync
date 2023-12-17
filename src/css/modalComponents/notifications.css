@@ -28,10 +28,16 @@
     min-height: 19px;
     min-width: 19px;
     margin: 2px;
+    margin-bottom: 4.5px;
     border-radius: 50%;
     border: 2px solid gray;
     background-color: transparent;
     transition: 500ms;
+}
+
+.notification-circle.unopened {
+    background-color: #90caf9;
+    border: 2px solid #90caf9
 }
 
 .notification-circle.new-marker.unopened {

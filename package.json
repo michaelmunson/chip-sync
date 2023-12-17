@@ -19,6 +19,7 @@
     "@types/react-dom": "^18.2.16",
     "aws-amplify": "^5.3.12",
     "axios": "^1.6.2",
+    "date-and-time": "^3.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.12.0",

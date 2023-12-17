@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
-import { ModalConfig, ToggleModal } from '../../../../types/generalTypes';
-import { User, Notification } from '../../../../types/dataTypes';
-import { DB } from '../../../../utils/database';
-import { 
-    Accordion,
-    AccordionSummary,
-    AccordionDetails
-} from '@mui/material';
 import { ExpandMore } from '@mui/icons-material';
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary
+} from '@mui/material';
+import React, { useMemo, useState } from 'react';
 import "../../../../css/modalComponents/notifications.css";
+import { Notification, User } from '../../../../types/dataTypes';
+import { ModalConfig, ToggleModal } from '../../../../types/generalTypes';
+import { DB } from '../../../../utils/database';
+import date from "date-and-time"
 
-type NotificationObject = Notification.AdminNotification | Notification.MarkerNotification;
+
+type NotificationObject = Notification.JoinReqNotification | Notification.MarkerNotification;
 
 namespace Props {
     export interface NotificationsProps {
@@ -32,12 +34,55 @@ function NotificationAccordian({
     activePanel,
 } : Props.NotificationAccordianProps
 ){
+    const SummaryContent = useMemo(() => ({
+        circle(){
+            const clsname = `notification-circle ${notification.opened ? "" : "unopened"}`
+			return <div className={clsname}></div>
+        }
+    }), [notification]);
+
+    const ContentMap = useMemo(() => {
+        switch(notification.type){
+            case "new-org-marker": return {
+                summary(){
+                    return <>
+                        {SummaryContent.circle()}
+                        <div className='summary-text'>
+                            New Marker Created
+                        </div>
+                    </>
+                },
+                details(){
+                    return <></>
+                }
+            }
+            case "new-gardner-marker": return {
+                summary(){
+                    return <></>
+                },
+                details(){
+                    return <></>
+                }
+            }
+            case "join-request": return {
+                summary(){
+                    return <></>
+                },
+                details(){
+                    return <></>
+                }
+            }
+        }
+    }, [notification]);
     
     return (
         <Accordion expanded={activePanel === notification.id} onChange={() => handleChange(notification)}>
             <AccordionSummary expandIcon={<ExpandMore/>}>
                 <div className='summary-container'>
-
+                    {ContentMap.summary()}
+                    <div className='timestamp'>
+                        {date.format(new Date(notification.updatedAt), "MM/DD/YY")}
+                    </div>
                 </div>
             </AccordionSummary>
             <AccordionDetails>

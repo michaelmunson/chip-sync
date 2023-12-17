@@ -33,20 +33,21 @@ export interface GardnerMarker {
     user: User
 }
 export namespace Notification {
-    export interface MarkerNotification {
+    interface GenericNotification {
         id:string
         timestamp:number
+        opened:boolean
+        createdAt:string
+        updatedAt:string
+    }
+    export interface MarkerNotification extends GenericNotification {
         type:"new-org-marker"
             |"new-gardner-marker"
         data:Marker
-        opened:boolean
     }
-    export interface AdminNotification {
-        id:string
-        timestamp:number
+    export interface JoinReqNotification extends GenericNotification {
         type:"join-request"
         data:User
-        opened:boolean
     }
 }
 export interface User {
@@ -55,7 +56,7 @@ export interface User {
     lastName:string
     role: "admin"|"employee"|"gardner"
     organization: Organization
-    notifications: Array<Notification.AdminNotification|Notification.MarkerNotification>
+    notifications: Array<Notification.JoinReqNotification|Notification.MarkerNotification>
     mapChoice: "apple"|"google"
     // if gardner
     contact?: Contact
