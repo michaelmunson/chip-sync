@@ -8,7 +8,7 @@ const Theme = {
     }),
     light: createTheme({
         palette: {
-            mode: 'dark',
+            mode: 'light',
         },
     }),
     decide(){

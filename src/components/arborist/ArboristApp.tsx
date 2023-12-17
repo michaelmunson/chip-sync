@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { CssBaseline, ThemeProvider } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import { User } from '../../types/dataTypes';
 import Map from './arboristComponents/Map';
 import Controls from './arboristComponents/Controls';
@@ -27,8 +28,7 @@ export default function ArboristApp({
     const [modalConfig, setModalConfig] = useState<ModalConfig>({type:"add-marker"});
     /* USE EFFECTS */
     useEffect(updateCurrentLocation, []);
-    useEffect(subscribe, [userData]);
-
+    useEffect(subscribe, []); // removed userData dependency
     /* Utility Functions */
     function toggleModal(isOpen:boolean, config?:ModalConfig){
         if (config) {

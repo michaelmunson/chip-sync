@@ -126,7 +126,6 @@ function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerA
                                     const config:ModalConfig = {
                                         type: "marker-details",
                                         data: marker,
-                                        goBack: true,
                                         goBackLocation: "marker-list"
                                     }
                                     toggleModal(true, config); 

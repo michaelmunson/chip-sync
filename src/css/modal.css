@@ -15,4 +15,21 @@
             overflow: visible !important;
         }
     }
+
+    & .css-sh22l5-MuiButtonBase-root-MuiAccordionSummary-root.Mui-expanded {
+        height: 64px;
+    }
+    .modal-icon-container {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        transform: translateY(-20px);
+        width: 100%;
+        & svg {
+            
+            font-size: 3em !important;
+            color:white;
+        }
+    }
+
 }

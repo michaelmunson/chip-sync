@@ -1,8 +1,9 @@
-import { ExpandMore } from '@mui/icons-material';
+import { ExpandMore, Notifications as NotificationsIcon } from '@mui/icons-material';
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary
+    AccordionSummary,
+    Button
 } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import "../../../../css/modalComponents/notifications.css";
@@ -10,6 +11,7 @@ import { Notification, User } from '../../../../types/dataTypes';
 import { ModalConfig, ToggleModal } from '../../../../types/generalTypes';
 import { DB } from '../../../../utils/database';
 import date from "date-and-time"
+import { AddressLink } from '../../../utils/AddressLink';
 
 
 type NotificationObject = Notification.JoinReqNotification | Notification.MarkerNotification;
@@ -25,6 +27,7 @@ namespace Props {
         notification: NotificationObject
         handleChange: (notification: NotificationObject) => void
         activePanel : string | undefined
+        toggleModal : ToggleModal
     }
 }
 
@@ -32,9 +35,10 @@ function NotificationAccordian({
     notification,
     handleChange,
     activePanel,
+    toggleModal
 } : Props.NotificationAccordianProps
 ){
-    const SummaryContent = useMemo(() => ({
+    const SubContentMap = useMemo(() => ({
         circle(){
             const clsname = `notification-circle ${notification.opened ? "" : "unopened"}`
 			return <div className={clsname}></div>
@@ -46,14 +50,24 @@ function NotificationAccordian({
             case "new-org-marker": return {
                 summary(){
                     return <>
-                        {SummaryContent.circle()}
+                        {SubContentMap.circle()}
                         <div className='summary-text'>
                             New Marker Created
                         </div>
                     </>
                 },
                 details(){
-                    return <></>
+                    return <>
+                        <Button onClick={() => {
+                            toggleModal(true, {
+                                type: "marker-details",
+                                data: notification.data,
+                                goBackLocation: "notifications"
+                            }); 
+                            }}>
+                            View Marker
+                        </Button>
+                    </>
                 }
             }
             case "new-gardner-marker": return {
@@ -78,15 +92,17 @@ function NotificationAccordian({
     return (
         <Accordion expanded={activePanel === notification.id} onChange={() => handleChange(notification)}>
             <AccordionSummary expandIcon={<ExpandMore/>}>
-                <div className='summary-container'>
+                <div className='notification-summary-container'>
                     {ContentMap.summary()}
                     <div className='timestamp'>
-                        {date.format(new Date(notification.updatedAt), "MM/DD/YY")}
-                    </div>
+						{date.format(new Date(notification.createdAt), "MM/DD/YY")}
+					</div>
                 </div>
             </AccordionSummary>
             <AccordionDetails>
-                
+                <div className='notification-details-container'>
+                    {ContentMap.details()}
+                </div>
             </AccordionDetails>
         </Accordion>
     )
@@ -127,13 +143,14 @@ export default function Notifications({
         });
     }
 
-    return (<>{
-        userData.notifications.map((notification, index) => (
+    return (<>
+        {userData.notifications.map((notification, index) => (
             <NotificationAccordian
                 key={`notification-${index}`}
                 notification={notification}
                 handleChange={handleChange}
-                activePanel={activePanel} />
-        ))
-    }</>)
+                activePanel={activePanel}
+                toggleModal={toggleModal}/>
+        ))}
+    </>)
 }

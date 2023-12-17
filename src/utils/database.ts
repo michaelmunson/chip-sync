@@ -58,7 +58,12 @@ export function cleanData(data:{[key:string]:any}):any{
         data.users = data.users.items; 
     }
     if ("notifications" in data && "items" in data?.notifications){
-        data.notifications = data.notifications.items; 
+        data.notifications = data.notifications.items;
+        for (const i in data.notifications){
+            if ("data" in data.notifications[i]){
+                data.notifications[i].data = JSON.parse(data.notifications[i].data); 
+            }
+        }
     }
     if ("organization" in data){
         data.organization = cleanData(data.organization);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Dialog } from '@mui/material';
 import { Coordinates, ModalConfig, ToggleModal } from '../../../types/generalTypes';
 import { User } from '../../../types/dataTypes';
@@ -27,7 +27,15 @@ export default function Modal({
 
     const {type, data, goBackLocation} = modalConfig; 
     
-    const ModalMap = {
+    const ClassMap = useMemo(() => ({
+        "marker-list" : "",
+        "add-marker"  : "add-marker-modal",
+        "notifications" : "",
+        "marker-details" : "",
+        "settings" : ""
+    }), [])
+
+    const ModalMap = useMemo(() => ({
         "marker-list" : () => 
             <MarkerList
                 userData={userData}
@@ -53,7 +61,7 @@ export default function Modal({
 
         "settings" : () => 
             <>Settings</>
-    }
+    }), []); 
 
     /* switch(type){
         case "marker-list": return (
@@ -97,7 +105,7 @@ export default function Modal({
     return (
         <Dialog 
             id="modal"
-            className='add-marker-modal' 
+            className={ClassMap[type]}
             open={open}
             onClose={()=>toggleModal(false)}>
             {ModalMap[type]()}

@@ -1,6 +1,6 @@
 
 
-.summary-container {
+.notification-summary-container {
     display: flex;
     flex-direction: row;
     width:100%;
@@ -8,19 +8,23 @@
     align-items: center;
 }
 
-.details-container-center {
+.notification-details-container {
     display: flex;
-    justify-content: center;
-    margin: 15px;
+    flex-direction: column;
+    /* justify-content: center; */
+    /* margin: 15px; */
 }
 
 .timestamp {
     color:gray;
+    font-size: .9rem;
+    margin-top: 1px;
 }
 
 .summary-text {
     width: 100%;
     text-align: left;
+    text-overflow: ellipsis;
     margin:10px;
 }
 
