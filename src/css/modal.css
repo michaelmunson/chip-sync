@@ -1,9 +1,9 @@
 #modal {
-    & .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation24.MuiDialog-paper.MuiDialog-paperScrollPaper.MuiDialog-paperWidthSm.css-1t1j96h-MuiPaper-root-MuiDialog-paper{
+    & .MuiDialog-container > .MuiPaper-root {
         border-radius: 20px !important;
-        width: 80%;
-        min-width: 326px;
-        max-width: 500px;
+        width: 80% !important;
+        min-width: 326px !important;
+        max-width: 500px !important;
     }
 
     & .css-yiavyu-MuiBackdrop-root-MuiDialog-backdrop {

@@ -33,7 +33,6 @@ function NotificationAccordian({
 } : Props.NotificationAccordianProps
 ){
     
-
     return (
         <Accordion expanded={activePanel === notification.id} onChange={() => handleChange(notification)}>
             <AccordionSummary expandIcon={<ExpandMore/>}>
@@ -77,15 +76,19 @@ export default function Notifications({
 
     function handleChange(notification: NotificationObject) {
         if (!notification.opened) updateNotification(notification);
-        setActivePanel(notification.id);
+        setActivePanel(lastId => {
+            if (lastId === notification.id) return undefined
+            else return notification.id; 
+        });
     }
 
-    return (
-        userData.notifications.map(notification => (
+    return (<>{
+        userData.notifications.map((notification, index) => (
             <NotificationAccordian
+                key={`notification-${index}`}
                 notification={notification}
                 handleChange={handleChange}
                 activePanel={activePanel} />
         ))
-    )
+    }</>)
 }

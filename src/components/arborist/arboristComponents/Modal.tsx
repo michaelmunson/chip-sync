@@ -26,8 +26,36 @@ export default function Modal({
 } : ModalProps) {
 
     const {type, data, goBackLocation} = modalConfig; 
+    
+    const ModalMap = {
+        "marker-list" : () => 
+            <MarkerList
+                userData={userData}
+                toggleModal={toggleModal}
+                currentLocation={currentLocation}/>,
+                
+        "add-marker"  : () =>
+            <AddMarker
+                data={data}
+                userData={userData}
+                toggleModal={toggleModal}
+                currentLocation={currentLocation}/>,
 
-    switch(type){
+        "notifications" : () =>
+            <Notifications
+                data={data}
+                userData={userData}
+                toggleModal={toggleModal}
+                setUserData={setUserData}/>,
+
+        "marker-details" : () => 
+            <>Marker Details</>,
+
+        "settings" : () => 
+            <>Settings</>
+    }
+
+    /* switch(type){
         case "marker-list": return (
             <Dialog
                 id="modal"
@@ -65,12 +93,14 @@ export default function Modal({
                     setUserData={setUserData}/>
             </Dialog>
         )
-    }
+    } */
     return (
         <Dialog 
+            id="modal"
+            className='add-marker-modal' 
             open={open}
             onClose={()=>toggleModal(false)}>
-            {modalConfig.type}
+            {ModalMap[type]()}
         </Dialog>
     )
 }
