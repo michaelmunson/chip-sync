@@ -58,7 +58,6 @@ function NotificationAccordian({
                 details(){
                     return <>
                         <Button
-                            variant='outlined'
                             style={{
                                 marginTop:"-10px"
                                 // transform:"translateY(-10px)"
