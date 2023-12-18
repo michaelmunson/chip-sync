@@ -8,6 +8,7 @@ import { Marker, User } from '../../../../types/dataTypes';
 import { Coordinates, ModalConfig, ToggleModal } from '../../../../types/generalTypes';
 import { Geo } from "../../../../utils/location";
 import "../../../../css/modalComponents/marker-list.css"; 
+import { AddressLink } from '../../../utils/AddressLink';
 
 interface MarkerListProps {
     userData: User,
@@ -118,7 +119,9 @@ function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerA
 					</AccordionSummary>
 					<AccordionDetails>
 						<div style={{ display: "flex", width: "100%", alignItems: "center", flexDirection: "column" }}>
-							<a className='marker-list-address-anchor' href={Geo.getAddressURL({mapChoice:userData.mapChoice, address:marker.address})} target="_blank" rel="noreferrer">{marker.address}</a>
+							<AddressLink
+                                mapChoice={userData.mapChoice}
+                                address={marker.address}/>
 							<Button 
                                 variant="outlined" 
                                 style={{ marginTop: "15px" }} 

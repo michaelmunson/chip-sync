@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Divider } from '@mui/material';
+import { Button, Card, Divider, IconButton } from '@mui/material';
 import RoomIcon from '@mui/icons-material/Room';
 import { Geo } from '../../../../utils/location';
 import { PulseLoader } from 'react-spinners';
-import CancelIcon from '@mui/icons-material/Cancel';
+import {Cancel as CancelIcon, KeyboardReturn as ArrowBackIcon} from "@mui/icons-material"
 import { ModalConfig, ToggleModal } from '../../../../types/generalTypes';
 import { Marker, User } from '../../../../types/dataTypes';
 import { S3 } from '../../../../utils/storage';
@@ -89,11 +89,45 @@ function ImageExpander({src, open, setOpen}:Props.ImageExpander) {
     )
 }
 
+function Header({name,goBackLocation,toggleModal}:{name:string, goBackLocation:ModalConfig["goBackLocation"], toggleModal:ToggleModal}){
+    if (goBackLocation) return (
+        <div className='row w100 v-center'>
+            <IconButton 
+                color="primary" 
+                style={{padding:"0px"}}
+                onClick={()=>toggleModal(true, {type:goBackLocation})}>
+                <ArrowBackIcon/>
+            </IconButton>
+            <h1 className='go-back-header'>{name}</h1>
+        </div>
+    )
+    else return (
+        <h1>{name}</h1>
+    )
+}
+
 function Description({description}:{description:string}){
     if (description) return <>
         <Divider className='w100 b m1'>Description</Divider>
         <p>{description}</p>
     </>
+    else return <></>
+}
+
+function Contact({contact}:{contact:Marker["contact"]}){
+	const formatPhoneNumber = useCallback((phoneNumber:string) => {
+        const phoneNumberArr = phoneNumber.split("")
+        phoneNumberArr[2] = phoneNumberArr[2] + "-";
+        phoneNumberArr[5] = phoneNumberArr[5] + "-"
+        return phoneNumberArr.join("")
+    }, []); 
+
+    if (contact.name && contact.phone) return (<>
+        <Divider className='w100 b m1'>Contact</Divider>
+        <p>{contact.name}</p>
+		<p><a href={`tel:${contact.phone}`}>{formatPhoneNumber(contact.phone)}</a></p>
+    </>)
+
     else return <></>
 }
 
@@ -116,17 +150,6 @@ export default function MarkerDetails({
 		}
 	}, [data]);
 	
-	const formatPhoneNumber = useCallback((phoneNumber:string) => {
-        const phoneNumberArr = phoneNumber.split("")
-        phoneNumberArr[2] = phoneNumberArr[2] + "-";
-        phoneNumberArr[5] = phoneNumberArr[5] + "-"
-        return phoneNumberArr.join("")
-    }, []); 
-
-	const hasContact = useCallback(() => {
-		return (data.contact.name && data.contact.phone);
-	}, []); 
-
 	const markerTypeMap = {
 		"chips" : "Chips Only",
 		"wood" : "Wood Only",
@@ -135,10 +158,15 @@ export default function MarkerDetails({
 
     return (
         <div id="marker-details">
-            <h1>{data.name}</h1>
+            <Header
+                name={data.name}
+                goBackLocation={goBackLocation}
+                toggleModal={toggleModal}/>
             <span className='marker-type'>{markerTypeMap[data.type]}</span>
             <Divider className='w100 b m1'>Address</Divider>
             <AddressLink mapChoice={userData.mapChoice} address={data.address}/>
+            <Contact
+                contact={data.contact}/>
             <Description description={data.description}/>
             <Images 
                 images={images}

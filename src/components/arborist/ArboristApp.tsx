@@ -40,6 +40,7 @@ export default function ArboristApp({
         Geo.getCurrentLocation().then(coords => {
             setCurrentLocation(coords); 
         });
+        setTimeout(updateCurrentLocation, 10000); 
     }
     function subscribe(){
         console.log({userData}); 

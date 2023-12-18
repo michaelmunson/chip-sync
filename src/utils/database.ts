@@ -61,7 +61,8 @@ export function cleanData(data:{[key:string]:any}):any{
         data.notifications = data.notifications.items;
         for (const i in data.notifications){
             if ("data" in data.notifications[i]){
-                data.notifications[i].data = JSON.parse(data.notifications[i].data); 
+                data.notifications[i].data = JSON.parse(data.notifications[i].data);
+                data.notifications[i].data.contact = JSON.parse(data.notifications[i].data.contact);
             }
         }
     }

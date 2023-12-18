@@ -57,7 +57,13 @@ function NotificationAccordian({
                 },
                 details(){
                     return <>
-                        <Button onClick={() => {
+                        <Button
+                            variant='outlined'
+                            style={{
+                                marginTop:"-10px"
+                                // transform:"translateY(-10px)"
+                            }}
+                            onClick={() => {
                             toggleModal(true, {
                                 type: "marker-details",
                                 data: notification.data,

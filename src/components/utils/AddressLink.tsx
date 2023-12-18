@@ -1,3 +1,4 @@
+import { Button } from "@mui/material";
 import { Geo } from "../../utils/location"
 
 interface AddressLinkProps {
@@ -8,23 +9,21 @@ interface AddressLinkProps {
 export function AddressLink({mapChoice,address}:AddressLinkProps){
     const href = Geo.getAddressURL({mapChoice, address});
 
-    const style = {
-        color: "var(--mui-primary)",
-        textDecoration: "none",
-        textAlign: "center"
-    }
-    
     return (
-        <a 
+        <Button
             style={{
-                color: "var(--mui-primary)",
-                textDecoration: "none",
-                textAlign: "center"
-            }} 
+                textAlign:"center",
+                textTransform:"none",
+                fontSize:"1rem"
+            }}
+            variant="text"
             href={href} 
             target="_blank" 
-            rel="noreferrer">
-            {address}
-        </a>
+            rel="noreferrer"
+            autoCapitalize="none">
+            {address.split(",")[0]}
+            <br/>
+            {address.split(",").slice(1).join(",")}
+        </Button>
     )
 }
