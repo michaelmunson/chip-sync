@@ -1,6 +1,16 @@
 Amplify:
-    [ ] Create Schema
-    
+    [√] Create Schema
+    [ ] Finish configuring SSO with google
+
 Registration:
-    [ ] Disable input until location is 5 len
+    [√] Disable input until location is 5 len
     [ ] 
+
+Arborist App:
+    # Modal
+        # Marker Details
+        [ ] Add Edit Marker Functionality
+        # Notifications
+        [ ] Add "New Gardner Marker" Notification
+        [ ] Add "Join Request" Notification
+        # 

@@ -15,6 +15,11 @@
             overflow: visible !important;
         }
     }
+    &.marker-details-modal {
+        & .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation24.MuiDialog-paper.MuiDialog-paperScrollPaper.MuiDialog-paperWidthSm.css-1t1j96h-MuiPaper-root-MuiDialog-paper {
+            overflow: visible !important;
+        }
+    }
 
     & .css-sh22l5-MuiButtonBase-root-MuiAccordionSummary-root.Mui-expanded {
         height: 64px;

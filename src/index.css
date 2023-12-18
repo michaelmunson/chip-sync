@@ -2,7 +2,7 @@
     --theme-color-green: #8cfcad;
     --theme-color-blue: #b9ebfd;
     --theme-linear-grad: linear-gradient(145deg, rgba(140, 252, 173, 1) 0%, rgba(185, 235, 253, 1) 50%, rgba(140, 252, 173, 1) 100%);
-
+    --mui-primary: #1976d2;
 }
 
 html,

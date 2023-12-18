@@ -1,4 +1,3 @@
-import { ExpandMore, Notifications as NotificationsIcon } from '@mui/icons-material';
 import {
     Accordion,
     AccordionDetails,
@@ -91,7 +90,7 @@ function NotificationAccordian({
     
     return (
         <Accordion expanded={activePanel === notification.id} onChange={() => handleChange(notification)}>
-            <AccordionSummary expandIcon={<ExpandMore/>}>
+            <AccordionSummary>
                 <div className='notification-summary-container'>
                     {ContentMap.summary()}
                     <div className='timestamp'>

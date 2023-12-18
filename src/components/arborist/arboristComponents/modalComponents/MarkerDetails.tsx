@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Card } from '@mui/material';
+import { Button, Card, Divider } from '@mui/material';
 import RoomIcon from '@mui/icons-material/Room';
 import { Geo } from '../../../../utils/location';
 import { PulseLoader } from 'react-spinners';
@@ -8,6 +8,7 @@ import { ModalConfig, ToggleModal } from '../../../../types/generalTypes';
 import { Marker, User } from '../../../../types/dataTypes';
 import { S3 } from '../../../../utils/storage';
 import "../../../../css/modalComponents/marker-details.css" 
+import { AddressLink } from '../../../utils/AddressLink';
 
 namespace Props {
     export interface ImageExpander {
@@ -32,16 +33,14 @@ function Images({images, setImageSrc, setImageOpen}:Props.Images){
 
     if (typeof images === "number" && images > 0) return (
         <>
-            <hr />
-            <h3>Images</h3>
+            <Divider className='w100 b m1'>Images</Divider>
             <PulseLoader color='green'/>
         </>
     )
 
     else if (Array.isArray(images)) return (
         <>
-            <hr />
-            <h3>Images</h3>
+            <Divider className='w100 b m1'>Images</Divider>
             {images.map((image, index) => (
                 <img 
                     alt={`Chip Location`}
@@ -90,6 +89,14 @@ function ImageExpander({src, open, setOpen}:Props.ImageExpander) {
     )
 }
 
+function Description({description}:{description:string}){
+    if (description) return <>
+        <Divider className='w100 b m1'>Description</Divider>
+        <p>{description}</p>
+    </>
+    else return <></>
+}
+
 export default function MarkerDetails({
     data, 
     userData, 
@@ -101,10 +108,10 @@ export default function MarkerDetails({
 	const [imageOpen, setImageOpen] = useState(false);
 
 	useEffect(() => {
-		setImages(data.images.length); 
+        console.log("Marker Data: ", data); 
 		if (data.images.length > 0){
 			S3.getImages({images:data.images}).then(srcArr => {
-				setTimeout(() => setImages(srcArr), 1000);
+				setImages(srcArr); 
 			});
 		}
 	}, [data]);
@@ -126,10 +133,30 @@ export default function MarkerDetails({
 		"both" : "Chips and Wood"
 	}
 
-	return (
+    return (
+        <div id="marker-details">
+            <h1>{data.name}</h1>
+            <span className='marker-type'>{markerTypeMap[data.type]}</span>
+            <Divider className='w100 b m1'>Address</Divider>
+            <AddressLink mapChoice={userData.mapChoice} address={data.address}/>
+            <Description description={data.description}/>
+            <Images 
+                images={images}
+                setImageOpen={setImageOpen}
+                setImageSrc={setImageSrc}
+            />
+            <ImageExpander 
+				src={imageSrc}
+				open={imageOpen}
+				setOpen={setImageOpen}
+			/>
+        </div>
+    )
+
+/* 	return (
 		<>
 			<RoomIcon className="modal-icon" />
-			<Card className='modal' >
+			<Card className='modal'>
 				<h1>{data.name}</h1>
 				<span>{markerTypeMap[data.type]}</span>
 				<hr />
@@ -184,5 +211,5 @@ export default function MarkerDetails({
 				setOpen={setImageOpen}
 			/>
 		</>
-	)
+	) */
 }

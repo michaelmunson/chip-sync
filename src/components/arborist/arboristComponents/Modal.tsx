@@ -1,11 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Dialog } from '@mui/material';
 import { Coordinates, ModalConfig, ToggleModal } from '../../../types/generalTypes';
-import { User } from '../../../types/dataTypes';
+import { Marker, User } from '../../../types/dataTypes';
 import MarkerList from './modalComponents/MarkerList';
 import AddMarker from './modalComponents/AddMarker';
 import Notifications from './modalComponents/Notifications';
 import "../../../css/modal.css"
+import MarkerDetails from './modalComponents/MarkerDetails';
 
 interface ModalProps {
     open: boolean
@@ -26,14 +27,6 @@ export default function Modal({
 } : ModalProps) {
 
     const {type, data, goBackLocation} = modalConfig; 
-    
-    const ClassMap = useMemo(() => ({
-        "marker-list" : "",
-        "add-marker"  : "add-marker-modal",
-        "notifications" : "",
-        "marker-details" : "",
-        "settings" : ""
-    }), [])
 
     const ModalMap = useMemo(() => ({
         "marker-list" : () => 
@@ -57,55 +50,20 @@ export default function Modal({
                 setUserData={setUserData}/>,
 
         "marker-details" : () => 
-            <>Marker Details</>,
+            <MarkerDetails  
+                data={(data as Marker)}
+                userData={userData}
+                goBackLocation={goBackLocation}
+                toggleModal={toggleModal}/>,
 
         "settings" : () => 
             <>Settings</>
-    }), []); 
+    }), [modalConfig]); 
 
-    /* switch(type){
-        case "marker-list": return (
-            <Dialog
-                id="modal"
-                open={open}
-                onClose={()=>toggleModal(false)}>
-                <MarkerList
-                    userData={userData}
-                    toggleModal={toggleModal}
-                    currentLocation={currentLocation}/>
-            </Dialog>
-        )
-        case "add-marker": return (
-            <Dialog
-                id="modal"
-                className='add-marker-modal' 
-                open={open}
-                onClose={()=>toggleModal(false)}>
-                <AddMarker
-                    data={data}
-                    userData={userData}
-                    toggleModal={toggleModal}
-                    currentLocation={currentLocation}/>
-            </Dialog>
-        )
-        case "notifications": return (
-            <Dialog
-                id="modal"
-                className='add-marker-modal' 
-                open={open}
-                onClose={()=>toggleModal(false)}>
-                <Notifications
-                    data={data}
-                    userData={userData}
-                    toggleModal={toggleModal}
-                    setUserData={setUserData}/>
-            </Dialog>
-        )
-    } */
     return (
         <Dialog 
             id="modal"
-            className={ClassMap[type]}
+            className={`${type}-modal`}
             open={open}
             onClose={()=>toggleModal(false)}>
             {ModalMap[type]()}
