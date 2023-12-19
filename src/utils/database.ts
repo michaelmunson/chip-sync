@@ -120,7 +120,7 @@ export const DB = {
     },
     async updateUser({role,mapChoice}:DBTypes.UpdateUser){
         if (role || mapChoice) {
-            const input = role ? {role} : {mapChoice};
+            const input = role ? {id:this.userId, role} : {id:this.userId, mapChoice};
             return await API.graphql({
                 query: updateUserMutation,
                 variables: {

@@ -41,7 +41,7 @@ function App({user, signOut}:AppProps) {
 export default withAuthenticator(App, {
 	components : {
 		Header(){
-			return <div className='col center' style={{marginTop:"-100px", marginBottom:"50px"}}>
+			return <div className='col h-center' style={{marginTop:"-100px", marginBottom:"50px"}}>
 				<Logo size='large' /> 
 			</div>
 		} 

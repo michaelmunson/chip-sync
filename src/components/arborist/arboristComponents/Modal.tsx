@@ -68,7 +68,7 @@ export default function Modal({
                 setTheme={setTheme}
                 setUserData={setUserData}/>
 
-    }), [modalConfig]); 
+    }), [modalConfig, theme, userData, ]); 
 
     return (
         <Dialog

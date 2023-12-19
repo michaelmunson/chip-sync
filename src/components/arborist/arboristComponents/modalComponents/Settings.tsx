@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { User } from '../../../../types/dataTypes';
 import { Accordion, AccordionDetails, AccordionSummary, Button, Divider, IconButton, Switch, Typography } from '@mui/material';
 import { 
@@ -21,6 +21,8 @@ import {
 } from '@mui/icons-material';
 import { DB } from '../../../../utils/database';
 import { Auth } from 'aws-amplify';
+import "../../../../css/modalComponents/settings.css"; 
+import Spacer from '../../../utils/Spacer';
 
 namespace Props {
     export interface Settings {
@@ -29,23 +31,27 @@ namespace Props {
         setTheme:React.Dispatch<React.SetStateAction<Settings["theme"]>>
         setUserData: React.Dispatch<React.SetStateAction<User|undefined>>
     }
+    export interface AdminSettings extends Settings {
+        setPage: React.Dispatch<React.SetStateAction<"members" | "markers" | undefined>>
+    }
+    export interface AdminManager {
+        page: "members"|"markers"
+        userData:User
+        setUserData: React.Dispatch<React.SetStateAction<User|undefined>>
+        setPage: React.Dispatch<React.SetStateAction<"members" | "markers" | undefined>>
+    }
 }
 
 const SettingsRow = ({children}:{children:JSX.Element|JSX.Element[]}) => (
-    <div className='row v-center space-between m1'>
+    <div className='row v-center space-between mt3 mb3'>
         {children}
     </div>
 );
-const SettingsLabel = ({text,icon}:{text:string,icon:JSX.Element}) => (
-    <Typography className='row v-center'>
-        {icon}
-        <b>{text}</b>
-    </Typography>
-);
+
 const SettingsAccordian = ({label,icon,children}:{label:string, icon:JSX.Element, children:JSX.Element|JSX.Element[]}) => (
     <Accordion style={{ width: "100%", boxShadow: "none" }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon/>} style={{ padding: "0px" }}>
-            <Typography className='row v-center'>
+        <AccordionSummary className='settings-accordian' expandIcon={<ExpandMoreIcon/>} style={{ padding: "0px" }}>
+            <Typography className='row v-center svg-right-10'>
                 {icon}
                 <b>{label}</b>
             </Typography>
@@ -56,7 +62,7 @@ const SettingsAccordian = ({label,icon,children}:{label:string, icon:JSX.Element
     </Accordion>
 );
 const SignOut = () => (
-    <div className='row hv-center space-between m1'>
+    <div className='row hv-center m1'>
         <Typography className='row vert-center'>
             <b>Sign Out</b>
         </Typography>
@@ -64,16 +70,15 @@ const SignOut = () => (
             <ExitToAppIcon style={{color:'#e90707'}}/>
         </IconButton>
     </div>
-)
+);
 
-export default function Settings({
+function MemberSettings({
     userData,
     theme,
     setTheme,
     setUserData
-}:Props.Settings){
-    const [page, setPage] = useState<"members"|"markers">();
-    
+} : Props.Settings
+){
     const updateMapChoice = useCallback((mapChoice:User["mapChoice"]) => {
         DB.updateUser({mapChoice});
         setUserData(data => {
@@ -84,21 +89,22 @@ export default function Settings({
         })
     }, []); 
 
-    const MemberSettings = useCallback(() => (<>
-        <Divider className='w100 b m1'>General</Divider>
+    return <>
+        {/* <Divider className='w100 b mt2'>General</Divider> */}
         <SettingsRow>
             <SettingsAccordian
                 label='Mode'
                 icon={theme === "dark" ? <NightsStayIcon/> : <LightModeIcon/>}>
                 <div className='row hv-center'>
-                    <Button variant={theme === "dark" ? "outlined" : "text"} style={{color: theme === "dark" ? "" : "gray"}} onClick={e => setTheme("dark")}>
+                    <Button variant={theme === "dark" ? "outlined" : "text"} style={{color: theme === "dark" ? "" : "gray", width:"110px"}} onClick={e => setTheme("dark")}>
                         {theme === "dark" ? <>
                             <NightsStayIcon style={{marginRight:"5px"}}/> Dark
                         </> : <>
                             <NightsStayOutlinedIcon style={{marginRight:"5px"}}/> Dark
                         </>}
                     </Button>
-                    <Button variant={theme === "light" ? "outlined" : "text"} style={{color: theme === "light" ? "" : "gray"}} onClick={e => setTheme("light")}>
+                    <Spacer width={20}/>
+                    <Button variant={theme === "light" ? "outlined" : "text"} style={{color: theme === "light" ? "" : "gray", width:"110px"}} onClick={e => setTheme("light")}>
                         {theme === "light" ? <>
                             <LightModeIcon style={{marginRight:"5px"}}/> Light
                         </> : <>
@@ -112,33 +118,42 @@ export default function Settings({
             <SettingsAccordian
                 label='Map Preference'
                 icon={<MapIcon/>}>
-                <div className='row hv-center'>
-                    <span style={{color:"gray", fontSize:".8em"}}>The app that address links will bring you to</span>
-                    <div className='row align-center space-evenly' style={{marginTop:"10px"}}>
-                        <Button variant={userData.mapChoice === "apple" ? "outlined" : "text"} style={{color: userData.mapChoice === "apple" ? "" : "gray"}} onClick={e => updateMapChoice('apple')}>
+                <div className='col v-center'>
+                    <span style={{color:"gray", fontSize:".8em", textAlign:"center"}}>The app that address links will bring you to</span>
+                    <div className='row hv-center' style={{marginTop:"10px"}}>
+                        <Button variant={userData.mapChoice === "apple" ? "outlined" : "text"} style={{color: userData.mapChoice === "apple" ? "" : "gray", width:"110px"}} onClick={e => updateMapChoice('apple')}>
                             <AppleIcon style={{marginRight:"5px"}}/> Apple
                         </Button>
-                        <Button variant={userData.mapChoice === "google" ? "outlined" : "text"} style={{color: userData.mapChoice === "google" ? "" : "gray"}} onClick={e => updateMapChoice('google')}>
+                        <Spacer width={20}/>
+                        <Button variant={userData.mapChoice === "google" ? "outlined" : "text"} style={{color: userData.mapChoice === "google" ? "" : "gray", width:"110px"}} onClick={e => updateMapChoice('google')}>
                             <GoogleIcon style={{marginRight:"5px"}}/> Google
                         </Button> 
                     </div>
                 </div>
             </SettingsAccordian>
         </SettingsRow>
-    </>), [theme, userData]);
-
-    const AdminSettings = useCallback(() => (<>
-        <Divider className='w100 b m1'>Admin</Divider>
+    </>
+}
+function AdminSettings({
+    userData,
+    theme,
+    setTheme,
+    setUserData,
+    setPage
+} : Props.AdminSettings){
+    return <>
+        {/* <Divider className='w100 b mt2'>Admin</Divider> */}
         <SettingsRow>
             <SettingsAccordian
                 label='Manage Organization'
-                icon={<ManageAccountsIcon/>}>
+                icon={<SettingsIcon/>}>
                 <div className='col hv-center'>
                     <Button variant={"outlined"} 
                         onClick={e => setPage("members")}
-                        startIcon={<SettingsIcon/>}>
+                        startIcon={<ManageAccountsIcon/>}>
                         Manage Members
                     </Button>
+                    <Spacer height={10}/>
                     <Button variant={"outlined"} 
                         startIcon={<RoomIcon/>}
                         onClick={e => setPage("markers")}>
@@ -147,41 +162,72 @@ export default function Settings({
                 </div>
             </SettingsAccordian>
         </SettingsRow>
-    </>), [userData]);
+    </>
+}
+function AdminManager({
+    page,
+    userData,
+    setPage,
+    setUserData
+} : Props.AdminManager
+){
+    if (page === "markers") return <>
+        markers
+    </>
+    else if (page === "members") return <>
+        members
+    </>
+    else return <></>
+}   
 
-    const AdminManager = useCallback(() => {
-        if (page==="members") return (
-            <>members</>
-        ); 
-        else if (page==="markers") return (
-            <>markers</>
-        )
-    }, [page, userData]);
+export default function Settings({
+    userData,
+    theme,
+    setTheme,
+    setUserData
+}:Props.Settings){
+    const [page, setPage] = useState<"members"|"markers">();
 
     if (page) return (
         <div id="settings-modal">
             <IconButton 
                 color="primary" 
-                style={{padding:"0px"}}
+                style={{padding:"0px", justifyContent:"left"}}
                 onClick={()=>setPage(undefined)}>
                 <ArrowBackIcon/>
             </IconButton>
-            <AdminManager/>
+            <AdminManager
+                page={page}
+                userData={userData}
+                setPage={setPage}
+                setUserData={setUserData}/>
         </div>
     ); 
 
     if (userData.role === "member") return (
         <div id="settings-modal">
-            <MemberSettings/>
+            <MemberSettings
+                theme={theme}
+                setTheme={setTheme}
+                userData={userData}
+                setUserData={setUserData}/>
             <SignOut/>
         </div>
     )
 
     return (
         <div id="settings-modal">
-            <MemberSettings/>
-            <Divider className='w100 b m1'>Admin</Divider>
-            <AdminSettings/>
+            <MemberSettings
+                theme={theme}
+                setTheme={setTheme}
+                userData={userData}
+                setUserData={setUserData}/>
+            <AdminSettings
+                theme={theme}
+                setTheme={setTheme}
+                userData={userData}
+                setUserData={setUserData}
+                setPage={setPage}/>
             <SignOut/>
         </div>
     )
