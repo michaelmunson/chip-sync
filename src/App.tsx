@@ -29,7 +29,7 @@ function App({user, signOut}:AppProps) {
 
     if (!userData) return <Register setUserData={setUserData}/>
 
-    if (userData.role === "admin" || userData.role === "employee"){
+    if (userData.role === "admin" || userData.role === "member"){
         return <ArboristApp userData={userData} setUserData={setUserData}/>
     }
 

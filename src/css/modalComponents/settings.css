@@ -1,0 +1,13 @@
+#settings-modal {
+    display: flex;
+    flex-flow: column;
+    padding:10px 10px 20px 10px;
+
+    
+}
+
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    width:100%;
+}

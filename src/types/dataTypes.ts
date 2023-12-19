@@ -54,7 +54,7 @@ export interface User {
     id:string
     firstName:string
     lastName:string
-    role: "admin"|"employee"|"gardner"
+    role: "admin"|"member"|"gardner"
     organization: Organization
     notifications: Array<Notification.JoinReqNotification|Notification.MarkerNotification>
     mapChoice: "apple"|"google"

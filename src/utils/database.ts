@@ -10,7 +10,8 @@ import {
     createUser as createUserMutation,
     createMarker as createMarkerMutation,
     createNotification as createNotificationMutation,
-    updateNotification as updateNotificationMutation
+    updateNotification as updateNotificationMutation,
+    updateUser as updateUserMutation
 } from "../graphql/mutations";
 import { Geo } from "./location";
 import { S3 } from "./storage";
@@ -37,6 +38,10 @@ namespace DBTypes {
         address:string
         images:File[]
         userData: User
+    }
+    export interface UpdateUser{
+        role?:User["role"]
+        mapChoice?:User["mapChoice"]
     }
 }
 
@@ -77,6 +82,7 @@ export const DB = {
         const authObj:any = {...Auth}
         return authObj.user.username; 
     },
+    /* USER */
     async getUser():Promise<User|void>{
         const res:any = await API.graphql({
             query:getUserQuery,
@@ -111,6 +117,18 @@ export const DB = {
     },
     async createGardner(){
     
+    },
+    async updateUser({role,mapChoice}:DBTypes.UpdateUser){
+        if (role || mapChoice) {
+            const input = role ? {role} : {mapChoice};
+            return await API.graphql({
+                query: updateUserMutation,
+                variables: {
+                    input
+                }
+            })
+        }
+        
     },
     /* ORGANIZATION */
     async getOrganization({organizationId}:{organizationId:string}): Promise<Organization|null> {

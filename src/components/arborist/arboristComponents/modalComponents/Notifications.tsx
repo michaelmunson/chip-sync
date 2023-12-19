@@ -63,11 +63,11 @@ function NotificationAccordian({
                                 // transform:"translateY(-10px)"
                             }}
                             onClick={() => {
-                            toggleModal(true, {
-                                type: "marker-details",
-                                data: notification.data,
-                                goBackLocation: "notifications"
-                            }); 
+                                toggleModal(true, {
+                                    type: "marker-details",
+                                    data: notification.data,
+                                    goBackLocation: "notifications"
+                                }); 
                             }}>
                             View Marker
                         </Button>

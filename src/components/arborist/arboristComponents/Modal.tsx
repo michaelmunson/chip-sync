@@ -7,11 +7,14 @@ import AddMarker from './modalComponents/AddMarker';
 import Notifications from './modalComponents/Notifications';
 import "../../../css/modal.css"
 import MarkerDetails from './modalComponents/MarkerDetails';
+import Settings from './modalComponents/Settings';
 
 interface ModalProps {
     open: boolean
     userData: User
-    setUserData:React.Dispatch<React.SetStateAction<User | undefined>>
+    theme:"light"|"dark"
+    setUserData:React.Dispatch<React.SetStateAction<User|undefined>>
+    setTheme:React.Dispatch<React.SetStateAction<"light"|"dark">>
     modalConfig:ModalConfig
     toggleModal:ToggleModal
     currentLocation:Coordinates
@@ -21,8 +24,10 @@ export default function Modal({
     open,
     userData,
     modalConfig,
+    theme,
     toggleModal,
     setUserData,
+    setTheme,
     currentLocation
 } : ModalProps) {
 
@@ -57,11 +62,16 @@ export default function Modal({
                 toggleModal={toggleModal}/>,
 
         "settings" : () => 
-            <>Settings</>
+            <Settings
+                theme={theme}
+                userData={userData}
+                setTheme={setTheme}
+                setUserData={setUserData}/>
+
     }), [modalConfig]); 
 
     return (
-        <Dialog 
+        <Dialog
             id="modal"
             className={`${type}-modal`}
             open={open}

@@ -42,8 +42,7 @@ export default function ArboristApp({
         });
         setTimeout(updateCurrentLocation, 10000); 
     }
-    function subscribe(){
-        console.log({userData}); 
+    function subscribe(){ 
         setSocket((sock:any) => {
             if (!sock) {
                 const newSock = DB.subscribeToNotification((data) => {
@@ -78,6 +77,8 @@ export default function ArboristApp({
                 open={modalOpen}
                 userData={userData}
                 setUserData={setUserData}
+                theme={theme}
+                setTheme={setTheme}
                 modalConfig={modalConfig}
                 toggleModal={toggleModal}
                 currentLocation={currentLocation}/>
