@@ -19,7 +19,7 @@ import "../../css/register.css";
 import Container from '../utils/Container';
 import Spacer from '../utils/Spacer';
 import { DB } from '../../utils/database';
-
+import { BeatLoader } from 'react-spinners';
 
 /* 
 Select Arborist or Gardner
@@ -113,7 +113,8 @@ export default function Register({
     const [canExpand, setCanExpand] = useState(new Set(['panel1']))
     const [isDone, setIsDone] = useState(new Set<string>())
     const [expanded, setExpanded] = useState<string>("panel1");
-    const [canSubmit, setCanSubmit] = useState<boolean>(false); 
+    const [canSubmit, setCanSubmit] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false); 
     const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
         setExpanded(isExpanded ? panel : "");
     }
@@ -129,6 +130,7 @@ export default function Register({
     }
     /* ACCOUNT HANDLERS */
     async function createAccount(){
+        setLoading(true);
         if (regType === "arborist"){
             if (arboristType === "create") {
                 const createOrgRes = await DB.createOrganization({
@@ -155,9 +157,11 @@ export default function Register({
                     setUserData(createUserRes);
                 } else {
                     setIncorrectAccessCode(true);
+                    toNext('panel1')
                 }
             }
         } 
+        setLoading(false); 
     }
     /* COMPONENTS */
     function AccountTypeSelection(){
@@ -173,6 +177,7 @@ export default function Register({
                 Arborist
             </Button>
             <Button
+                disabled={true}
                 color="success"
                 variant={regType==="gardner"?"contained":"outlined"}
                 className='select-type-button'
@@ -189,11 +194,23 @@ export default function Register({
         function orgDetails(){
             if (arboristType==="join") return (
                 <TextField
-                    style={{maxWidth:'390px', width:'100%'}}
-                    onChange={(e) => setOrgAccessCode(e.target.value)}
+                    style={{
+                        maxWidth:'390px', 
+                        width:'100%'
+                    }}
+                    sx={{
+                        input: {
+                            textTransform:"uppercase",
+                            letterSpacing:"4px",
+                            textAlign:"center"
+                        }
+                    }}
+                    onChange={(e) => setOrgAccessCode(e.target.value.toUpperCase())}
                     label="Organization Access Code"
                     error={incorrectAccessCode}
-                    helperText={incorrectAccessCode ? "Invalid Access Code" : ""}/>
+                    helperText={incorrectAccessCode ? "Invalid Access Code" : ""}
+                    autoComplete="new-password"
+                    inputProps={{maxLength:10}}/>
             );
             else if (arboristType === "create") return (<>
                 <TextField
@@ -324,10 +341,14 @@ export default function Register({
             </InputAccordian>
             <Button 
                 variant='contained' 
-                disabled={isDone.size !== 3} 
+                disabled={isDone.size !== 3 || loading} 
                 style={{marginTop:'20px'}}
                 onClick={() => createAccount()}>
-                Create Account
+                {loading ? (
+                    <BeatLoader color="green"/>
+                ) : (
+                    <>Create Account</>
+                )}
             </Button>
         </Container>
     )

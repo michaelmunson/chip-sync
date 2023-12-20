@@ -66,7 +66,8 @@ export default function Modal({
                 theme={theme}
                 userData={userData}
                 setTheme={setTheme}
-                setUserData={setUserData}/>
+                setUserData={setUserData}
+                toggleModal={toggleModal}/>
 
     }), [modalConfig, theme, userData, ]); 
 

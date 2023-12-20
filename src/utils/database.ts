@@ -11,7 +11,10 @@ import {
     createMarker as createMarkerMutation,
     createNotification as createNotificationMutation,
     updateNotification as updateNotificationMutation,
-    updateUser as updateUserMutation
+    updateUser as updateUserMutation,
+    deleteMarker as deleteMarkerMutation,
+    deleteUser as deleteUserMutation,
+    deleteNotification as deleteNotificationMutation
 } from "../graphql/mutations";
 import { Geo } from "./location";
 import { S3 } from "./storage";
@@ -45,6 +48,7 @@ namespace DBTypes {
         userData: User
     }
     export interface UpdateUser{
+        id:string
         role?:User["role"]
         mapChoice?:User["mapChoice"]
     }
@@ -158,15 +162,13 @@ export const DB = {
             return data;
         }
     },
-    async updateUserOrganization(){
-        
-    },
     async createGardner(){
     
     },
-    async updateUser({role,mapChoice}:DBTypes.UpdateUser){
+    async updateUser({id,role,mapChoice}:DBTypes.UpdateUser){
         if (role || mapChoice) {
-            const input = role ? {id:this.userId, role} : {id:this.userId, mapChoice};
+            const input = role ? {id, role} : {id, mapChoice};
+            console.log("Input: ", input);
             return await API.graphql({
                 query: updateUserMutation,
                 variables: {
@@ -175,6 +177,16 @@ export const DB = {
             })
         }
         
+    },
+    async deleteUser({userId}:{userId:string}){
+        return await API.graphql({
+            query: deleteUserMutation,
+            variables: {
+                input : {
+                    id: userId,
+                }
+            }
+        })
     },
     /* ORGANIZATION */
     async getOrganization({organizationId}:{organizationId:string}): Promise<Organization|null> {
@@ -277,6 +289,16 @@ export const DB = {
         console.log("Create Marker Res Cleaned: ", data);
         return data; 
     },
+    async deleteMarker({id}:{id:string}){
+        await API.graphql({
+            query: deleteMarkerMutation,
+            variables: {
+                input: {
+                    id
+                }
+            }
+        })
+    },
     /* NOTIFICATIONS */
     async createNotification({data,userId,type}:{data:AnyObject,userId:string,type:DBTypes.NotificationType}){
         const res:any = await API.graphql({
@@ -317,7 +339,14 @@ export const DB = {
         return res?.data?.updateNotification; 
     },
     async deleteNotification({id}:{id:string}){
-        
+        return await API.graphql({
+            query: deleteNotificationMutation,
+            variables: {
+                input: {
+                    id
+                }
+            }
+        })
     },
     async subscribeToNotification(callback:(data:any) => void){
         const idToken = await getIdToken(); 

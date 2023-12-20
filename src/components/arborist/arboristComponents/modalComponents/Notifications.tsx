@@ -9,8 +9,10 @@ import "../../../../css/modalComponents/notifications.css";
 import { Notification, User } from '../../../../types/dataTypes';
 import { ModalConfig, ToggleModal } from '../../../../types/generalTypes';
 import { DB } from '../../../../utils/database';
-import date from "date-and-time"
+import date from "date-and-time";
 import { AddressLink } from '../../../utils/AddressLink';
+import ModalIcon from './modalUtils/ModalIcon';
+import ModalButtons from './modalUtils/ModalButtons';
 
 
 type NotificationObject = Notification.JoinReqNotification | Notification.MarkerNotification;
@@ -88,13 +90,12 @@ function NotificationAccordian({
                     return <>
                         {SubContentMap.circle()}
                         <div className='summary-text'>
-                            {firstName} {lastName} has joined your notification.
+                            <b>{firstName} {lastName}</b> has joined your organization
                         </div>
                     </>
                 },
                 details(){
                     return <>
-                        <p style={{textAlign:"center"}}>You can remove or promote them at any time.</p>
                         <Button
                             style={{
                                 marginTop:"-10px"
@@ -159,6 +160,17 @@ export default function Notifications({
         await DB.updateNotification({ id: notification.id });
     }
 
+    async function clearNotifications() {
+        userData.notifications.forEach(notification => DB.deleteNotification({id:notification.id}));
+        setUserData(data => {
+            if (data) {
+                const dataMut = {...data};
+                dataMut.notifications = [];
+                return dataMut; 
+            }
+        }); 
+    }
+
     function handleChange(notification: NotificationObject) {
         if (!notification.opened) updateNotification(notification);
         setActivePanel(lastId => {
@@ -167,7 +179,13 @@ export default function Notifications({
         });
     }
 
+    if (userData.notifications.length === 0) return <>
+        <ModalIcon type="notifications"/>
+        <p style={{textAlign:"center"}}>No New Notifications</p>
+    </>
+
     return (<>
+        <ModalIcon type="notifications"/>
         {userData.notifications.map((notification, index) => (
             <NotificationAccordian
                 key={`notification-${index}`}
@@ -176,5 +194,10 @@ export default function Notifications({
                 activePanel={activePanel}
                 toggleModal={toggleModal}/>
         ))}
+        <ModalButtons>
+            <Button color="error" variant='contained' style={{padding:"15px"}} onClick={clearNotifications}>
+                Clear
+            </Button>
+        </ModalButtons>
     </>)
 }

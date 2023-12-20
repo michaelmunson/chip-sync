@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { User } from '../../../../types/dataTypes';
+import { User, Marker } from '../../../../types/dataTypes';
 import { Accordion, AccordionDetails, AccordionSummary, Button, Divider, IconButton, Switch, Typography } from '@mui/material';
 import { 
     NightsStay as NightsStayIcon,
@@ -23,15 +23,27 @@ import {
     CheckCircleOutline as CheckCircleOutlineIcon,
     LockOpen as LockOpenIcon,
     Check as CheckIcon,
-    CheckBoxOutlined as CheckBoxOutlinedIcon
+    CheckBoxOutlined as CheckBoxOutlinedIcon,
+    Edit as EditIcon
 } from '@mui/icons-material';
 import { DB } from '../../../../utils/database';
 import { Auth } from 'aws-amplify';
 import "../../../../css/modalComponents/settings.css"; 
 import Spacer from '../../../utils/Spacer';
+import { ToggleModal } from '../../../../types/generalTypes';
+// @ts-ignore
+import { v4 as uuidv4 } from 'uuid';
+
 
 namespace Props {
     export interface Settings {
+        userData:User
+        theme:"light"|"dark"
+        setTheme:React.Dispatch<React.SetStateAction<Settings["theme"]>>
+        setUserData: React.Dispatch<React.SetStateAction<User|undefined>>
+        toggleModal: ToggleModal
+    }
+    export interface MemberSettings {
         userData:User
         theme:"light"|"dark"
         setTheme:React.Dispatch<React.SetStateAction<Settings["theme"]>>
@@ -45,6 +57,7 @@ namespace Props {
         userData:User
         setUserData: React.Dispatch<React.SetStateAction<User|undefined>>
         setPage: React.Dispatch<React.SetStateAction<"members" | "markers" | undefined>>
+        toggleModal: ToggleModal
     }
 }
 
@@ -61,8 +74,8 @@ const SettingsLabel = ({icon, text}:{icon:JSX.Element, text:string}) => (
     </Typography>
 )
 
-const SettingsAccordian = ({label,icon,children}:{label:string, icon:JSX.Element, children:JSX.Element|JSX.Element[]}) => (
-    <Accordion style={{ width: "100%", boxShadow: "none" }}>
+const SettingsAccordian = ({label,icon,children,onChange=()=>{}}:{label:string, icon:JSX.Element, children:JSX.Element|JSX.Element[], onChange?:()=>void}) => (
+    <Accordion style={{ width: "100%", boxShadow: "none" }} onChange={onChange}>
         <AccordionSummary className='settings-accordian' expandIcon={<ExpandMoreIcon/>} style={{ padding: "0px" }}>
             <Typography className='row v-center svg-right-10'>
                 {icon}
@@ -91,10 +104,10 @@ function MemberSettings({
     theme,
     setTheme,
     setUserData
-} : Props.Settings
+} : Props.MemberSettings
 ){
     const updateMapChoice = useCallback((mapChoice:User["mapChoice"]) => {
-        DB.updateUser({mapChoice});
+        DB.updateUser({id:userData.id, mapChoice});
         setUserData(data => {
             if (!data) return ({} as User); 
             const dataMut = {...data};
@@ -202,14 +215,146 @@ function AdminManager({
     page,
     userData,
     setPage,
-    setUserData
+    setUserData,
+    toggleModal
 } : Props.AdminManager
 ){
-    if (page === "markers") return <>
-        markers
+    const [userActionType, setUserActionType] = useState<"remove"|"promote">();
+    const [userActionTarget, setUserActionTarget] = useState<User>();
+    const [markerActionType, setMarkerActionType] = useState<"remove"|"edit">();
+    const [markerActionTarget, setMarkerActionTarget] = useState<Marker>();  
+
+    async function handleUserAction(){
+        if (userActionType === "promote" && userActionTarget) {
+            DB.updateUser({role:"admin", id:userActionTarget.id}).then(result => {
+                console.log(result); 
+            });
+            setUserData(data => {
+                if (data) {
+                    const dataMut = {...data};
+                    for (const i in data.organization.users){
+                        if (dataMut.organization.users[i].id === userActionTarget.id){
+                            dataMut.organization.users[i].role = "admin";
+                        }
+                    }
+                    return dataMut; 
+                }
+            })
+        }
+        else if (userActionType === "remove" && userActionTarget) {
+            DB.deleteUser({userId:userActionTarget.id});
+            setUserData(data => {
+                if (data) {
+                    const dataMut = {...data};
+                    dataMut.organization.users = dataMut.organization.users.filter(user => user.id !== userActionTarget.id);
+                    return dataMut; 
+                }
+            })
+        }
+        setUserActionType(undefined); 
+    }
+    async function handleMarkerAction(){
+        if (markerActionType === "remove" && markerActionTarget) {
+            setUserData(data => {
+                if (data) {
+                    const dataMut = {...data};
+                    dataMut.organization.markers = dataMut.organization.markers.filter(marker => marker.id !== markerActionTarget.id);
+                    return dataMut; 
+                }
+            })
+        }
+    }
+
+    if (page === "members") return (userData.organization.users.filter(user => user.id !== userData.id).length > 0) ? <>
+        {userData.organization.users.filter(user => user.id !== userData.id).sort((a,b) => a.role === 'admin' ? -1 : 1).map((user, index) => {
+            return (<>
+                <Spacer height={10}/>
+                <SettingsAccordian
+                    label={`${user.firstName} ${user.lastName}`}
+                    icon={user.role==="admin" ? <AdminPanelSettingsIcon color="success"/> : <PersonIcon/> }
+                    onChange={() => {
+                        if (userActionTarget?.id === user.id) setUserActionTarget(undefined)
+                    }}>
+                    {(!userActionType || (userActionTarget?.id !== user.id)) ? (
+                        <div className='row hv-center'>
+                            <Button color="error" startIcon={<DeleteForeverIcon/>} variant='outlined' onClick={()=>{setUserActionType("remove"); setUserActionTarget(user)}}>
+                                Remove
+                            </Button>
+                            <Spacer width={15}/>
+                            {user.role!=="admin" ? (
+                                <Button color="success" startIcon={<AdminPanelSettingsIcon color="success"/>} variant='outlined' onClick={()=>{setUserActionType("promote"); setUserActionTarget(user)}}>
+                                    Promote
+                                </Button>
+                            ) : (
+                                <></>
+                            )}
+                        </div>
+                    ) : (
+                        (userActionType === "remove") ? (
+                            <Button color="error" variant='outlined' onClick={handleUserAction}>
+                                <span>
+                                    Remove <u>{user.firstName} {user.lastName}</u> from Organization
+                                </span>
+                            </Button>
+                        ) : (
+                            <Button color="success" variant='outlined' onClick={handleUserAction}>
+                                <span>
+                                    Promote <u>{user.firstName} {user.lastName}</u> to Admin
+                                </span>
+                            </Button>
+                        )
+                    )}
+                </SettingsAccordian>
+            </>)
+        })}
+    </> : <>
+        <Typography
+            style={{
+                margin:"15px",
+                textAlign:"center",
+                textTransform:"capitalize"
+            }}>There are currently no members in your organization</Typography>
     </>
-    else if (page === "members") return <>
-        members
+    else if (page === "markers") return <>
+        {userData.organization.markers.map((marker, index) => {
+            return (<>
+                <Spacer height={10}/>
+                <SettingsAccordian
+                    label={marker.name}
+                    icon={ <RoomIcon/> }
+                    onChange={() => {
+                        if (markerActionTarget?.id === marker.id) setMarkerActionTarget(undefined)
+                    }}>
+                    {((markerActionType !== "remove") || (markerActionTarget?.id !== marker.id)) ? (
+                        <div className='row hv-center'>
+                            <Button color="error" startIcon={<DeleteForeverIcon/>} variant='outlined' onClick={()=>{setMarkerActionType("remove"); setMarkerActionTarget(marker)}}>
+                                Remove
+                            </Button>
+                            <Spacer width={15}/>
+                            <Button startIcon={<EditIcon/>} variant='outlined' onClick={()=>{
+                                    toggleModal(true, {
+                                        type: "add-marker",
+                                        data: markerActionTarget
+                                    })
+                                }}>
+                                Edit
+                            </Button>
+                        </div>
+                    ) : (
+                        (markerActionType === "remove") ? (
+                            <Button color="error" variant='outlined' onClick={handleMarkerAction}>
+                                <span>
+                                    Remove <u>{marker.name}</u> from Organization
+                                </span>
+                            </Button>
+                        ) : (
+                            <></>
+                        )
+                    )}
+                    
+                </SettingsAccordian>
+            </>)
+        })}
     </>
     else return <></>
 }   
@@ -218,23 +363,26 @@ export default function Settings({
     userData,
     theme,
     setTheme,
-    setUserData
+    setUserData,
+    toggleModal
 }:Props.Settings){
     const [page, setPage] = useState<"members"|"markers">();
 
     if (page) return (
         <div id="settings-modal">
-            <IconButton 
+            <Button 
                 color="primary" 
                 style={{padding:"0px", justifyContent:"left"}}
-                onClick={()=>setPage(undefined)}>
-                <ArrowBackIcon/>
-            </IconButton>
+                onClick={()=>setPage(undefined)}
+                startIcon={<ArrowBackIcon style={{marginTop:"1px"}}/>}>
+                Settings
+            </Button>
             <AdminManager
                 page={page}
                 userData={userData}
                 setPage={setPage}
-                setUserData={setUserData}/>
+                setUserData={setUserData}
+                toggleModal={toggleModal}/>
         </div>
     ); 
 
@@ -261,7 +409,8 @@ export default function Settings({
                 setTheme={setTheme}
                 userData={userData}
                 setUserData={setUserData}
-                setPage={setPage}/>
+                setPage={setPage}
+                toggleModal={toggleModal}/>
             <SignOut/>
         </div>
     )

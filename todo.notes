@@ -13,4 +13,5 @@ Arborist App:
         # Notifications
         [ ] Add "New Gardner Marker" Notification
         [ ] Add "Join Request" Notification
-        # 
+        # Marker List
+        [ ] Make only one accordian be expanded at a time

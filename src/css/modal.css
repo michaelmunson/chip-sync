@@ -4,6 +4,7 @@
         width: 80% !important;
         min-width: 326px !important;
         max-width: 500px !important;
+        overflow: visible;
     }
 
     & .css-yiavyu-MuiBackdrop-root-MuiDialog-backdrop {
@@ -22,13 +23,14 @@
     }
 
     & .css-sh22l5-MuiButtonBase-root-MuiAccordionSummary-root.Mui-expanded {
-        height: 64px;
+        /* height: 64px; */
     }
-    .modal-icon-container {
+    
+    & .modal-icon-container {
         position: absolute;
         display: flex;
         justify-content: center;
-        transform: translateY(-20px);
+        transform: translateY(-65px);
         width: 100%;
         & svg {
             
@@ -37,4 +39,24 @@
         }
     }
 
+    & .modal-buttons-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        height:0px; 
+        overflow:visible; 
+        transform:translateY(30px);
+        & button {
+            line-height: 0 !important;
+            &:disabled {
+                opacity: 1 !important;
+                background-color: rgb(91, 91, 91) !important;
+                color: #2f2f2f !important;
+            }
+        }
+    }
+}
+
+.css-1elwnq4-MuiPaper-root-MuiAccordion-root {
+    background-color: transparent !important;
 }
