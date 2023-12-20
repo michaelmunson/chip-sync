@@ -17,7 +17,13 @@ import {
     Settings as SettingsIcon,
     ExpandMore as ExpandMoreIcon,
     ManageAccounts as ManageAccountsIcon,
-    ArrowBack as ArrowBackIcon
+    ArrowBack as ArrowBackIcon,
+    Key as KeyIcon,
+    ContentCopy as ContentCopyIcon,
+    CheckCircleOutline as CheckCircleOutlineIcon,
+    LockOpen as LockOpenIcon,
+    Check as CheckIcon,
+    CheckBoxOutlined as CheckBoxOutlinedIcon
 } from '@mui/icons-material';
 import { DB } from '../../../../utils/database';
 import { Auth } from 'aws-amplify';
@@ -48,6 +54,13 @@ const SettingsRow = ({children}:{children:JSX.Element|JSX.Element[]}) => (
     </div>
 );
 
+const SettingsLabel = ({icon, text}:{icon:JSX.Element, text:string}) => (
+    <Typography className='row v-center'>
+        <span style={{marginRight:"10px", marginTop:"6px"}}>{icon}</span>
+        <b>{text}</b>
+    </Typography>
+)
+
 const SettingsAccordian = ({label,icon,children}:{label:string, icon:JSX.Element, children:JSX.Element|JSX.Element[]}) => (
     <Accordion style={{ width: "100%", boxShadow: "none" }}>
         <AccordionSummary className='settings-accordian' expandIcon={<ExpandMoreIcon/>} style={{ padding: "0px" }}>
@@ -61,6 +74,7 @@ const SettingsAccordian = ({label,icon,children}:{label:string, icon:JSX.Element
         </AccordionDetails>
     </Accordion>
 );
+
 const SignOut = () => (
     <div className='row hv-center m1'>
         <Typography className='row vert-center'>
@@ -141,6 +155,12 @@ function AdminSettings({
     setUserData,
     setPage
 } : Props.AdminSettings){
+    const [isCopied, setIsCopied] = useState<boolean>(false);
+    const copyAccessCode = () => {
+        navigator.clipboard.writeText(userData.organization.accessCode);
+        setIsCopied(someBool => !someBool);
+    }
+
     return <>
         {/* <Divider className='w100 b mt2'>Admin</Divider> */}
         <SettingsRow>
@@ -161,6 +181,29 @@ function AdminSettings({
                     </Button> 
                 </div>
             </SettingsAccordian>
+        </SettingsRow>
+        <SettingsRow>
+            <SettingsAccordian
+                label='Access Code'
+                icon={<LockOpenIcon/>}>
+                <div className='row hv-center'>
+                    <span style={{background:"rgb(136,135,135,.4)", padding:"5px 10px 3px 12px", borderRadius:"10px", marginRight:"7px", fontSize:"1.2rem", letterSpacing:"3px"}}>{userData.organization.accessCode}</span>
+                    {!isCopied ? (
+                        <ContentCopyIcon onClick={copyAccessCode}/>
+                    ) : (
+                        <CheckIcon onClick={copyAccessCode}/>
+                    )}
+                </div>
+            </SettingsAccordian>
+            {/* <SettingsLabel text="Access Code" icon={<KeyIcon/>}/>
+            <div className='row v-center'>
+                <span style={{background:"#676767", padding:"3px 10px", borderRadius:"10px", marginRight:"5px"}}>{userData.organization.accessCode}</span>
+                {!isCopied ? (
+                    <ContentCopyIcon onClick={e => setIsCopied(true)}/>
+                ) : (
+                    <CheckIcon style={{color:"green"}}/>
+                )}
+            </div> */}
         </SettingsRow>
     </>
 }

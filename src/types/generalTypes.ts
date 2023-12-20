@@ -27,3 +27,4 @@ export interface ModalConfig {
 }
 
 export type ToggleModal = (isOpen: boolean, config?: ModalConfig) => void; 
+

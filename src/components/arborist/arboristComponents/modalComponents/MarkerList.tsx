@@ -93,9 +93,10 @@ function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerA
 		}
 
 		markersMut.forEach(marker => {
-			const { latitude: mLat, longitude: mLng } = marker;
-			marker.distance = distance(cLat, cLng, mLat, mLng);
-		});
+			const { latitude, longitude } = marker;
+			// marker.distance = distance(cLat, cLng, mLat, mLng);
+            marker.distance = Geo.distance({latitude, longitude}, currentLocation); 
+        });
 
 		return markersMut.sort((a, b) => {
             if (a.distance && b.distance)

@@ -1,12 +1,17 @@
-import _zipcodes from "../data/zipcodes.json";
+import zips from "../data/zipcodes.json";
 import { Coordinates } from "../types/generalTypes";
 import { Loader } from '@googlemaps/js-api-loader';
 import { getGoogleMapsApiKey } from "./secrets";
-
-const zipcodes = _zipcodes as {[key:string]:{
+const zipcodes = zips as {[key:string]:{
     LAT:any,
     LNG:any
 }};
+
+namespace GeoTypes {
+    export type Unit = "mi" | "km" | "ft"
+}
+
+const convertFromMiles = (miles:number, unit:GeoTypes.Unit) => ({mi:1,ft:5280,km:1.60934}[unit]) * miles;
 
 export const Geo = {
     getCurrentLocation():Promise<Coordinates>{
@@ -31,6 +36,27 @@ export const Geo = {
         } else {
             const url = new URL(`http://maps.apple.com/?address=${address}`)
             return url.href;
+        }
+    },
+    distance(coords1:Coordinates, coords2:Coordinates, unit:GeoTypes.Unit="mi") : number {
+        const {latitude:lat1, longitude:lon1} = coords1;
+        const {latitude:lat2, longitude:lon2} = coords2;
+        if ((lat1 === lat2) && (lon1 === lon2)) {
+            return 0;
+        }
+        else {
+            let radlat1 = Math.PI * lat1 / 180;
+            let radlat2 = Math.PI * lat2 / 180;
+            let theta = lon1 - lon2;
+            let radtheta = Math.PI * theta / 180;
+            let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+            if (dist > 1) {
+                dist = 1;
+            }
+            dist = Math.acos(dist);
+            dist = dist * 180 / Math.PI;
+            dist = dist * 60 * 1.1515;
+            return convertFromMiles(dist, unit);
         }
     },
     async getPredictionFunction({latitude, longitude}:Coordinates):Promise<()=>Promise<string[]>>{
@@ -71,7 +97,8 @@ export const Geo = {
         res = await res.json();
         const {lat:latitude, lng:longitude} = res.results[0].geometry.location;
         return {latitude, longitude}; 
-    }
+    },
+    
 }
 
 /* interface LocationObject {

@@ -50,6 +50,19 @@ const getIdToken = async () => {
     return session.getIdToken().getJwtToken();
 }
 
+const generateAccessCode = (length:number=7) => {
+    const characters = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase();
+    let result = '';
+  
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      if (i % 2 === 0) result += characters.charAt(randomIndex);
+      else result += Math.floor(Math.random() * 10);
+    }
+  
+    return result;
+}
+
 export function cleanData(data:{[key:string]:any}):any{
     if ("markers" in data && "items" in data?.markers){
         data.markers = data.markers.items;
@@ -112,7 +125,24 @@ export const DB = {
         console.log("Create Admin Res Cleaned: ", data); 
         return data; 
     },
-    async createUser(){
+    async createUser({firstName,lastName,organizationId}:DBTypes.CreateAdmin) : Promise<User> {
+        const res:any = await API.graphql({
+            query: createUserMutation,
+            variables: {
+                input : {
+                    id: this.userId,
+                    firstName,
+                    lastName,
+                    role:'member',
+                    organizationUsersId: organizationId,
+                }   
+            }
+        });
+        const data = cleanData(res.data.createUser); 
+        console.log("Create Admin Res Cleaned: ", data); 
+        return data; 
+    },
+    async updateUserOrganization(){
         
     },
     async createGardner(){
@@ -141,7 +171,7 @@ export const DB = {
         return cleanData(res.data.getOrganization); 
     },
     async getUniqueAccessCode():Promise<string>{
-        const accessCode = Math.floor(100000 + Math.random() * 900000);
+        const accessCode = generateAccessCode(7);
         console.log('access code', accessCode); 
         const res:any = await API.graphql({
             query:listOrganizationsQuery,

@@ -11,6 +11,8 @@ import Modal from './arboristComponents/Modal';
 import { S3 } from '../../utils/storage';
 import Theme from '../../utils/theme';
 
+const MIN_UPDATE_DISTANCE = .2 // miles
+
 interface ArboristAppProps {
     userData:User,
     setUserData: React.Dispatch<React.SetStateAction<User | undefined>>
@@ -37,10 +39,18 @@ export default function ArboristApp({
         setModalOpen(isOpen); 
     }
     function updateCurrentLocation(){
-        Geo.getCurrentLocation().then(coords => {
-            setCurrentLocation(coords); 
-        });
-        setTimeout(updateCurrentLocation, 10000); 
+        Geo.getCurrentLocation().then(newCoords => {
+            setCurrentLocation(oldCoords => {
+                const distance = Geo.distance(newCoords, oldCoords);
+                if (distance < MIN_UPDATE_DISTANCE){
+                    return oldCoords;
+                } else {
+                    console.log("∆ Dist. =",distance,"miles");
+                    return newCoords; 
+                }
+            });
+            setTimeout(updateCurrentLocation, 1000);
+        }); 
     }
     function subscribe(){ 
         setSocket((sock:any) => {
