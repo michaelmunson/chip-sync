@@ -84,10 +84,30 @@ function NotificationAccordian({
             }
             case "join-request": return {
                 summary(){
-                    return <></>
+                    const {firstName, lastName} = notification.data; 
+                    return <>
+                        {SubContentMap.circle()}
+                        <div className='summary-text'>
+                            {firstName} {lastName} has joined your notification.
+                        </div>
+                    </>
                 },
                 details(){
-                    return <></>
+                    return <>
+                        <p style={{textAlign:"center"}}>You can remove or promote them at any time.</p>
+                        <Button
+                            style={{
+                                marginTop:"-10px"
+                                // transform:"translateY(-10px)"
+                            }}
+                            onClick={() => {
+                                toggleModal(true, {
+                                    type: "settings"
+                                }); 
+                            }}>
+                            Manage Members
+                        </Button>
+                    </>
                 }
             }
         }
