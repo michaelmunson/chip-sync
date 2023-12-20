@@ -195,15 +195,6 @@ function AdminSettings({
                     )}
                 </div>
             </SettingsAccordian>
-            {/* <SettingsLabel text="Access Code" icon={<KeyIcon/>}/>
-            <div className='row v-center'>
-                <span style={{background:"#676767", padding:"3px 10px", borderRadius:"10px", marginRight:"5px"}}>{userData.organization.accessCode}</span>
-                {!isCopied ? (
-                    <ContentCopyIcon onClick={e => setIsCopied(true)}/>
-                ) : (
-                    <CheckIcon style={{color:"green"}}/>
-                )}
-            </div> */}
         </SettingsRow>
     </>
 }

@@ -64,8 +64,20 @@ export const listOrganizations = /* GraphQL */ `
         accessCode
         location
         users {
-          nextToken
-          __typename
+            items {
+                id
+                firstName
+                lastName
+                role
+                mapChoice
+                contact
+                createdAt
+                updatedAt
+                organizationUsersId
+                __typename
+            }
+            nextToken
+            __typename
         }
         markers {
           nextToken
@@ -109,21 +121,21 @@ export const getUser = /* GraphQL */ `
         accessCode
         location
         users {
-        items {
-          id
-          firstName
-          lastName
-          role
-          mapChoice
-          contact
-          createdAt
-          updatedAt
-          organizationUsersId
-          __typename
+            items {
+                id
+                firstName
+                lastName
+                role
+                mapChoice
+                contact
+                createdAt
+                updatedAt
+                organizationUsersId
+                __typename
+            }
+            nextToken
+            __typename
         }
-        nextToken
-        __typename
-      }
       markers {
         items {
           id

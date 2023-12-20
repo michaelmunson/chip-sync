@@ -107,7 +107,8 @@ export default function Register({
     const [orgAccessCode, setOrgAccessCode] = useState<string>(""); 
     const [orgName, setOrgName] = useState<string>(""); 
     const [orgLocation, setOrgLocation] = useState<string>(""); 
-    const [isAgreed, setIsAgreed] = useState<boolean>(false); 
+    const [isAgreed, setIsAgreed] = useState<boolean>(false);
+    const [incorrectAccessCode, setIncorrectAccessCode] = useState<boolean>(false);  
     // ACCORDIAN STATE
     const [canExpand, setCanExpand] = useState(new Set(['panel1']))
     const [isDone, setIsDone] = useState(new Set<string>())
@@ -135,15 +136,26 @@ export default function Register({
                     location: orgLocation,
                     tier: "enterprise"
                 });
-                console.log("Create Org Res: ", createOrgRes); 
                 const organizationId = createOrgRes.id; 
                 const createAdminRes = await DB.createAdmin({
                     firstName,
                     lastName,
                     organizationId
                 });
-                console.log("Create Admin Res: ", createAdminRes)
                 setUserData(createAdminRes); 
+            } 
+            else if (arboristType === "join") {
+                setIncorrectAccessCode(false); 
+                const createUserRes = await DB.createMember({
+                    firstName, 
+                    lastName,
+                    accessCode: orgAccessCode
+                });
+                if (createUserRes) {
+                    setUserData(createUserRes);
+                } else {
+                    setIncorrectAccessCode(true);
+                }
             }
         } 
     }
@@ -178,9 +190,10 @@ export default function Register({
             if (arboristType==="join") return (
                 <TextField
                     style={{maxWidth:'390px', width:'100%'}}
-                    type='number'
                     onChange={(e) => setOrgAccessCode(e.target.value)}
-                    label="Organization Access Code"/>
+                    label="Organization Access Code"
+                    error={incorrectAccessCode}
+                    helperText={incorrectAccessCode ? "Invalid Access Code" : ""}/>
             );
             else if (arboristType === "create") return (<>
                 <TextField
