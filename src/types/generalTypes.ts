@@ -21,7 +21,7 @@ export interface Coordinates {
 }
 
 export interface ModalConfig {
-    type: "add-marker"|"settings"|"marker-list"|"notifications"|"marker-details"
+    type: "add-marker"|"settings"|"marker-list"|"notifications"|"marker-details"|"edit-marker"
     data?: AnyObject
     goBackLocation?:ModalConfig["type"]
 }

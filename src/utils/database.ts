@@ -9,6 +9,7 @@ import {
     createOrganization as createOrganizationMutation,
     createUser as createUserMutation,
     createMarker as createMarkerMutation,
+    updateMarker as updateMarkerMutation,
     createNotification as createNotificationMutation,
     updateNotification as updateNotificationMutation,
     updateUser as updateUserMutation,
@@ -51,6 +52,9 @@ namespace DBTypes {
         id:string
         role?:User["role"]
         mapChoice?:User["mapChoice"]
+    }
+    export interface UpdateMarker extends CreateMarker {
+        id:string
     }
     export type NotificationType = Notification.JoinReqNotification["type"] | Notification.MarkerNotification["type"]
 }
@@ -298,6 +302,31 @@ export const DB = {
                 }
             }
         })
+    },
+    async updateMarker({id,type,name,address,description,contact,images,userData}:DBTypes.UpdateMarker) : Promise<Marker> {
+        const organizationId = userData.organization.id; 
+        const imageKeys = await S3.put({organizationId, images}); 
+        const {latitude, longitude} = await Geo.addressToCoords(address); 
+        const res:any = await API.graphql({
+            query: createMarkerMutation,
+            variables: {
+                input : {
+                    id,
+                    type,
+                    name,
+                    address,
+                    description,
+                    contact: JSON.stringify(contact),
+                    latitude,
+                    longitude,
+                    organizationMarkersId: organizationId,
+                    images: imageKeys
+                }   
+            }
+        });
+        const data = cleanData(res.data.createMarker);
+        console.log("Create Marker Res Cleaned: ", data);
+        return data; 
     },
     /* NOTIFICATIONS */
     async createNotification({data,userId,type}:{data:AnyObject,userId:string,type:DBTypes.NotificationType}){

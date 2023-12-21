@@ -333,7 +333,7 @@ function AdminManager({
                             <Spacer width={15}/>
                             <Button startIcon={<EditIcon/>} variant='outlined' onClick={()=>{
                                     toggleModal(true, {
-                                        type: "add-marker",
+                                        type: "edit-marker",
                                         data: markerActionTarget
                                     })
                                 }}>

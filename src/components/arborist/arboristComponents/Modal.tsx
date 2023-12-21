@@ -8,6 +8,7 @@ import Notifications from './modalComponents/Notifications';
 import "../../../css/modal.css"
 import MarkerDetails from './modalComponents/MarkerDetails';
 import Settings from './modalComponents/Settings';
+import EditMarker from './modalComponents/EditMarker';
 
 interface ModalProps {
     open: boolean
@@ -67,7 +68,14 @@ export default function Modal({
                 userData={userData}
                 setTheme={setTheme}
                 setUserData={setUserData}
-                toggleModal={toggleModal}/>
+                toggleModal={toggleModal}/>,
+
+        "edit-marker" : () => 
+            <EditMarker
+                data={data}
+                userData={userData}
+                toggleModal={toggleModal}
+                currentLocation={currentLocation}/>
 
     }), [modalConfig, theme, userData, ]); 
 

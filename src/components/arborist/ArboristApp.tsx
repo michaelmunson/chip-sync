@@ -92,13 +92,6 @@ export default function ArboristApp({
                 modalConfig={modalConfig}
                 toggleModal={toggleModal}
                 currentLocation={currentLocation}/>
-
-            <button style={{zIndex:1000000, position:'relative'}} onClick={e => {
-                setCurrentLocation({
-                    latitude: 40.730610,
-                    longitude: -73.935242
-                });
-            }}>HELLO</button>
         </ThemeProvider>
     )
 }

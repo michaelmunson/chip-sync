@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react'
 import { ModalConfig } from '../../../../../types/generalTypes';
 import {
-    Notifications as NotificationIcon
+    Notifications as NotificationIcon,
+    EditLocationAlt as EditLocationIcon
 } from "@mui/icons-material"
 
 export default function ModalIcon({ type }: { type: ModalConfig["type"] }) {
@@ -10,7 +11,8 @@ export default function ModalIcon({ type }: { type: ModalConfig["type"] }) {
         "add-marker"    : <></>,
         "marker-list"   : <></>,
         "settings"      : <></>,
-        "marker-details": <></>
+        "marker-details": <></>,
+        "edit-marker"   : <EditLocationIcon/>
     }), []);
 
     return (
