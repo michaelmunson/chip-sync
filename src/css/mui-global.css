@@ -1,19 +1,28 @@
-.css-1puturl-MuiDivider-root::before, .css-1puturl-MuiDivider-root::after,
+/* .css-1puturl-MuiDivider-root::before, .css-1puturl-MuiDivider-root::after,
 .css-9mgopn-MuiDivider-root {
-    border-top: thin solid rgba(0, 0, 0, 0.32) !important;
-}
+    border-top: none !important;
+} */
 
-.css-qoi9-MuiPaper-root-MuiAccordion-root {
+/* .css-qoi9-MuiPaper-root-MuiAccordion-root {
     background: transparent !important;
     background-image: transparent !important;
-}
+} */
 
-.css-1ujnqem-MuiTabs-root {
+.MuiTabs-root {
     width: 100% !important;
 }
 
-.css-1r7avug-MuiButtonBase-root-MuiTab-root,
-.css-1h9z7r5-MuiButtonBase-root-MuiTab-root {
+.MuiButtonBase-root.MuiTab-root {
     min-width: initial !important;
     flex-grow: 1 !important;
 }
+
+/* .css-1ujnqem-MuiTabs-root {
+    width: 100% !important;
+} */
+
+/* .css-1r7avug-MuiButtonBase-root-MuiTab-root,
+.css-1h9z7r5-MuiButtonBase-root-MuiTab-root {
+    min-width: initial !important;
+    flex-grow: 1 !important;
+} */
