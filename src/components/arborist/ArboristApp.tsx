@@ -31,6 +31,7 @@ export default function ArboristApp({
     /* USE EFFECTS */
     useEffect(updateCurrentLocation, []);
     useEffect(subscribe, []); // removed userData dependency
+    
     /* Utility Functions */
     function toggleModal(isOpen:boolean, config?:ModalConfig){
         if (config) {
