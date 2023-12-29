@@ -110,7 +110,7 @@ function Header({data,goBackLocation,toggleModal}:{data:Marker, goBackLocation:M
                     type:"edit-marker",
                     data,
                 })}>
-                <ArrowBackIcon/>
+                <EditIcon/>
             </IconButton>
         </div>
     )

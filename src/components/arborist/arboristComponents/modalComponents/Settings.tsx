@@ -332,9 +332,10 @@ function AdminManager({
                             </Button>
                             <Spacer width={15}/>
                             <Button startIcon={<EditIcon/>} variant='outlined' onClick={()=>{
+                                    console.log("Marker", marker);
                                     toggleModal(true, {
                                         type: "edit-marker",
-                                        data: markerActionTarget
+                                        data: marker
                                     })
                                 }}>
                                 Edit
