@@ -72,8 +72,9 @@ export default function Modal({
 
         "edit-marker" : () => 
             <EditMarker
-                data={data}
+                data={(data as Marker)}
                 userData={userData}
+                setUserData={setUserData}
                 toggleModal={toggleModal}
                 currentLocation={currentLocation}/>
 

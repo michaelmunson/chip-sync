@@ -53,8 +53,13 @@ namespace DBTypes {
         role?:User["role"]
         mapChoice?:User["mapChoice"]
     }
-    export interface UpdateMarker extends CreateMarker {
+    export interface UpdateMarker {
         id:string
+        type:Marker["type"]
+        name:string
+        description:string
+        contact:Marker["contact"]
+        address:string
     }
     export type NotificationType = Notification.JoinReqNotification["type"] | Notification.MarkerNotification["type"]
 }
@@ -100,6 +105,9 @@ export function cleanData(data:{[key:string]:any}):any{
     }
     if ("organization" in data){
         data.organization = cleanData(data.organization);
+    }
+    if ("contact" in data){
+        data.contact = JSON.parse(data.contact);
     }
     return data; 
 }
@@ -303,12 +311,11 @@ export const DB = {
             }
         })
     },
-    async updateMarker({id,type,name,address,description,contact,images,userData}:DBTypes.UpdateMarker) : Promise<Marker> {
-        const organizationId = userData.organization.id; 
-        const imageKeys = await S3.put({organizationId, images}); 
+    async updateMarker({id,type,name,address,description,contact}:DBTypes.UpdateMarker) : Promise<Marker> {
+        // const imageKeys = await S3.put({organizationId, images}); 
         const {latitude, longitude} = await Geo.addressToCoords(address); 
         const res:any = await API.graphql({
-            query: createMarkerMutation,
+            query: updateMarkerMutation,
             variables: {
                 input : {
                     id,
@@ -318,14 +325,12 @@ export const DB = {
                     description,
                     contact: JSON.stringify(contact),
                     latitude,
-                    longitude,
-                    organizationMarkersId: organizationId,
-                    images: imageKeys
+                    longitude                
                 }   
             }
         });
-        const data = cleanData(res.data.createMarker);
-        console.log("Create Marker Res Cleaned: ", data);
+        const data = cleanData(res.data.updateMarker);
+        console.log("Update Marker Res Cleaned: ", data);
         return data; 
     },
     /* NOTIFICATIONS */

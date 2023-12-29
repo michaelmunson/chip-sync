@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import { Coordinates, ModalConfig, ToggleModal } from '../../../../types/generalTypes'
+import { AnyObject, Coordinates, ModalConfig, ToggleModal } from '../../../../types/generalTypes'
 import { Divider, Button, TextField, Autocomplete, styled } from '@mui/material'
 import { CheckCircle, CloudUpload, AddCircle, AddBox, AddCircleOutline, AddBoxRounded, Add, AutoAwesome as PublishIcon } from '@mui/icons-material';
 import "../../../../css/modalComponents/add-marker.css"; 
@@ -7,23 +7,26 @@ import Spacer from '../../../utils/Spacer';
 import { Geo } from '../../../../utils/location';
 import { PropagateLoader, PulseLoader } from 'react-spinners';
 import { DB } from '../../../../utils/database';
-import { User } from '../../../../types/dataTypes';
+import { Marker, User } from '../../../../types/dataTypes';
 
 let predictorFn:((input:string)=>Promise<string[]>) = (input:string) => new Promise((resolve,reject) => resolve([]));
 
-interface AddMarkerProps {
-    data?: ModalConfig["data"]
+interface EditMarkerProps {
+    data: Marker
     userData:User
     toggleModal:ToggleModal
+    setUserData:React.Dispatch<React.SetStateAction<User|undefined>>,
     currentLocation: Coordinates
 }
 
 function Description({
+    description,
     setDescription 
 }: {
+    description:string
     setDescription:React.Dispatch<React.SetStateAction<string>>
 }){
-    const [isAddDescription, setIsAddDescription] = useState<boolean>(false); 
+    const [isAddDescription, setIsAddDescription] = useState<boolean>(!!description); 
 
     if (isAddDescription) return (
         <TextField 
@@ -31,6 +34,7 @@ function Description({
                 maxRows={3}
                 className='add-marker-text-field'
                 label='Description'
+                value={description}
                 onChange={e=>setDescription(e.target.value)}/>
     )
     
@@ -44,13 +48,17 @@ function Description({
 }
 
 function ContactDetails({
+    contactName,
+    contactPhone,
     setContactPhone, 
     setContactName
 }: {
-    setContactPhone:React.Dispatch<React.SetStateAction<string>>,
+    contactName:string
+    contactPhone:string
+    setContactPhone:React.Dispatch<React.SetStateAction<string>>
     setContactName:React.Dispatch<React.SetStateAction<string>>
 }){
-    const [isAddContact, setIsAddContact] = useState<boolean>(false); 
+    const [isAddContact, setIsAddContact] = useState<boolean>(!!contactName || !!contactPhone); 
 
     if (isAddContact) return <>
         <Divider className='w100 b m1'>Contact Info.</Divider>
@@ -58,12 +66,14 @@ function ContactDetails({
             <TextField 
                 className='add-marker-text-field'
                 label='Contact Name'
+                value={contactName}
                 onChange={e=>setContactName(e.target.value)}/>
             <Spacer height={10}/>
             <TextField
                 className='add-marker-text-field'
                 type="number"
                 label='Contact Phone #'
+                value={contactPhone}
                 onChange={e=>setContactPhone(e.target.value)}/>
         </div>
     </>
@@ -126,10 +136,10 @@ function MediaUpload({
 
 function SubmitButton({
     isDisabled,
-    createMarker
+    updateMarker
 }:{
     isDisabled:boolean,
-    createMarker:()=>void
+    updateMarker:()=>void
 }){ 
     return (
         <div className='create-marker-button b'>
@@ -138,7 +148,7 @@ function SubmitButton({
                 color="success"
                 variant="contained"
                 disabled={isDisabled}
-                onClick={createMarker}
+                onClick={updateMarker}
                 startIcon={<PublishIcon/>}>
                 Update Marker
             </Button>
@@ -149,20 +159,34 @@ function SubmitButton({
 export default function EditMarker({
     data,
     userData,
+    setUserData,
     toggleModal,
     currentLocation
-} : AddMarkerProps
+} : EditMarkerProps
 ){
-    const [markerType, setMarkerType] = useState<Set<"wood"|"chips">>(new Set());
-    const [markerName, setMarkerName] = useState<string>("");
-    const [markerAddress, setMarkerAddress] = useState<string>("");
+    const [markerType, setMarkerType] = useState<Set<"wood"|"chips">>(
+        data?.type ? new Set(({
+            "chips" : ["chips"],
+            "wood"  : ["wood"],
+            "both"  : ["chips","wood"]
+        } as AnyObject)[data.type]) : new Set()
+    );
+    const [markerName, setMarkerName] = useState<string>(data?.name || "");
+    const [markerAddress, setMarkerAddress] = useState<string>(data?.address || "");
     const [addressOptions, setAddressOptions] = useState<string[]>([]);
-    const [markerDescription, setMarkerDescription] = useState<string>("");  
-    const [contactName, setContactName] = useState<string>("");
-    const [contactPhone, setContactPhone] = useState<string>("");
+    const [markerDescription, setMarkerDescription] = useState<string>(data?.description || "");  
+    const [contactName, setContactName] = useState<string>(data?.contact.name || "");
+    const [contactPhone, setContactPhone] = useState<string>(data?.contact.phone || "");
     const [markerImages, setMarkerImages] = useState<File[]>([]);
     const [isCreating, setIsCreating] = useState<boolean>(false); 
     
+    useEffect(() => {
+        Geo.getPredictionFunction(currentLocation).then(fn => {
+            predictorFn = fn
+            window.exports = {predictorFn}
+        }); 
+    }, []); 
+
     function changeMarkerType(type:"chips"|"wood"){
         setMarkerType(mt => {
             if (mt.has(type)) mt.delete(type);
@@ -171,18 +195,11 @@ export default function EditMarker({
         }); 
     }
 
-    useEffect(() => {
-        Geo.getPredictionFunction(currentLocation).then(fn => {
-            predictorFn = fn
-            window.exports = {predictorFn}
-        }); 
-    }, []); 
-
-    async function createMarker(){
+    async function updateMarker(){
         if (!data) return; 
         setIsCreating(true);
         const type = markerType.size > 1 ? "both" : [...markerType][0]; 
-        await DB.updateMarker({
+        const markerData = await DB.updateMarker({
             id: data.id,
             type,
             name: markerName,
@@ -191,12 +208,16 @@ export default function EditMarker({
             contact:{
                 name:contactName,
                 phone:contactPhone
-            },
-            images:markerImages,
-            userData
+            }
         }); 
+        const newUserData = await DB.getUser();
+        if (newUserData) setUserData(newUserData); 
         toggleModal(false); 
         setIsCreating(false);
+        toggleModal(true, {
+            type:"marker-details",
+            data: markerData
+        }); 
     }
 
     if (isCreating) return (
@@ -230,6 +251,7 @@ export default function EditMarker({
                 <TextField 
                     className='add-marker-text-field'
                     label='Marker Name'
+                    value={markerName}
                     onChange={e => setMarkerName(e.target.value)}/>
                 <Spacer height={10}/>
                 <Autocomplete
@@ -237,6 +259,7 @@ export default function EditMarker({
 					freeSolo={true}
 					id="address-auotocomplete"
                     className='add-marker-text-field'
+                    value={markerAddress}
 					options={addressOptions}
 					onChange={(e, value) => {
                         if (value) setMarkerAddress(value);
@@ -256,9 +279,12 @@ export default function EditMarker({
 				/>
                 <Spacer height={10}/>
                 <Description
+                    description={markerDescription}
                     setDescription={setMarkerDescription}/>
             </div>
             <ContactDetails
+                contactName={contactName}
+                contactPhone={contactPhone}
                 setContactName={setContactName}
                 setContactPhone={setContactPhone}/>
             <MediaUpload
@@ -267,7 +293,7 @@ export default function EditMarker({
             <SubmitButton
                 isDisabled={markerType.size < 1 || !markerName || !markerAddress}
                 // isDisabled={false}
-                createMarker={createMarker}/>
+                updateMarker={updateMarker}/>
         </div>
     )
 }

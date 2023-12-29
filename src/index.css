@@ -22,6 +22,10 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.bg-white {
+    background: white !important;
+}
+
 .h100 {
     height: 100% !important;
 }

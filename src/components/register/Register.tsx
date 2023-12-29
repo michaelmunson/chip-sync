@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SetUserData } from '../../types/generalTypes';
-import { GiGardeningShears } from "react-icons/gi";
-import { GiChainsaw } from "react-icons/gi";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -20,7 +18,6 @@ import Container from '../utils/Container';
 import Spacer from '../utils/Spacer';
 import { DB } from '../../utils/database';
 import { BeatLoader } from 'react-spinners';
-
 /* 
 Select Arborist or Gardner
 - Arborist:
@@ -65,6 +62,7 @@ function InputAccordian({ summary, children, expanded, handleChange, panelId, ca
             expanded={expanded === panelId}
             onChange={handleChange(panelId)}
             disabled={!canExpand.has(panelId)}
+            className='bg-white'
             style={{
                 borderRadius: "20px",
                 margin: "15px",
