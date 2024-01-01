@@ -24,6 +24,7 @@ body {
 
 .bg-white {
     background: white !important;
+    background-color: white !important;
 }
 
 .h100 {

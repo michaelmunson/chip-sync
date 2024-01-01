@@ -68,6 +68,8 @@ function InputAccordian({ summary, children, expanded, handleChange, panelId, ca
                 margin: "15px",
                 width:'90%',
                 maxWidth:'500px',
+                background:"white",
+                backgroundColor:"white",
                 opacity: (isDone.has(panelId) && expanded !== panelId) ? ".7" : ""
             }}>
             <AccordionSummary
