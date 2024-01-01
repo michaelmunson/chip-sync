@@ -9,6 +9,7 @@ import { Coordinates, ModalConfig, ToggleModal } from '../../../../types/general
 import { Geo } from "../../../../utils/location";
 import "../../../../css/modalComponents/marker-list.css"; 
 import { AddressLink } from '../../../utils/AddressLink';
+import ModalContent from './modalUtils/ModalContent';
 
 interface MarkerListProps {
     userData: User,
@@ -54,6 +55,7 @@ function MarkerTabs({tab,setTab}:MarkerTabsProps) {
 
 function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerAccordianProps) {
 	const [markerArray, setMarkerArray] = useState(sortMarkers([...userData.organization.markers]));
+    const [expanded, setExpanded] = useState<string>(); 
 	
     const markerFilterMap = {
 		chips: () => [...userData.organization.markers].filter(marker => marker.type === "chips"),
@@ -62,35 +64,16 @@ function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerA
 		all: () => [...userData.organization.markers]
 	}
 
-    useEffect(()=>{setMarkerArray(markerFilterMap[tab]())}, [tab]);
+    useEffect(()=>{
+        setMarkerArray(
+            sortMarkers(markerFilterMap[tab]())
+        )
+    }, [tab]);
 	
     const formatMarkerName = (name:string, cutoffIndex=15) => name.length > cutoffIndex ? name.slice(0,cutoffIndex) + "..." : name;
 	
     function sortMarkers(markers:Marker[]){
-		const { latitude: cLat, longitude: cLng } = currentLocation;
 		const markersMut = [...markers];
-		// courtesy of https://stackoverflow.com/users/1594823/saikat
-		function distance(lat1:number, lon1:number, lat2:number, lon2:number, unit?:any) {
-			if ((lat1 === lat2) && (lon1 === lon2)) {
-				return 0;
-			}
-			else {
-				let radlat1 = Math.PI * lat1 / 180;
-				let radlat2 = Math.PI * lat2 / 180;
-				let theta = lon1 - lon2;
-				let radtheta = Math.PI * theta / 180;
-				let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-				if (dist > 1) {
-					dist = 1;
-				}
-				dist = Math.acos(dist);
-				dist = dist * 180 / Math.PI;
-				dist = dist * 60 * 1.1515;
-				if (unit === "K") { dist = dist * 1.609344 }
-				if (unit === "N") { dist = dist * 0.8684 }
-				return dist;
-			}
-		}
 
 		markersMut.forEach(marker => {
 			const { latitude, longitude } = marker;
@@ -108,7 +91,13 @@ function MarkerAccordian({ tab, userData, toggleModal, currentLocation }:MarkerA
 	return (
 		<div>
 			{markerArray.length > 0 ? markerArray.map((marker, index) => (
-				<Accordion key={`accordian#${index}`} style={{ padding: "10px" }}>
+				<Accordion 
+                    expanded={marker.id === expanded}
+                    onChange={() => {
+                        setExpanded(marker.id)
+                    }}
+                    key={`accordian#${index}`} 
+                    style={{ padding: "10px" }}>
 					<AccordionSummary
 						expandIcon={<ExpandMoreIcon />}
 						aria-controls="panel2a-content"
@@ -155,11 +144,13 @@ export default function MarkerList({userData, toggleModal, currentLocation}:Mark
         <MarkerTabs 
             tab={tab}
             setTab={setTab}/>
-        <MarkerAccordian
-            tab={tab}
-            userData={userData}
-            toggleModal={toggleModal}
-            currentLocation={currentLocation}/>
+        <ModalContent>
+            <MarkerAccordian
+                tab={tab}
+                userData={userData}
+                toggleModal={toggleModal}
+                currentLocation={currentLocation}/>
+        </ModalContent>
     </>)
 	/* return (
 		<>

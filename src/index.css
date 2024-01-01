@@ -271,22 +271,21 @@ body {
 .css-67l5gl.Mui-expanded {
     margin: 0px !important;
 }
-/* width */
-::-webkit-scrollbar {
-    width: 0px;
+
+a {
+    color: #1976d2 !important
 }
 
-/* Track */
+
+/* ::-webkit-scrollbar {
+    width: 0px;
+}
 ::-webkit-scrollbar-track {
     background: transparent;
 }
-
-/* Handle */
 ::-webkit-scrollbar-thumb {
     background: transparent;
 }
-
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     background: transparent;
-}
+} */

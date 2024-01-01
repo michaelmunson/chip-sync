@@ -13,6 +13,7 @@ import date from "date-and-time";
 import { AddressLink } from '../../../utils/AddressLink';
 import ModalIcon from './modalUtils/ModalIcon';
 import ModalButtons from './modalUtils/ModalButtons';
+import ModalContent from './modalUtils/ModalContent';
 
 
 type NotificationObject = Notification.JoinReqNotification | Notification.MarkerNotification;
@@ -185,15 +186,17 @@ export default function Notifications({
     </>
 
     return (<>
-        <ModalIcon type="notifications"/>
-        {userData.notifications.map((notification, index) => (
-            <NotificationAccordian
-                key={`notification-${index}`}
-                notification={notification}
-                handleChange={handleChange}
-                activePanel={activePanel}
-                toggleModal={toggleModal}/>
-        ))}
+        {/* <ModalIcon type="notifications"/> */}
+        <ModalContent>
+            {userData.notifications.map((notification, index) => (
+                <NotificationAccordian
+                    key={`notification-${index}`}
+                    notification={notification}
+                    handleChange={handleChange}
+                    activePanel={activePanel}
+                    toggleModal={toggleModal}/>
+            ))}
+        </ModalContent>
         <ModalButtons>
             <Button color="error" variant='contained' style={{padding:"15px"}} onClick={clearNotifications}>
                 Clear

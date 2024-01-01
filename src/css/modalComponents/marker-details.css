@@ -11,7 +11,7 @@
 
         &.go-back-header {
             flex-grow: 1;
-            margin-left: -24px;
+            /* margin-left: -24px; */
             text-align: center;
         }
 

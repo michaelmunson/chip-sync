@@ -1,6 +1,7 @@
 #modal {
     & .MuiDialog-container > .MuiPaper-root {
         border-radius: 20px !important;
+        max-height: 75%;
         width: 80% !important;
         min-width: 326px !important;
         max-width: 500px !important;
