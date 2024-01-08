@@ -136,7 +136,11 @@ export default function Register({
                 const createOrgRes = await DB.createOrganization({
                     name: orgName,
                     location: orgLocation,
-                    tier: "enterprise"
+                    tier: JSON.stringify({
+                        plan: "free",
+                        type: "monthly",
+                        timestamp: Date.now()
+                    })
                 });
                 const organizationId = createOrgRes.id; 
                 const createAdminRes = await DB.createAdmin({

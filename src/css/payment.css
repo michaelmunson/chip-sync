@@ -1,0 +1,98 @@
+#payment {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+
+    & .header {
+        text-align: center;
+        padding:10px;
+        font-weight: 300 !important;
+        /* text-transform: uppercase; */
+        /* background-color:rgba(255, 255, 255, 0.6); */
+        border-radius: 10px;
+    }
+}
+
+.pricing-page {
+    min-height:100vh;
+    padding-top: 100px;
+    background: white;
+    position: relative;
+}
+
+.pricing-page .header {
+    text-align: center;
+    font-family: var(--header-font);
+    line-height: 1.1;
+}
+
+.price-card-container {
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding:30px;
+}
+
+@media screen and (max-width: 885px) {
+	.price-card-container {
+        display:flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+.price-card {
+    width: 100%;
+    background-color: white;
+    margin: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 20px;
+    /* border:1px solid gray; */
+    box-shadow: 0px 4px 13px -1px gray;
+}
+
+.price-card .plan h2 {
+    text-align: center;
+}
+
+.price-card .plan h2 span {
+    background-color: green;
+    padding:10px;
+    border-radius:10px;
+    color:white;
+    font-size: .75em;
+}
+
+.price-card .price {
+    text-align: center;
+    font-size: 2em;
+}
+
+.price-card .features {
+    margin-top:20px;
+    padding:20px;
+    padding-top: 5px;
+    background-color: rgb(235, 235, 235);
+    border-radius: 0px 0px 20px 20px;
+    text-align: center;
+}
+
+.price-card .features .feature {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pricing-disclaimer {
+    text-align: center;
+    color:black;
+    margin:0px 20px 50px 20px;
+    font-size: .8em;
+}

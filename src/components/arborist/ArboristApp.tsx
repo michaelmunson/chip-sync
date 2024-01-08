@@ -10,6 +10,9 @@ import { Geo } from '../../utils/location';
 import Modal from './arboristComponents/Modal';
 import { S3 } from '../../utils/storage';
 import Theme from '../../utils/theme';
+import Native from '../../utils/native';
+import payment from '../../utils/payment';
+import Payment from './arboristComponents/Payment';
 
 const MIN_UPDATE_DISTANCE = .2 // miles
 
@@ -32,6 +35,7 @@ export default function ArboristApp({
     useEffect(updateCurrentLocation, []);
     useEffect(subscribe, []); // removed userData dependency
     
+
     /* Utility Functions */
     function toggleModal(isOpen:boolean, config?:ModalConfig){
         if (config) {
@@ -46,7 +50,6 @@ export default function ArboristApp({
                 if (distance < MIN_UPDATE_DISTANCE){
                     return oldCoords;
                 } else {
-                    console.log("∆ Dist. =",distance,"miles");
                     return newCoords; 
                 }
             });
@@ -70,6 +73,10 @@ export default function ArboristApp({
             }
         })
     }
+
+    if (payment.isRequirePayment(userData.organization.tier.plan)) return (
+        <Payment/>
+    )
     
     return (
         <ThemeProvider theme={Theme[theme]}>

@@ -1,7 +1,12 @@
 declare global {
-    interface Window { exports: any; }
+    interface Window { 
+        exports: any;
+        ReactNativeWebView: any;
+    }
 }
+
 window.exports = window.exports || {};
+window.ReactNativeWebView = window.ReactNativeWebView || undefined;
 
 /* SUBTYPES */
 export interface Contact {
@@ -65,7 +70,11 @@ export interface User {
 export interface Organization {
     id:string
     name:string
-    tier: "basic"|"pro"|"enterprise"
+    tier: {
+        plan: "basic"|"pro"|"enterprise"|"free"
+        cycle: "monthly"|"annually"
+        timestamp: number
+    }
     location:string
     accessCode:string
     users: User[]

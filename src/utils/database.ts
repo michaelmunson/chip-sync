@@ -12,6 +12,7 @@ import {
     updateMarker as updateMarkerMutation,
     createNotification as createNotificationMutation,
     updateNotification as updateNotificationMutation,
+    updateOrganization as updateOrganizationMutation,
     updateUser as updateUserMutation,
     deleteMarker as deleteMarkerMutation,
     deleteUser as deleteUserMutation,
@@ -28,6 +29,10 @@ namespace DBTypes {
         name:string
         location:string
         tier:string
+    }
+    export interface UpdateOrg {
+        organizationId:string
+        tier: Organization["tier"]
     }
     export interface CreateAdmin {
         firstName:string
@@ -108,6 +113,9 @@ export function cleanData(data:{[key:string]:any}):any{
     }
     if ("contact" in data){
         data.contact = JSON.parse(data.contact);
+    }
+    if ("tier" in data){
+        data.tier = JSON.parse(data.tier);
     }
     return data; 
 }
@@ -258,6 +266,17 @@ export const DB = {
             }
         });
         return res?.data?.createOrganization; 
+    },
+    async updateOrganization({organizationId, tier}:DBTypes.UpdateOrg) : Promise<Organization> {
+        const result:any = await API.graphql({
+            query: updateOrganizationMutation,
+            variables: {
+                id: organizationId,
+                tier
+            }
+        });
+
+        return result; 
     },
     /* MARKER */
     async createMarker({type,name,address,description,contact,images,userData}:DBTypes.CreateMarker) : Promise<Marker> {

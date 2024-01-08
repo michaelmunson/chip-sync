@@ -118,7 +118,6 @@ export default function Map({
 	}
     async function addMarkers(){
         if (!loader) return; 
-        console.log("%cAdd Markers!","color:red;");
         const { InfoWindow } = await loader.importLibrary("maps");
 		const { AdvancedMarkerElement, PinElement } = await loader.importLibrary("marker");
         const markers = userData.organization.markers.map((markerData:Marker) => {
