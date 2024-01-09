@@ -271,8 +271,10 @@ export const DB = {
         const result:any = await API.graphql({
             query: updateOrganizationMutation,
             variables: {
-                id: organizationId,
-                tier
+                input: {
+                    id: organizationId,
+                    tier:JSON.stringify(tier)
+                }
             }
         });
 

@@ -1,15 +1,26 @@
 import { Organization } from "../types/dataTypes";
+import { DB } from "./database";
 import Native from "./native";
 
 const payment = {
     isRequirePayment(tier:Organization["tier"]["plan"]) : boolean {
         return tier === "free"; 
     },
-    registerPayment(tier:Organization["tier"]){
+    registerPayment({organizationId, tier}:{organizationId:string, tier:Organization["tier"]}){
         if (Native.isNative){
-            console.log("is native!")
+            Native.sendMessage({
+                messageType: "payment",
+                data: tier
+            });
+            return new Promise((resolve, reject) => {
+                setTimeout(() => resolve("native"), 1000);
+            })
         } else {
-            console.log("is not native :(")
+            return new Promise((resolve, reject) => {
+                DB.updateOrganization({organizationId, tier})
+                .then(res => resolve(res))
+                .catch(err => reject(err))
+            });
         }
     }
 }

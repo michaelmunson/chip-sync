@@ -1,7 +1,7 @@
 import { AnyObject } from "../types/generalTypes";
 
 export interface NativeMessage {
-    messageType: "payment",
+    messageType: "payment"|"debug",
     data: AnyObject
 }
 

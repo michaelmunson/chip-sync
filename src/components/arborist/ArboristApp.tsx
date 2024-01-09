@@ -12,7 +12,7 @@ import { S3 } from '../../utils/storage';
 import Theme from '../../utils/theme';
 import Native from '../../utils/native';
 import payment from '../../utils/payment';
-import Payment from './arboristComponents/Payment';
+import PricingPage from './arboristComponents/Pricing';
 
 const MIN_UPDATE_DISTANCE = .2 // miles
 
@@ -34,6 +34,20 @@ export default function ArboristApp({
     /* USE EFFECTS */
     useEffect(updateCurrentLocation, []);
     useEffect(subscribe, []); // removed userData dependency
+    useEffect(() => {
+        const listener = Native.listen(async message => {
+            const messageData = JSON.parse(message.data); 
+            if (messageData.status === 200 && messageData.messageType === "payment"){
+                const tier = messageData.data.tier;
+                if (tier.cycle && tier.plan && tier.timestamp){
+                    const updateOrgRes:any = await DB.updateOrganization({organizationId:userData.organization.id, tier}); 
+                    const newUserData = await DB.getUser();
+                    if (newUserData) setUserData(newUserData)
+                }
+            }
+        });
+        return listener; 
+    }, []);
     
 
     /* Utility Functions */
@@ -75,7 +89,9 @@ export default function ArboristApp({
     }
 
     if (payment.isRequirePayment(userData.organization.tier.plan)) return (
-        <Payment/>
+        <PricingPage
+            userData={userData}
+            setUserData={setUserData}/>
     )
     
     return (

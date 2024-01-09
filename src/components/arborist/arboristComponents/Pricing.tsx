@@ -3,7 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { ButtonGroup, Button } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import payment from "../../../utils/payment";
-import { Organization } from "../../../types/dataTypes";
+import { Organization, User } from "../../../types/dataTypes";
+import { DB } from "../../../utils/database";
+import { HashLoader } from "react-spinners";
+
 
 const pricingConfig = {
     "exceeder" : 1,
@@ -35,14 +38,19 @@ const pricingConfig = {
     ]
 }
 
+interface PricingPageProps {
+    userData:User,
+    setUserData: React.Dispatch<React.SetStateAction<User | undefined>> 
+}
+
 interface PricingCardProps {
     plan: string
     price: number
-    cycle: "monthly"|"annually"
     features: string[]
+    registerPayment(plan:Organization["tier"]["plan"]): void
 }
 
-function PriceCard({plan, price, features, cycle}:PricingCardProps){
+function PriceCard({plan, price, features, registerPayment}:PricingCardProps){
     return (
         <div className='price-card'>
             <div className='plan'>
@@ -64,11 +72,7 @@ function PriceCard({plan, price, features, cycle}:PricingCardProps){
                     color="success" 
                     style={{marginTop:"5px", fontWeight:"bold"}}
                     onClick={() => {
-                        payment.registerPayment({
-                            plan: (plan.toLowerCase() as Organization["tier"]["plan"]),
-                            cycle,
-                            timestamp: Date.now()
-                        })
+                        registerPayment(plan.toLowerCase() as Organization["tier"]["plan"])
                     }}>
                     Purchase
                 </Button>
@@ -77,8 +81,42 @@ function PriceCard({plan, price, features, cycle}:PricingCardProps){
     )
 }
 
-export default function PricingPage() {
+export default function PricingPage({
+    userData,
+    setUserData
+} : PricingPageProps) {
     const [billingCycle, setBillingCycle] = useState<"monthly"|"annually">("monthly");
+    const [isLoading, setIsLoading] = useState<boolean>(false); 
+
+    async function registerPayment(plan:Organization["tier"]["plan"]){
+        setIsLoading(true); 
+        const registerPaymentRes = await payment.registerPayment({
+            organizationId: userData.organization.id,
+            tier: {
+                plan,
+                cycle: billingCycle,
+                timestamp: Date.now()
+            }
+        });
+        if (registerPaymentRes !== "native"){
+            const newUserData = await DB.getUser();
+            if (newUserData)
+                setUserData(newUserData);
+            setIsLoading(false);
+        }
+    }
+
+    if (isLoading) return (
+        <div className="bg-grad" style={{
+            height:"100%",
+            width:"100%",
+            display:"flex",
+            justifyContent:"center",
+            alignItems:"center"
+        }}>
+            <HashLoader size={100} color="green"/>
+        </div>
+    )
 
     return (
         <div id="payment" className="bg-grad">
@@ -95,9 +133,10 @@ export default function PricingPage() {
                 {pricingConfig.plans.map((data,index) => {
                     return (
                         <PriceCard
+                            key={`pricing-card-key-${index}`}
                             plan={data.plan}
                             price={data[billingCycle]}
-                            cycle={billingCycle}
+                            registerPayment={registerPayment}
                             features={data.features}
                         />
                     )
