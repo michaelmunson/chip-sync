@@ -1,4 +1,4 @@
-import { User } from "./dataTypes";
+import { Organization, User } from "./dataTypes";
 
 export type SetUserData = React.Dispatch<React.SetStateAction<User|undefined>>
 
@@ -28,3 +28,21 @@ export interface ModalConfig {
 
 export type ToggleModal = (isOpen: boolean, config?: ModalConfig) => void; 
 
+export namespace NativeMessaging {
+    export type Payment = {
+        status:number
+        messageType:'payment'
+        data:{
+            tier:Organization['tier']
+        }
+    }
+    export type Error = {
+        status:number
+        messageType:'error'
+        data: {
+            errorMessage:string
+            errorType:"payment-failure"
+            errorCode?:number
+        }
+    }
+}

@@ -5,7 +5,7 @@ import { User } from '../../types/dataTypes';
 import Map from './arboristComponents/Map';
 import Controls from './arboristComponents/Controls';
 import { DB } from '../../utils/database';
-import { Coordinates, ModalConfig } from '../../types/generalTypes';
+import { Coordinates, ModalConfig, NativeMessaging } from '../../types/generalTypes';
 import { Geo } from '../../utils/location';
 import Modal from './arboristComponents/Modal';
 import { S3 } from '../../utils/storage';
@@ -36,7 +36,7 @@ export default function ArboristApp({
     useEffect(subscribe, []); // removed userData dependency
     useEffect(() => {
         const listener = Native.listen(async message => {
-            const messageData = JSON.parse(message.data); 
+            const messageData:NativeMessaging.Error|NativeMessaging.Payment = JSON.parse(message.data); 
             if (messageData.status === 200 && messageData.messageType === "payment"){
                 const tier = messageData.data.tier;
                 if (tier.cycle && tier.plan && tier.timestamp){
@@ -44,6 +44,9 @@ export default function ArboristApp({
                     const newUserData = await DB.getUser();
                     if (newUserData) setUserData(newUserData)
                 }
+            } 
+            else if (messageData.messageType === "error") {
+                
             }
         });
         return listener; 
