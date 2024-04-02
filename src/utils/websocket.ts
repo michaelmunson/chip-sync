@@ -39,12 +39,17 @@ export class NotificationGQLSocket extends WebSocket {
             host: '3wbb2yhbkjeetjpozeisw2zhza.appsync-api.us-east-1.amazonaws.com',
             Authorization: idToken,
         };
+
         const payload = {};
+        
         const base64_api_header = btoa(JSON.stringify(api_header));
+
         const base64_payload = btoa(JSON.stringify(payload));
+
         const appsync_url = url + '?header=' + base64_api_header + '&payload=' + base64_payload;
         
         super(appsync_url, ['graphql-ws']);
+
         this.wsUrl = "wss://3wbb2yhbkjeetjpozeisw2zhza.appsync-realtime-api.us-east-1.amazonaws.com/graphql"
         this.hostUrl = "3wbb2yhbkjeetjpozeisw2zhza.appsync-api.us-east-1.amazonaws.com"
         this.token = idToken; 

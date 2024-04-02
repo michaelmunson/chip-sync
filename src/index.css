@@ -277,7 +277,9 @@ a {
     color: #1976d2 !important
 }
 
-
+.federated-sign-in-container {
+    display: none !important;
+}
 /* ::-webkit-scrollbar {
     width: 0px;
 }
