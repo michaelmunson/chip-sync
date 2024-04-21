@@ -280,6 +280,15 @@ a {
 .federated-sign-in-container {
     display: none !important;
 }
+
+[id="radix-:r1:-trigger-1"] {
+    display: none !important;
+}
+ 
+.amplify-flex.amplify-tabs {
+    display: none !important;
+}
+
 /* ::-webkit-scrollbar {
     width: 0px;
 }
