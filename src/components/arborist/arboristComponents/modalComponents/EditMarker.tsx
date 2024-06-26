@@ -294,6 +294,7 @@ export default function EditMarker({
                 isDisabled={markerType.size < 1 || !markerName || !markerAddress}
                 // isDisabled={false}
                 updateMarker={updateMarker}/>
+                
         </div>
     )
 }
