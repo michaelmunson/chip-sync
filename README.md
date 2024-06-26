@@ -1,4 +1,2 @@
-# Remember
-- use Auth.signOut() to signout 
+# Changes
 
-# Routes
