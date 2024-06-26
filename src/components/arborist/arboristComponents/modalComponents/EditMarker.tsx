@@ -287,9 +287,9 @@ export default function EditMarker({
                 contactPhone={contactPhone}
                 setContactName={setContactName}
                 setContactPhone={setContactPhone}/>
-            <MediaUpload
+            {/* <MediaUpload
                 markerImages={markerImages}
-                setMarkerImages={setMarkerImages}/>
+                setMarkerImages={setMarkerImages}/> */}
             <SubmitButton
                 isDisabled={markerType.size < 1 || !markerName || !markerAddress}
                 // isDisabled={false}

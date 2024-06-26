@@ -1,6 +1,4 @@
 import { AnyObject } from "../types/generalTypes";
-import { Auth } from "aws-amplify";
-import { cleanData } from "./database";
 
 const generateUUID = () => {
     let uuid = "";
