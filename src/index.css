@@ -281,13 +281,13 @@ a {
     display: none !important;
 }
 
-[id="radix-:r1:-trigger-1"] {
+/* [id="radix-:r1:-trigger-1"] {
     display: none !important;
-}
+} */
  
-.amplify-flex.amplify-tabs {
+/* .amplify-flex.amplify-tabs {
     display: initial !important;
-}
+} */
 
 /* ::-webkit-scrollbar {
     width: 0px;
