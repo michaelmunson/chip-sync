@@ -286,7 +286,7 @@ a {
 }
  
 .amplify-flex.amplify-tabs {
-    display: none !important;
+    display: initial !important;
 }
 
 /* ::-webkit-scrollbar {
