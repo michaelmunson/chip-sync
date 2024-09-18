@@ -137,7 +137,7 @@ export default function Register({
                     name: orgName,
                     location: orgLocation,
                     tier: JSON.stringify({
-                        plan: "free",
+                        plan: "",
                         type: "monthly",
                         timestamp: Date.now()
                     })
@@ -212,7 +212,7 @@ export default function Register({
                     onChange={(e) => setOrgAccessCode(e.target.value.toUpperCase())}
                     label="Organization Access Code"
                     error={incorrectAccessCode}
-                    helperText={incorrectAccessCode ? "Invalid Access Code" : ""}
+                    helperText={incorrectAccessCode ? "Invalid Access Code" : "Request this code from your employer. It will be located in their settings panel."}
                     autoComplete="new-password"
                     inputProps={{maxLength:10}}/>
             );

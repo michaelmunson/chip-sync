@@ -13,6 +13,7 @@ import Theme from '../../utils/theme';
 import Native from '../../utils/native';
 import payment from '../../utils/payment';
 import PricingPage from './arboristComponents/Pricing';
+import TrialStart from './arboristComponents/TrialStart';
 
 const MIN_UPDATE_DISTANCE = .2 // miles
 
@@ -36,6 +37,7 @@ export default function ArboristApp({
     useEffect(subscribe, []); // removed userData dependency
     useEffect(() => {
         const listener = Native.listen(async message => {
+            if (typeof message.data !== 'string') return;
             const messageData:NativeMessaging.Error|NativeMessaging.Payment = JSON.parse(message.data); 
             if (messageData.status === 200 && messageData.messageType === "payment"){
                 const tier = messageData.data.tier;
@@ -91,10 +93,14 @@ export default function ArboristApp({
         })
     }
 
-    if (payment.isRequirePayment(userData.organization.tier.plan)) return (
-        <PricingPage
-            userData={userData}
-            setUserData={setUserData}/>
+    // if (payment.isRequirePayment(userData.organization.tier.plan)) return (
+    //     <PricingPage
+    //         userData={userData}
+    //         setUserData={setUserData}/>
+    // )
+
+    if (userData.organization.tier.plan === "") return (
+        <TrialStart userData={userData} setUserData={setUserData}/>
     )
     
     return (

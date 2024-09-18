@@ -71,7 +71,7 @@ export interface Organization {
     id:string
     name:string
     tier: {
-        plan: "basic"|"pro"|"enterprise"|"free"
+        plan: "basic"|"pro"|"enterprise"|"free"|"trial"|""
         cycle: "monthly"|"annually"
         timestamp: number
     }
