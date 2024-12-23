@@ -34,7 +34,7 @@ export const Geo = {
             const url = new URL(`https://www.google.com/maps/search/?api=1&query=${address}`)
             return url.href;
         } else {
-            const url = new URL(`http://maps.apple.com/?address=${address}`)
+            const url = new URL(`https://maps.apple.com/?address=${address}`)
             return url.href;
         }
     },
