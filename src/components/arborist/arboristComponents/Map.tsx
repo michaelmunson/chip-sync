@@ -22,17 +22,18 @@ export default function Map({
     toggleModal
 } : MapProps
 ){
+    const [loadError, setLoadError] = useState(false);
     const [loader, setLoader] = useState<Loader>();
     const [map, setMap] = useState<any>(); 
     const [locationMarker, setLocationMarker] = useState<any>();
     const [mapMarkers, setMapMarkers] = useState<any[]>([]); 
-    const getLoader = () => {getGoogleMapsApiKey().then(apiKey => setLoader(new Loader({apiKey, version:"weekly"})))}
+    const getLoader = () => {getGoogleMapsApiKey().then(apiKey => setLoader(new Loader({apiKey, version:"weekly"}))).catch(() => setLoadError(true))}
     /* USE EFFECTS */
     useEffect(getLoader, []);
     useEffect(()=>{changeMapTheme()}, [theme]);
     useEffect(()=>{
         if (loader && !map){
-            loadMap();
+            loadMap().catch(() => setLoadError(true));
         }
         else if (map) {
             addLocationMarker(); 
@@ -226,10 +227,7 @@ export default function Map({
             className='map'
             onTouchMove={clearHold} onTouchEnd={clearHold} onMouseMove={clearHold} onDoubleClick={clearHold} onTouchStart={e => {if (e.touches.length > 1) clearHold()}}>
             <div className={`map-spinner-container ${theme}`}>
-				<BounceLoader
-					color="green"
-					size={70}
-				/>
+				<div className="map-loading" role={loadError ? 'alert' : 'status'}>{loadError ? <><h2>Map unavailable</h2><p>Check your connection and reload to try again.</p><p>You can still manage sites using the workspace tools.</p></> : <><BounceLoader color="#216849" size={40} /><p>Loading your workspace map…</p></>}</div>
 			</div>
         </div>
     )

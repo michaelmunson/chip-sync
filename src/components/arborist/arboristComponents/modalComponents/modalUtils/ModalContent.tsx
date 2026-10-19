@@ -1,13 +1,9 @@
-import React from 'react'
-import { JsxElement } from 'typescript'
+import React from "react";
 
-export default function ModalContent({children}:{children:JSX.Element|JSX.Element[]}) {
-    return (
-        <div style={{
-            height:"100%",
-            overflowY:"auto"
-        }}>
-            {children}
-        </div>
-    )
+export default function ModalContent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <div className="dialog-content">{children}</div>;
 }

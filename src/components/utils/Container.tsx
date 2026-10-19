@@ -11,7 +11,7 @@ export default function Container({
     const fadeClass = fadeIn ? "fade-in " : ""
     return (
         <div
-            className={`col hv-center hw100 ${fadeClass}bg-grad`}>
+            className={`onboarding-container col hv-center hw100 ${fadeClass}bg-grad`}>
             {children}
         </div>
     )

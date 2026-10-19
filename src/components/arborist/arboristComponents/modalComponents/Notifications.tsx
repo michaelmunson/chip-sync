@@ -54,7 +54,7 @@ function NotificationAccordian({
                     return <>
                         {SubContentMap.circle()}
                         <div className='summary-text'>
-                            New Marker Created
+                            New drop site saved
                         </div>
                     </>
                 },
@@ -72,7 +72,7 @@ function NotificationAccordian({
                                     goBackLocation: "notifications"
                                 }); 
                             }}>
-                            View Marker
+                            View site
                         </Button>
                     </>
                 }
@@ -182,7 +182,7 @@ export default function Notifications({
 
     if (userData.notifications.length === 0) return <>
         <ModalIcon type="notifications"/>
-        <p style={{textAlign:"center"}}>No New Notifications</p>
+        <div className="empty-sites"><h3>You’re all caught up</h3><p>New sites and crew updates will appear here.</p></div>
     </>
 
     return (<>

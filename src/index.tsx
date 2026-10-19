@@ -1,16 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { ThemeProvider } from '@mui/material/styles';
+import Theme from './utils/theme';
 import reportWebVitals from './reportWebVitals';
 import { Amplify } from 'aws-amplify';
-import config from "./aws-exports"; 
+import config from "./aws-exports";
 import "@aws-amplify/ui-react/styles.css";
-import "./css/auth.css"; 
+import "./css/auth.css";
 import './index.css';
 import './css/animations.css';
-import './css/mui-global.css'; 
+import './css/mui-global.css';
+import './css/design-system.css';
 
-Amplify.configure(config); 
+Amplify.configure(config);
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -18,7 +21,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider theme={Theme.light}><App /></ThemeProvider>
   </React.StrictMode>
 );
 

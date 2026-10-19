@@ -1,7 +1,7 @@
 :root {
-    --theme-color-green: #8cfcad;
-    --theme-color-blue: #b9ebfd;
-    --theme-linear-grad: linear-gradient(145deg, rgba(140, 252, 173, 1) 0%, rgba(185, 235, 253, 1) 50%, rgba(140, 252, 173, 1) 100%);
+    --theme-color-green: #216849;
+    --theme-color-blue: #e6f2eb;
+    --theme-linear-grad: linear-gradient(145deg, #f4f7f3, #e5efe8);
     --mui-primary: #1976d2;
 }
 
@@ -274,7 +274,7 @@ body {
 }
 
 a {
-    color: #1976d2 !important
+    color: #216849
 }
 
 .federated-sign-in-container {

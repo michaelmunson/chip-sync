@@ -106,6 +106,7 @@ export default function ArboristApp({
     return (
         <ThemeProvider theme={Theme[theme]}>
             <CssBaseline/>
+            <main className={`workspace workspace-${theme}`} aria-label="Drop site map">
             <Map
                 theme={theme}
                 userData={userData}
@@ -125,6 +126,7 @@ export default function ArboristApp({
                 modalConfig={modalConfig}
                 toggleModal={toggleModal}
                 currentLocation={currentLocation}/>
+            </main>
         </ThemeProvider>
     )
 }

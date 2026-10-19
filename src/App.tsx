@@ -41,9 +41,7 @@ function App({user, signOut}:AppProps) {
 export default withAuthenticator(App, {
 	components : {
 		Header(){
-			return <div className='col h-center' style={{marginTop:"-100px", marginBottom:"50px"}}>
-				<Logo size='large' /> 
-			</div>
+			return <div className="auth-brand"><Logo size="small" /><h1>Welcome to Chip Sync</h1><p>Your crew. Your sites. One connected workspace.</p></div>
 		} 
 	}
 });

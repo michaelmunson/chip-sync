@@ -1,213 +1,89 @@
-import AddLocationIcon from '@mui/icons-material/AddLocation';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { Button } from '@mui/material';
-import { useEffect, useState } from 'react';
+import AddLocationAltOutlined from "@mui/icons-material/AddLocationAltOutlined";
+import FormatListBulletedOutlined from "@mui/icons-material/FormatListBulletedOutlined";
+import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
+import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
+import ForestOutlined from "@mui/icons-material/ForestOutlined";
+import { Badge, Button } from "@mui/material";
 import "../../../css/controls.css";
-import { User } from '../../../types/dataTypes';
-import { ToggleModal } from '../../../types/generalTypes';
-
-interface ControlsProps {
-    userData: User,
-    toggleModal: ToggleModal
-}
+import { User } from "../../../types/dataTypes";
+import { ToggleModal } from "../../../types/generalTypes";
 
 export default function Controls({
-    userData,
-    toggleModal
-} : ControlsProps
-){
-    const [numNotific, setNumNotific] = useState(0);
-    
-    const openFns = {
-        settings: () => toggleModal(true, {type:"settings", data:{}}),
-        add: () => toggleModal(true, {type:"add-marker", data:{}}),
-        list: () => toggleModal(true, {type:"marker-list", data:{}}),
-        notif: () => toggleModal(true, {type:"notifications", data:{}})
-    }
-    
-    useEffect(()=>{setNumNotific(userData.notifications.filter(notif => !notif.opened).length)},[userData]); 
-
-    return (
-        <div>
-            <div className='ui-button-group-row ui-controls position-bottom'>
-                <Button variant="contained" className='ui-button small' onClick={openFns.settings}> <SettingsIcon fontSize='large' /> </Button>
-
-                <Button variant="contained" className='ui-button large darker' onClick={openFns.list}> <FormatListBulletedIcon fontSize='large' /> </Button>
-                <Button variant="contained" className='ui-button large darker' onClick={openFns.add}> <AddLocationIcon fontSize='large' /> </Button>
-
-                <Button variant="contained" className='ui-button small' onClick={openFns.notif}>
-                    <NotificationsIcon fontSize='large' />
-                    {numNotific ? (
-                        <div className='num-notifications'>{numNotific}</div>
-                    ) : (
-                        <></>
-                    )}
-                </Button>
-            </div>
+  userData,
+  toggleModal,
+}: {
+  userData: User;
+  toggleModal: ToggleModal;
+}) {
+  const unread = userData.notifications.filter(
+    (notification) => !notification.opened,
+  ).length;
+  return (
+    <>
+      <header className="workspace-header">
+        <div className="workspace-brand">
+          <span className="brand-symbol">
+            <ForestOutlined />
+          </span>
+          <div>
+            <strong>Chip Sync</strong>
+            <span>Field workspace</span>
+          </div>
         </div>
-    )
-
+        <div className="workspace-organization">
+          <strong>{userData.organization.name}</strong>
+          <span>
+            {userData.firstName} {userData.lastName}
+          </span>
+        </div>
+      </header>
+      <aside className="map-overview" aria-label="Workspace overview">
+        <span className="eyebrow">YOUR NETWORK</span>
+        <h1>Good work starts here.</h1>
+        <p>Find your next drop site and keep your crew connected.</p>
+        <div className="site-count">
+          <strong>{userData.organization.markers.length}</strong>
+          <span>saved drop sites</span>
+        </div>
+        <Button
+          variant="outlined"
+          onClick={() => toggleModal(true, { type: "marker-list" })}
+        >
+          Explore drop sites
+        </Button>
+      </aside>
+      <nav className="workspace-navigation" aria-label="Workspace tools">
+        <Button
+          startIcon={<FormatListBulletedOutlined />}
+          onClick={() => toggleModal(true, { type: "marker-list" })}
+        >
+          Sites
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<AddLocationAltOutlined />}
+          onClick={() => toggleModal(true, { type: "add-marker" })}
+        >
+          Add site
+        </Button>
+        <Button
+          startIcon={
+            <Badge badgeContent={unread} color="error">
+              <NotificationsNoneOutlined />
+            </Badge>
+          }
+          aria-label={`Notifications, ${unread} unread`}
+          onClick={() => toggleModal(true, { type: "notifications" })}
+        >
+          Activity
+        </Button>
+        <Button
+          startIcon={<SettingsOutlined />}
+          onClick={() => toggleModal(true, { type: "settings" })}
+        >
+          Settings
+        </Button>
+      </nav>
+    </>
+  );
 }
-
-
-
-
-
-
-/*
-
-    const layoutRendersOld = {
-        "top" : (
-            <div>
-                <div className='ui-button-group-row ui-controls'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("addMarker",{})} disabled={!currentLocation}> <AddIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("markerList")} disabled={!currentLocation}> <ListIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("notifications")}> 
-                        <NotificationsIcon fontSize='large'/> 
-                        {numNotific ? (
-                            <div className='num-notifications'>{numNotific}</div>
-                        ) : (
-                            <></>
-                        )}
-                    </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("settings")}> <SettingsIcon fontSize='large'/> </Button>
-                </div>
-            </div>
-        ),
-        "bottom" : (
-            <div>
-                <div className='ui-button-group-row ui-controls position-bottom'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("settings")}> <SettingsIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("notifications")}> 
-                        <NotificationsIcon fontSize='large'/> 
-                        {numNotific ? (
-                            <div className='num-notifications'>{numNotific}</div>
-                        ) : (
-                            <></>
-                        )}
-                    </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("addMarker",{})} disabled={!currentLocation}> <AddIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("markerList")} disabled={!currentLocation}> <ListIcon fontSize='large'/> </Button>
-                </div>
-            </div>
-        ),
-        "bottom-alt" : (
-            <div>
-                <div className='ui-button-group-row ui-controls position-bottom'>
-                    <Button variant="contained" className='ui-button small' onClick={() => openModal("settings")}> <SettingsIcon fontSize='large'/> </Button>
-                	
-                    <Button variant="contained" className='ui-button large' onClick={() => openModal("markerList")} disabled={!currentLocation}> <ListIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button large' onClick={() => openModal("addMarker",{})} disabled={!currentLocation}> <AddLocationIcon fontSize='large'/> </Button>
-                	
-                    <Button variant="contained" className='ui-button small' onClick={() => openModal("notifications")}> 
-                        <NotificationsIcon fontSize='large'/> 
-                        {numNotific ? (
-                            <div className='num-notifications'>{numNotific}</div>
-                        ) : (
-                            <></>
-                        )}
-                    </Button>
-                </div>
-            </div>
-        ),
-        "bottom-reverse" : (
-            <div>
-                <div className='ui-button-group-row ui-controls position-bottom'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("addMarker",{})} disabled={!currentLocation}> <AddIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("markerList")} disabled={!currentLocation}> <ListIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("notifications")}> 
-                        <NotificationsIcon fontSize='large'/> 
-                        {numNotific ? (
-                            <div className='num-notifications'>{numNotific}</div>
-                        ) : (
-                            <></>
-                        )}
-                    </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("settings")}> <SettingsIcon fontSize='large'/> </Button>
-                </div>
-            </div>
-        ),
-        "left" : (
-            <div>
-                <div className='ui-button-group ui-controls'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("notifications")}> 
-                        <NotificationsIcon fontSize='large'/> 
-                        {numNotific ? (
-                            <div className='num-notifications'>{numNotific}</div>
-                        ) : (
-                            <></>
-                        )}
-                    </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("settings")}> <SettingsIcon fontSize='large'/> </Button>
-                </div>
-                <div className='ui-button-group ui-controls position-bottom'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("addMarker",{})} disabled={!currentLocation}> <AddIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("markerList")} disabled={!currentLocation}> <ListIcon fontSize='large'/> </Button>
-
-                </div>
-            </div>
-        ),
-        "left-reverse" : (
-            <div>
-                <div className='ui-button-group ui-controls'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("addMarker",{})} disabled={!currentLocation}> <AddIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("markerList")} disabled={!currentLocation}> <ListIcon fontSize='large'/> </Button>
-                </div>
-                <div className='ui-button-group ui-controls position-bottom'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("notifications")}> 
-                        <NotificationsIcon fontSize='large'/> 
-                        {numNotific ? (
-                            <div className='num-notifications'>{numNotific}</div>
-                        ) : (
-                            <></>
-                        )}
-                    </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("settings")}> <SettingsIcon fontSize='large'/> </Button>
-                </div>
-            </div>
-        ),
-        "right" : (
-            <div>
-                <div className='ui-button-group ui-controls right'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("notifications")}> 
-                        <NotificationsIcon fontSize='large'/> 
-                        {numNotific ? (
-                            <div className='num-notifications'>{numNotific}</div>
-                        ) : (
-                            <></>
-                        )}
-                    </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("settings")}> <SettingsIcon fontSize='large'/> </Button>
-                </div>
-                <div className='ui-button-group ui-controls position-bottom right'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("addMarker",{})} disabled={!currentLocation}> <AddIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("markerList")} disabled={!currentLocation}> <ListIcon fontSize='large'/> </Button>
-
-                </div>
-            </div>
-        ),
-        "right-reverse" : (
-            <div>
-                <div className='ui-button-group ui-controls right'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("addMarker",{})} disabled={!currentLocation}> <AddIcon fontSize='large'/> </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("markerList")} disabled={!currentLocation}> <ListIcon fontSize='large'/> </Button>
-                </div>
-                <div className='ui-button-group ui-controls position-bottom right'>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("notifications")}> 
-                        <NotificationsIcon fontSize='large'/> 
-                        {numNotific ? (
-                            <div className='num-notifications'>{numNotific}</div>
-                        ) : (
-                            <></>
-                        )}
-                    </Button>
-                    <Button variant="contained" className='ui-button' onClick={() => openModal("settings")}> <SettingsIcon fontSize='large'/> </Button>
-                </div>
-            </div>
-        )
-    }
-
-
-*/

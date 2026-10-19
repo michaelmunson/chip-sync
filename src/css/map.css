@@ -83,24 +83,7 @@
     color: white;
     font-weight: bold;
     border-radius: 5px;
-    border:0px; 
+    border:0px;
     padding: 6px 10px;
     margin: 7px;
 }
-
-
-/* GOOGLE MAPS OVERRIDE */
-[aria-label="Map"]:nth-child(2){
-    cursor: crosshair !important;
-}
-
-.gmnoprint {
-    display: none !important;
-}
-
-img[alt="Google"],
-button[title="Keyboard shortcuts"],
-button[title="Map Data"] {
-    display: none !important;
-}
-

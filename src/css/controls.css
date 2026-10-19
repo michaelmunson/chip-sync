@@ -1,74 +1,154 @@
-.ui-controls {
-    position: absolute;
-    z-index: 1000;
-    padding:10px;
+.workspace-header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 10;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
 }
-
-.ui-button-group {
-    display: flex;
+.workspace-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-symbol {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: #e6f2eb;
+  color: #216849;
+  border-radius: 12px;
+}
+.workspace-brand strong {
+  display: block;
+  font-size: 20px;
+  letter-spacing: -0.6px;
+}
+.workspace-brand span:not(.brand-symbol),
+.workspace-organization span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+.workspace-organization {
+  text-align: right;
+  font-size: 14px;
+}
+.map-overview {
+  position: absolute;
+  top: 108px;
+  left: 28px;
+  z-index: 10;
+  width: 300px;
+  padding: 26px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px #152d2314;
+  color: var(--ink);
+}
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  color: var(--muted);
+}
+.map-overview h1 {
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+  margin: 12px 0;
+}
+.map-overview p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.site-count {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+.site-count strong {
+  font-size: 30px;
+}
+.site-count span {
+  font-size: 13px;
+  color: var(--muted);
+}
+.workspace-navigation {
+  position: absolute;
+  z-index: 10;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px #152d2326;
+}
+.workspace-navigation .MuiButton-root {
+  white-space: nowrap;
+  padding: 12px 18px;
+}
+@media (max-width: 640px) {
+  .workspace-header {
+    height: 72px;
+    padding: 0 16px;
+  }
+  .workspace-organization {
+    max-width: 42%;
+    overflow-wrap: anywhere;
+  }
+  .map-overview {
+    top: 88px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    padding: 16px;
+  }
+  .map-overview h1 {
+    font-size: 20px;
+    margin: 8px 0;
+  }
+  .map-overview p,
+  .map-overview > .MuiButton-root {
+    display: none;
+  }
+  .site-count {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .site-count strong {
+    font-size: 22px;
+  }
+  .workspace-navigation {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    gap: 2px;
+    padding: 6px;
+    max-width: calc(100% - 24px);
+  }
+  .workspace-navigation .MuiButton-root {
+    min-width: 64px;
+    padding: 10px 8px;
+    font-size: 11px;
     flex-direction: column;
-}
-
-.ui-controls.right {
-    right:0px;
-}
-
-.ui-button-group-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    width: 100%;
-}
-
-.ui-button-group-row.space-between {
-    justify-content: space-between !important;
-}
-
-.ui-button-group-row.center {
-    justify-content: center !important;
-}
-
-.ui-button {
-    position:relative;
-    min-width: 0px !important;
-    padding:10px !important;
-    background-color: rgba(0,0,0,.5) !important;
-    backdrop-filter: blur(5px);
-    margin:5px !important;
-    color: white !important;
-    border:1px solid lightgray !important;
-    border-radius: 10px !important;
-}
-
-.num-notifications {
-    position: absolute;
-    height:25px;
-    width:25px;
-    border-radius: 50%;
-    background-color: red;
-    top: -7px;
-    left: -8px;
-}
-
-.position-bottom {
-    bottom: 10px;
-}
-
-/* ALT */
-
-.ui-button.small {
-    transform:scale(.8);
-    background-color: rgba(0,0,0,.45) !important;
-}
-
-.ui-button.large {
-    transform:scale(1.1);
-}
-
-.ui-button.darker {
-    background-color: rgba(0,0,0,.6) !important;
-}
-
-.mr-40 {
-    margin-right: 40px !important;
+    gap: 6px;
+  }
+  .workspace-navigation .MuiButton-startIcon {
+    margin: 0;
+  }
 }

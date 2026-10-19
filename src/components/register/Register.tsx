@@ -301,6 +301,7 @@ export default function Register({
 
     return (
         <Container fadeIn>
+            <div className="onboarding-heading"><h1>Set up your workspace</h1><p>A few details to get your crew connected.</p></div>
             <InputAccordian
                 summary='Account Type'
                 expanded={expanded}
@@ -338,7 +339,7 @@ export default function Register({
                         }
                     }}/>
                     <label>
-                        I agree to the <a target="_blank" href="https://www.getchipsync.com/terms-and-conditions">Terms and Conditions</a>
+                        I agree to the <a target="_blank" rel="noreferrer" href="https://www.getchipsync.com/terms-and-conditions">Terms and Conditions</a>
                     </label>
                 </div>
                 <Spacer height={15}/>

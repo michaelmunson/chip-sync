@@ -1,78 +1,67 @@
-#modal {
-    & .MuiDialog-container > .MuiPaper-root {
-        border-radius: 20px !important;
-        max-height: 75%;
-        width: 80% !important;
-        min-width: 326px !important;
-        max-width: 500px !important;
-        overflow: visible;
-    }
-
-    & .MuiBackdrop-root.MuiModal-backdrop {
-        background: rgb(0,0,0,.75) !important;
-    }
-
-    &.add-marker-modal {
-        & .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation24.MuiDialog-paper.MuiDialog-paperScrollPaper.MuiDialog-paperWidthSm.css-1t1j96h-MuiPaper-root-MuiDialog-paper {
-            overflow: visible !important;
-        }
-    }
-    &.marker-details-modal {
-        & .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation24.MuiDialog-paper.MuiDialog-paperScrollPaper.MuiDialog-paperWidthSm.css-1t1j96h-MuiPaper-root-MuiDialog-paper {
-            overflow: visible !important;
-        }
-    }
-    
-    & .modal-icon-container {
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        transform: translateY(-65px);
-        width: 100%;
-        & svg {
-            
-            font-size: 3em !important;
-            color:white;
-        }
-    }
-
-    & .modal-buttons-container {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        height:0px; 
-        overflow:visible; 
-        transform:translateY(30px);
-        & button {
-            line-height: 0 !important;
-            &:disabled {
-                opacity: 1 !important;
-                background-color: rgb(91, 91, 91) !important;
-                color: #2f2f2f !important;
-            }
-        }
-    }
+#modal .MuiDialog-paper {
+  border-radius: 20px;
+  max-height: calc(100dvh - 64px);
+  width: 560px;
+  max-width: calc(100% - 32px);
+  min-width: 0;
+  margin: 16px;
+  overflow: auto;
+  padding-bottom: 24px;
+}
+#modal .MuiBackdrop-root {
+  background: #10251dc2;
+  backdrop-filter: blur(4px);
+}
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px !important;
+  font-size: 20px !important;
+}
+#modal .modal-icon-container {
+  display: none;
+}
+#modal .modal-buttons-container,
+#modal .create-marker-button {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  height: auto;
+  transform: none;
+  padding: 16px;
+  flex-shrink: 0;
+}
+#modal .modal-buttons-container button,
+#modal .create-marker-button button {
+  line-height: 1.75 !important;
+}
+#modal .MuiAccordion-root {
+  box-shadow: none;
+  border-bottom: 1px solid var(--border);
+}
+#modal .MuiAccordion-root::before {
+  display: none;
+}
+#modal .MuiTabs-root {
+  padding: 8px 16px;
+}
+#modal .MuiAccordionSummary-content {
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  #modal .MuiDialog-paper {
+    max-height: calc(100dvh - 24px);
+  }
+  .dialog-heading {
+    padding: 12px 16px !important;
+  }
 }
 
-.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation1.MuiAccordion-root.MuiAccordion-rounded.MuiAccordion-gutters:not(.bg-white) {
-    background: transparent !important;
-    background-image: transparent !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-
-    &::before {
-        height:0px;
-    }
-
-    &::after {
-        height:0px;
-    }
+.dialog-content {
+  min-height: 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
 }
-
-/* .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation1.MuiAccordion-root.MuiAccordion-rounded.MuiAccordion-gutters {
-
-} */
-/* 
-.css-1elwnq4-MuiPaper-root-MuiAccordion-root {
-    background-color: transparent !important;
-} */
