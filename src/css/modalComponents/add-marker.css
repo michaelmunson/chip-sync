@@ -1,48 +1,13 @@
-.marker-type-row {
-    & button {
-        border-radius: 20px;
-        padding: 0px 10px; 
-        font-weight: bold !important;
-        & svg {
-            margin-right: -5px;
-            margin-bottom: 1px;
-            font-size: 1rem !important;
-        }
-    }
+.marker-type-row button {
+    border-radius: 10px;
+    padding: 8px 20px;
+    font-weight: 600;
 }
 
 .add-marker-text-field {
-    width:100%; 
-    & input {
-        border-radius: 10px !important;
-    }
-    & .MuiOutlinedInput-root {
-        border-radius: 15px !important;
-    }
-}
-
-.create-marker-button {
-    height:0px; 
-    overflow:visible; 
-    transform:translateY(30px);
-
-    & button {
-        line-height: 0 !important;
-        &:disabled {
-            opacity: 1 !important;
-            background-color: rgb(91, 91, 91) !important;
-            color: #2f2f2f !important;
-        }
-    }
+    width: 100%;
 }
 
 .add-marker-start-icon {
     font-size: 22px !important;
-    margin-right: -4px !important;
 }
-
-
-
-/* .MuiPopper-root.MuiAutocomplete-popper.MuiAutocomplete-popperDisablePortal.css-1rndd9j-MuiPopper-root-MuiAutocomplete-popper {
-
-} */
