@@ -1,4 +1,5 @@
-import { API, Auth } from "aws-amplify";
+import { generateClient } from "aws-amplify/api";
+import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 import { User, Organization, Marker, Notification } from "../types/dataTypes";
 import {
     getUser as getUserQuery,
@@ -69,10 +70,21 @@ namespace DBTypes {
     export type NotificationType = Notification.JoinReqNotification["type"] | Notification.MarkerNotification["type"]
 }
 
+const client = generateClient();
+
 const getIdToken = async () => {
-    const session = await Auth.currentSession();
-    return session.getIdToken().getJwtToken();
-}
+    const session = await fetchAuthSession();
+    const token = session.tokens?.idToken?.toString();
+    if (!token) {
+        throw new Error("No ID token in auth session");
+    }
+    return token;
+};
+
+const getUserId = async () => {
+    const user = await getCurrentUser();
+    return user.userId;
+};
 
 const generateAccessCode = (length:number=7) => {
     const characters = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase();
@@ -121,16 +133,12 @@ export function cleanData(data:{[key:string]:any}):any{
 }
 
 export const DB = {
-    get userId(){
-        const authObj:any = {...Auth}
-        return authObj.user.username; 
-    },
     /* USER */
     async getUser():Promise<User|void>{
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query:getUserQuery,
             variables:{
-                id:this.userId
+                id: await getUserId()
             }
         });
         const userData = res?.data?.getUser;
@@ -139,11 +147,11 @@ export const DB = {
         }
     },
     async createAdmin({firstName,lastName,organizationId}:DBTypes.CreateAdmin) : Promise<User> {
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query: createUserMutation,
             variables: {
                 input : {
-                    id: this.userId,
+                    id: await getUserId(),
                     firstName,
                     lastName,
                     role:'admin',
@@ -158,11 +166,11 @@ export const DB = {
     async createMember({firstName,lastName,accessCode}:DBTypes.CreateUser) : Promise<User|void> {
         const orgRes = await this.getOrganizationByAccessCode({accessCode});
         if (orgRes && orgRes.accessCode === accessCode) {
-            const res:any = await API.graphql({
+            const res:any = await client.graphql({
                 query: createUserMutation,
                 variables: {
                     input : {
-                        id: this.userId,
+                        id: await getUserId(),
                         firstName,
                         lastName,
                         role:'member',
@@ -189,7 +197,7 @@ export const DB = {
         if (role || mapChoice) {
             const input = role ? {id, role} : {id, mapChoice};
             console.log("Input: ", input);
-            return await API.graphql({
+            return await client.graphql({
                 query: updateUserMutation,
                 variables: {
                     input
@@ -199,7 +207,7 @@ export const DB = {
         
     },
     async deleteUser({userId}:{userId:string}){
-        return await API.graphql({
+        return await client.graphql({
             query: deleteUserMutation,
             variables: {
                 input : {
@@ -210,7 +218,7 @@ export const DB = {
     },
     /* ORGANIZATION */
     async getOrganization({organizationId}:{organizationId:string}): Promise<Organization|null> {
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query: getOrganizationQuery,
             variables: {
                 id: organizationId
@@ -219,7 +227,7 @@ export const DB = {
         return cleanData(res.data.getOrganization); 
     },
     async getOrganizationByAccessCode({accessCode}:{accessCode:string}) : Promise<Organization|void> {
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query:listOrganizationsQuery,
             variables: {
                 filter: {
@@ -236,7 +244,7 @@ export const DB = {
     async getUniqueAccessCode():Promise<string>{
         const accessCode = generateAccessCode(10);
         console.log('access code', accessCode); 
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query:listOrganizationsQuery,
             variables: {
                 filter: {
@@ -254,7 +262,7 @@ export const DB = {
     },
     async createOrganization({name,location,tier}:DBTypes.CreateOrg) : Promise<Organization> {
         const accessCode = await this.getUniqueAccessCode(); 
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query: createOrganizationMutation,
             variables: {
                 input : {
@@ -268,7 +276,7 @@ export const DB = {
         return res?.data?.createOrganization; 
     },
     async updateOrganization({organizationId, tier}:DBTypes.UpdateOrg) : Promise<Organization> {
-        const result:any = await API.graphql({
+        const result:any = await client.graphql({
             query: updateOrganizationMutation,
             variables: {
                 input: {
@@ -285,7 +293,7 @@ export const DB = {
         const organizationId = userData.organization.id; 
         const imageKeys = await S3.put({organizationId, images}); 
         const {latitude, longitude} = await Geo.addressToCoords(address); 
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query: createMarkerMutation,
             variables: {
                 input : {
@@ -323,7 +331,7 @@ export const DB = {
         return data; 
     },
     async deleteMarker({id}:{id:string}){
-        await API.graphql({
+        await client.graphql({
             query: deleteMarkerMutation,
             variables: {
                 input: {
@@ -335,7 +343,7 @@ export const DB = {
     async updateMarker({id,type,name,address,description,contact}:DBTypes.UpdateMarker) : Promise<Marker> {
         // const imageKeys = await S3.put({organizationId, images}); 
         const {latitude, longitude} = await Geo.addressToCoords(address); 
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query: updateMarkerMutation,
             variables: {
                 input : {
@@ -356,7 +364,7 @@ export const DB = {
     },
     /* NOTIFICATIONS */
     async createNotification({data,userId,type}:{data:AnyObject,userId:string,type:DBTypes.NotificationType}){
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query: createNotificationMutation,
             variables: {
                 input: {
@@ -373,7 +381,7 @@ export const DB = {
         return resData; 
     },
     async updateNotification({id}:{id:string}){
-        const res:any = await API.graphql({
+        const res:any = await client.graphql({
             query: updateNotificationMutation,
             variables: {
                 input: {
@@ -394,7 +402,7 @@ export const DB = {
         return res?.data?.updateNotification; 
     },
     async deleteNotification({id}:{id:string}){
-        return await API.graphql({
+        return await client.graphql({
             query: deleteNotificationMutation,
             variables: {
                 input: {
@@ -405,7 +413,7 @@ export const DB = {
     },
     async subscribeToNotification(callback:(data:any) => void){
         const idToken = await getIdToken(); 
-        const userId = (await Auth.currentUserInfo()).username; 
+        const userId = await getUserId();
         const socket = new NotificationGQLSocket({
             idToken,
             userId,

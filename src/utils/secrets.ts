@@ -2,10 +2,14 @@ import {
     SecretsManagerClient,
     GetSecretValueCommand,
 } from "@aws-sdk/client-secrets-manager";
-import { Auth } from "aws-amplify";
+import { fetchAuthSession } from "aws-amplify/auth";
 
 export async function getGoogleMapsApiKey():Promise<string>{
-    const credentials = await Auth.currentCredentials(); 
+    const session = await fetchAuthSession();
+    const credentials = session.credentials;
+    if (!credentials) {
+        throw new Error("No IAM credentials in auth session");
+    }
     const secret_name = "google-maps-api-key";
   
     const client = new SecretsManagerClient({
@@ -19,12 +23,10 @@ export async function getGoogleMapsApiKey():Promise<string>{
       response = await client.send(
         new GetSecretValueCommand({
           SecretId: secret_name,
-          VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
+          VersionStage: "AWSCURRENT",
         })
       );
     } catch (error) {
-      // For a list of exceptions thrown, see
-      // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
       throw error;
     }
     

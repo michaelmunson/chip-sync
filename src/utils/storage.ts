@@ -1,4 +1,4 @@
-import { Storage } from "aws-amplify";
+import { getUrl, uploadData } from "aws-amplify/storage";
 
 namespace S3Types {
     export interface PutArgs {
@@ -10,16 +10,20 @@ namespace S3Types {
 export const S3 = {
     async put({organizationId, images}:S3Types.PutArgs):Promise<string[]>{
         const s3Keys:string[] = []; 
-        await Promise.all(images.map(image => {
-            const key = `${organizationId}/${Date.now()}-${image.name}`;
+        await Promise.all(images.map(async (image) => {
+            const key = `marker-images/${organizationId}/${Date.now()}-${image.name}`;
             s3Keys.push(key);
-            return Storage.put(key, image);
+            await uploadData({
+                path: key,
+                data: image,
+            }).result;
         }));
         return s3Keys; 
     },
     async getImages({images}:{images:string[]}):Promise<string[]>{
-        const imageUrls = await Promise.all(images.map(key => {
-            return Storage.get(key); 
+        const imageUrls = await Promise.all(images.map(async (key) => {
+            const { url } = await getUrl({ path: key });
+            return url.toString();
         }));
         return imageUrls; 
     }

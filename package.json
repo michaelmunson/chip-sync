@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@aws-amplify/ui-react": "^5.3.2",
+    "@aws-amplify/ui-react": "^6.9.1",
     "@aws-sdk/client-secrets-manager": "^3.14.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -18,7 +18,7 @@
     "@types/react": "^18.2.38",
     "@types/react-dom": "^18.2.16",
     "@types/uuid": "^9.0.7",
-    "aws-amplify": "^5.3.12",
+    "aws-amplify": "^6.16.2",
     "axios": "^1.6.2",
     "date-and-time": "^3.0.3",
     "react": "^18.2.0",
@@ -34,7 +34,20 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "sandbox": "ampx sandbox",
+    "sandbox:once": "ampx sandbox --once",
+    "sync-outputs": "cp -f amplify_outputs.json src/amplify_outputs.example.json",
+    "sandbox:google-secrets": "ampx sandbox secret set GOOGLE_CLIENT_ID && ampx sandbox secret set GOOGLE_CLIENT_SECRET"
+  },
+  "devDependencies": {
+    "@aws-amplify/backend": "^1.14.0",
+    "@aws-amplify/backend-cli": "^1.4.0",
+    "aws-cdk": "^2.170.0",
+    "aws-cdk-lib": "^2.170.0",
+    "constructs": "^10.4.2",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.19.0"
   },
   "eslintConfig": {
     "extends": [

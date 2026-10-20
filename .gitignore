@@ -43,3 +43,7 @@ amplifytools.xcconfig
 .secret-*
 **.sample
 #amplify-do-not-edit-end
+
+# Amplify Gen 2
+.amplify/
+amplify_outputs.json

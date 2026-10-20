@@ -1,4 +1,5 @@
 import { AnyObject } from "../types/generalTypes";
+import { getAppSyncRealtimeEndpoints } from "./appsync";
 
 const generateUUID = () => {
     let uuid = "";
@@ -32,9 +33,10 @@ export class NotificationGQLSocket extends WebSocket {
         userId:string
         callback:(data:any) => void
     }){
-        const url = "wss://3wbb2yhbkjeetjpozeisw2zhza.appsync-realtime-api.us-east-1.amazonaws.com/graphql"; 
+        const { wsUrl, host } = getAppSyncRealtimeEndpoints();
+        const url = wsUrl;
         const api_header = {
-            host: '3wbb2yhbkjeetjpozeisw2zhza.appsync-api.us-east-1.amazonaws.com',
+            host,
             Authorization: idToken,
         };
 
@@ -48,8 +50,8 @@ export class NotificationGQLSocket extends WebSocket {
         
         super(appsync_url, ['graphql-ws']);
 
-        this.wsUrl = "wss://3wbb2yhbkjeetjpozeisw2zhza.appsync-realtime-api.us-east-1.amazonaws.com/graphql"
-        this.hostUrl = "3wbb2yhbkjeetjpozeisw2zhza.appsync-api.us-east-1.amazonaws.com"
+        this.wsUrl = wsUrl;
+        this.hostUrl = host;
         this.token = idToken; 
         this.callback = callback
         this.userId = userId;

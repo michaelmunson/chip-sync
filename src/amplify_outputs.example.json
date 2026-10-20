@@ -1,0 +1,45 @@
+{
+  "version": "1",
+  "auth": {
+    "user_pool_id": "us-east-1_kVC315fXa",
+    "aws_region": "us-east-1",
+    "user_pool_client_id": "bffcf7tt8t9c3g7dufa963ak1",
+    "identity_pool_id": "us-east-1:af647c7d-3c07-4724-ad11-7018aa92d5e5",
+    "mfa_configuration": "NONE",
+    "password_policy": {
+      "min_length": 8,
+      "require_lowercase": false,
+      "require_uppercase": false,
+      "require_numbers": false,
+      "require_symbols": false
+    },
+    "username_attributes": ["email"],
+    "standard_required_attributes": ["email"],
+    "user_verification_types": ["email"],
+    "unauthenticated_identities_enabled": false,
+    "oauth": {
+      "identity_providers": ["GOOGLE"],
+      "domain": "chipsync371bee59-371bee59-staging.auth.us-east-1.amazoncognito.com",
+      "scopes": [
+        "phone",
+        "email",
+        "openid",
+        "profile",
+        "aws.cognito.signin.user.admin"
+      ],
+      "redirect_sign_in_uri": ["http://localhost:3000/", "https://www.chipsync.io/"],
+      "redirect_sign_out_uri": ["http://localhost:3000/", "https://www.chipsync.io/signout/"],
+      "response_type": "code"
+    }
+  },
+  "data": {
+    "url": "https://3wbb2yhbkjeetjpozeisw2zhza.appsync-api.us-east-1.amazonaws.com/graphql",
+    "aws_region": "us-east-1",
+    "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
+    "authorization_types": ["AMAZON_COGNITO_USER_POOLS", "AWS_IAM"]
+  },
+  "storage": {
+    "aws_region": "us-east-1",
+    "bucket_name": "chip-sync-storage220138-staging"
+  }
+}

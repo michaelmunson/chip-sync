@@ -27,7 +27,7 @@ import {
     Edit as EditIcon
 } from '@mui/icons-material';
 import { DB } from '../../../../utils/database';
-import { Auth } from 'aws-amplify';
+import { signOut } from 'aws-amplify/auth';
 import "../../../../css/modalComponents/settings.css"; 
 import Spacer from '../../../utils/Spacer';
 import { ToggleModal } from '../../../../types/generalTypes';
@@ -93,7 +93,7 @@ const SignOut = () => (
         <Typography className='row vert-center'>
             <b>Sign Out</b>
         </Typography>
-        <IconButton onClick={() => Auth.signOut()}>
+        <IconButton onClick={() => signOut()}>
             <ExitToAppIcon style={{color:'#e90707'}}/>
         </IconButton>
     </div>
