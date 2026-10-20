@@ -81,7 +81,7 @@ export const Geo = {
                       }
                     }
                 }, (predictions:any, status:any) => {
-                    predictions = predictions.map((pred:any) => pred.description);
+                    predictions = (predictions || []).map((pred:any) => pred.description);
                     resolve(predictions);
                 });
             });

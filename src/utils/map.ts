@@ -4,6 +4,7 @@ import chipsMarkerIcon from "../images/icons/icons_svg/chip_user.svg";
 import woodAndChipsMarkerIcon from "../images/icons/icons_svg/wood_and_chip_user.svg"; 
 import { Contact, User } from "../types/dataTypes";
 import { Geo } from "./location";
+import { escapeHtml, formatPhone } from "./format";
 export const icons = {
     wood: woodMarkerIcon,
     chips: chipsMarkerIcon,
@@ -329,41 +330,40 @@ export const clearHold = () => {
 }
 export const buildMarkerHtml = ({
     name,
+    type,
     contact,
     address,
     mapChoice
 }:{
     name:string,
+    type?:"wood"|"chips"|"both",
     address:string,
     contact:Contact,
     mapChoice:User["mapChoice"]
 }) => {
-    const formatPhoneNumber = (phoneNumber:string) => {
-        const phoneNumberArr = phoneNumber.split("")
-        phoneNumberArr[2] = phoneNumberArr[2] + "-";
-        phoneNumberArr[5] = phoneNumberArr[5] + "-"
-        return phoneNumberArr.join("")
-    }
-
-    if (!contact.phone) return `
-        <div class="marker-content">
-            <h2> ${name} </h2>
-            <p> <a href="${Geo.getAddressURL({mapChoice,address})}" target="_blank"> ${address.slice(0, address.indexOf(","))} </a>  </p>
-            <button class="details-button">DETAILS</button>
-        </div>
-    `
+    // This HTML is handed to Google's InfoWindow, so all user-provided text is escaped.
+    const streetLine = escapeHtml(address.split(",")[0]);
+    const href = escapeHtml(Geo.getAddressURL({mapChoice,address}));
+    const pills = !type ? "" : `
+        <div class="marker-pills">
+            ${(type === "both" ? ["chips","wood"] : [type]).map(m =>
+                `<span class="marker-pill marker-pill--${m}">${m === "chips" ? "Chips" : "Wood"}</span>`
+            ).join("")}
+        </div>`;
+    const contactLine = (contact?.name || contact?.phone) ? `
+        <p class="marker-contact">
+            ${contact.name ? escapeHtml(contact.name) : ""}
+            ${contact.name && contact.phone ? "<br/>" : ""}
+            ${contact.phone ? `<a href="tel:${escapeHtml(contact.phone)}">${escapeHtml(formatPhone(contact.phone))}</a>` : ""}
+        </p>` : "";
 
     return `
         <div class="marker-content">
-            <h2> ${name} </h2>
-            <p> <a href="${Geo.getAddressURL({mapChoice,address})}" target="_blank"> ${address.slice(0, address.indexOf(","))} </a>  </p>
-            <hr/>
-            <p>
-                <span style="line-height:1.7">${contact.name}</span>
-                <br/>
-                <a href="tel:${contact.phone}">${formatPhoneNumber(contact.phone)}</a>
-            </p>
-            <button class="details-button">DETAILS</button>
+            <h2>${escapeHtml(name)}</h2>
+            ${pills}
+            <p class="marker-address"><a href="${href}" target="_blank" rel="noreferrer">${streetLine}</a></p>
+            ${contactLine}
+            <button class="details-button">View details</button>
         </div>
-    `
+    `;
 }

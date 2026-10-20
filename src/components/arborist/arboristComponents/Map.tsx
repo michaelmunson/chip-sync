@@ -1,6 +1,7 @@
 import { Loader } from '@googlemaps/js-api-loader';
 import { useEffect, useState } from 'react';
-import { BounceLoader } from "react-spinners";
+import { CircularProgress } from "@mui/material";
+import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import "../../../css/map.css";
 import { Marker, User } from '../../../types/dataTypes';
 import { Coordinates, ToggleModal } from '../../../types/generalTypes';
@@ -226,9 +227,20 @@ export default function Map({
             id="map" 
             className='map'
             onTouchMove={clearHold} onTouchEnd={clearHold} onMouseMove={clearHold} onDoubleClick={clearHold} onTouchStart={e => {if (e.touches.length > 1) clearHold()}}>
-            <div className={`map-spinner-container ${theme}`}>
-				<div className="map-loading" role={loadError ? 'alert' : 'status'}>{loadError ? <><h2>Map unavailable</h2><p>Check your connection and reload to try again.</p><p>You can still manage sites using the workspace tools.</p></> : <><BounceLoader color="#216849" size={40} /><p>Loading your workspace map…</p></>}</div>
-			</div>
+            <div className="map-spinner-container">
+                {loadError ? (
+                    <div className="map-status" role="alert">
+                        <span className="tile tile--brand" aria-hidden="true"><MapOutlinedIcon /></span>
+                        <h2>Map unavailable</h2>
+                        <p>Check your connection and reload to try again. You can still manage sites with the tools below.</p>
+                    </div>
+                ) : (
+                    <div className="map-status" role="status">
+                        <CircularProgress size={30} thickness={4} />
+                        <p>Loading your map…</p>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

@@ -2,11 +2,34 @@ import AddLocationAltOutlined from "@mui/icons-material/AddLocationAltOutlined";
 import FormatListBulletedOutlined from "@mui/icons-material/FormatListBulletedOutlined";
 import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
-import ForestOutlined from "@mui/icons-material/ForestOutlined";
-import { Badge, Button } from "@mui/material";
+import { Badge } from "@mui/material";
+import React from "react";
 import "../../../css/controls.css";
 import { User } from "../../../types/dataTypes";
-import { ToggleModal } from "../../../types/generalTypes";
+import { ModalConfig, ToggleModal } from "../../../types/generalTypes";
+import Logo from "../../utils/Logo";
+
+interface DockItemProps {
+  icon: React.ReactNode;
+  label: string;
+  ariaLabel?: string;
+  primary?: boolean;
+  onClick: () => void;
+}
+
+function DockItem({ icon, label, ariaLabel, primary, onClick }: DockItemProps) {
+  return (
+    <button
+      type="button"
+      className={`dock-item${primary ? " dock-item--primary" : ""}`}
+      aria-label={ariaLabel}
+      onClick={onClick}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+}
 
 export default function Controls({
   userData,
@@ -18,71 +41,48 @@ export default function Controls({
   const unread = userData.notifications.filter(
     (notification) => !notification.opened,
   ).length;
+  const siteCount = userData.organization.markers.length;
+  const open = (type: ModalConfig["type"]) => () => toggleModal(true, { type });
+
   return (
     <>
       <header className="workspace-header">
-        <div className="workspace-brand">
-          <span className="brand-symbol">
-            <ForestOutlined />
-          </span>
-          <div>
-            <strong>Chip Sync</strong>
-            <span>Field workspace</span>
-          </div>
-        </div>
-        <div className="workspace-organization">
-          <strong>{userData.organization.name}</strong>
+        <Logo size="small" />
+        <div className="workspace-header-text">
+          <strong className="truncate">{userData.organization.name}</strong>
           <span>
-            {userData.firstName} {userData.lastName}
+            {siteCount} drop {siteCount === 1 ? "site" : "sites"}
           </span>
         </div>
       </header>
-      <aside className="map-overview" aria-label="Workspace overview">
-        <span className="eyebrow">YOUR NETWORK</span>
-        <h1>Good work starts here.</h1>
-        <p>Find your next drop site and keep your crew connected.</p>
-        <div className="site-count">
-          <strong>{userData.organization.markers.length}</strong>
-          <span>saved drop sites</span>
-        </div>
-        <Button
-          variant="outlined"
-          onClick={() => toggleModal(true, { type: "marker-list" })}
-        >
-          Explore drop sites
-        </Button>
-      </aside>
-      <nav className="workspace-navigation" aria-label="Workspace tools">
-        <Button
-          startIcon={<FormatListBulletedOutlined />}
-          onClick={() => toggleModal(true, { type: "marker-list" })}
-        >
-          Sites
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<AddLocationAltOutlined />}
-          onClick={() => toggleModal(true, { type: "add-marker" })}
-        >
-          Add site
-        </Button>
-        <Button
-          startIcon={
+
+      <nav className="workspace-dock" aria-label="Workspace tools">
+        <DockItem
+          icon={<FormatListBulletedOutlined />}
+          label="Sites"
+          onClick={open("marker-list")}
+        />
+        <DockItem
+          icon={
             <Badge badgeContent={unread} color="error">
               <NotificationsNoneOutlined />
             </Badge>
           }
-          aria-label={`Notifications, ${unread} unread`}
-          onClick={() => toggleModal(true, { type: "notifications" })}
-        >
-          Activity
-        </Button>
-        <Button
-          startIcon={<SettingsOutlined />}
-          onClick={() => toggleModal(true, { type: "settings" })}
-        >
-          Settings
-        </Button>
+          label="Activity"
+          ariaLabel={unread ? `Activity, ${unread} unread` : "Activity"}
+          onClick={open("notifications")}
+        />
+        <DockItem
+          icon={<SettingsOutlined />}
+          label="Settings"
+          onClick={open("settings")}
+        />
+        <DockItem
+          primary
+          icon={<AddLocationAltOutlined />}
+          label="Add site"
+          onClick={open("add-marker")}
+        />
       </nav>
     </>
   );

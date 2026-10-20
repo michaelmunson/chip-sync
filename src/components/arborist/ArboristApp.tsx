@@ -33,6 +33,10 @@ export default function ArboristApp({
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [modalConfig, setModalConfig] = useState<ModalConfig>({type:"add-marker"});
     /* USE EFFECTS */
+    useEffect(() => {
+        document.documentElement.dataset.theme = theme;
+        return () => { delete document.documentElement.dataset.theme; };
+    }, [theme]);
     useEffect(updateCurrentLocation, []);
     useEffect(subscribe, []); // removed userData dependency
     useEffect(() => {
@@ -73,7 +77,9 @@ export default function ArboristApp({
                 }
             });
             setTimeout(updateCurrentLocation, 1000);
-        }); 
+        }).catch(() => {
+            // Location permission denied/unavailable: keep the saved organization location.
+        });
     }
     function subscribe(){ 
         setSocket((sock:any) => {
@@ -106,7 +112,7 @@ export default function ArboristApp({
     return (
         <ThemeProvider theme={Theme[theme]}>
             <CssBaseline/>
-            <main className={`workspace workspace-${theme}`} aria-label="Drop site map">
+            <main className="workspace" aria-label="Drop site map">
             <Map
                 theme={theme}
                 userData={userData}

@@ -1,18 +1,31 @@
-## Workspace UI refactor
+## UI overhaul
 
-The map remains the central workspace. A persistent header identifies the crew and member, a site overview shows the organization’s saved locations, and labeled navigation opens sites, creation, activity, and settings. On narrow screens the overview becomes compact and the navigation remains within the viewport.
+The map stays the central workspace. A floating header card shows the crew name and site count; a glass dock at the bottom opens Sites, Activity, and Settings, with "Add site" as the primary action. Dialogs have a title, Back/Close actions, a scrolling body, and a sticky footer, and turn into bottom sheets under 640px.
 
-Shared visual tokens live in `src/css/design-system.css`; Material UI colors, typography, and component defaults live in `src/utils/theme.ts`. Authentication and registration use the same forest-green and neutral palette. The workspace follows the system color preference, with the existing settings control retained.
+### Design system
+- `src/css/tokens.css`: all design tokens (color scale, materials, radii, elevation, motion), base styles, and shared primitives (`.pill`, `.tile`, `.avatar`, `.empty-state`). Dark mode is `<html data-theme="dark">`, set by `ArboristApp` from the Settings control.
+- `src/utils/theme.ts`: the MUI theme, reading the same tokens through CSS variables.
+- `src/css/{modal,controls,map,design-system,logo,payment}.css`: component styles. `design-system.css` also themes the Amplify Authenticator, onboarding wizard, trial card and loader.
+- Chips are green and wood is amber everywhere (map markers, pills, tiles).
 
-Dialogs have an accessible title, an explicit close action, bounded height, scrolling content, and actions inside the panel. Site lists update when organization data changes, sort without mutating stored marker objects, and show a useful action when filters are empty. Site creation reports save failures and allows retry. Map loading failures explain how to continue using site tools.
+### Screens
+- Sites: search, segmented material filter with counts, and cards (tap for details, trailing directions link).
+- Add/Edit site: one shared `MarkerForm` (controlled, keeps input after a failed save).
+- Site details: hero, info group, photo grid with lightbox.
+- Activity: card feed; join requests open Settings → Members.
+- Settings: profile, preferences, organization (access code, members, manage sites), sign out.
+- Register: three-step wizard. Trial: single card with loading and error handling.
 
-## Validation
+### Behavior changes beyond styling
+- Removing a drop site in Settings now calls `DB.deleteMarker`. Previously it only changed local state, so deleted sites returned on reload. Member remove/promote and site removal roll back and show an error if the request fails.
+- Register validates the ZIP code through geocoding and no longer uses `type=number`. The "Gardner" label is now "Gardener"; the stored value is unchanged.
+- Marker InfoWindow HTML escapes user-provided text.
+- Trial start no longer mutates `userData` in place.
 
-- `npm run build` succeeds; existing lint and bundle-size warnings remain.
-- `npx tsc --noEmit` succeeds.
-- `CI=true npm test -- --watchAll=false --runInBand`: three tests cover navigation routing, unread counts, filtering, empty-state actions, and live site-list refresh.
-- Chromium renders the actual sign-in screen at desktop and mobile sizes without horizontal overflow.
-- An offline Chromium fixture checks navigation bounds at 320, 390, 768, and 1440 pixels, plus site-list and add-site dialogs. Its placeholder map is explicitly labeled; it does not validate authenticated services.
-- For local build validation, copy the repository’s `aws-exports-copy.js` to the ignored `src/aws-exports.js`; production continues to use Amplify-generated configuration.
+### Validation
+- `npx tsc --noEmit`, `npx vitest run` (10 tests: navigation, filtering, search, empty states, formatters) and `npm run build` pass.
+- Every screen was checked in Chromium at desktop (light and dark) and 390px mobile against a mocked-data harness (not committed).
+- Not validated: authenticated map loading, address predictions, create/edit/delete against a real backend, activity updates, membership, and billing. Check these in the intended AWS environment before release.
 
-Before release, verify authenticated map loading, address predictions, site create/edit/delete, activity updates, organization membership, and subscription actions with the intended AWS environment. No production data or deployments are changed by this PR.
+### Known, intentionally unchanged
+`Geo.getAddressURL` does not URL-encode the address; location polling runs every second; the Google Maps key is fetched from Secrets Manager on each use; `window.exports` shims remain; the Pricing screen is still disabled in `ArboristApp`; `react-spinners` is no longer imported and can be removed from `package.json`.

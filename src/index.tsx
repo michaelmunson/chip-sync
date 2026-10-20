@@ -7,11 +7,9 @@ import reportWebVitals from './reportWebVitals';
 import { Amplify } from 'aws-amplify';
 import { loadAmplifyOutputs } from './utils/amplifyOutputs';
 import "@aws-amplify/ui-react/styles.css";
-import "./css/auth.css";
-import './index.css';
-import './css/animations.css';
-import './css/mui-global.css';
-import './css/design-system.css';
+import "./css/tokens.css";
+import "./css/animations.css";
+import "./css/design-system.css";
 
 Amplify.configure(loadAmplifyOutputs() as Parameters<typeof Amplify.configure>[0]);
 

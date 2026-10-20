@@ -1,418 +1,520 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { User, Marker } from '../../../../types/dataTypes';
-import { Accordion, AccordionDetails, AccordionSummary, Button, Divider, IconButton, Switch, Typography } from '@mui/material';
-import { 
-    NightsStay as NightsStayIcon,
-    NightsStayOutlined as NightsStayOutlinedIcon,
-    LightMode as LightModeIcon,
-    LightModeOutlined as LightModeOutlinedIcon,
-    Map as MapIcon,
-    Room as RoomIcon,
-    Person as PersonIcon,
-    DeleteForever as DeleteForeverIcon,
-    AdminPanelSettings as AdminPanelSettingsIcon,
-    ExitToApp as ExitToAppIcon,
-    Apple as AppleIcon,
-    Google as GoogleIcon,
-    Settings as SettingsIcon,
-    ExpandMore as ExpandMoreIcon,
-    ManageAccounts as ManageAccountsIcon,
-    ArrowBack as ArrowBackIcon,
-    Key as KeyIcon,
-    ContentCopy as ContentCopyIcon,
-    CheckCircleOutline as CheckCircleOutlineIcon,
-    LockOpen as LockOpenIcon,
-    Check as CheckIcon,
-    CheckBoxOutlined as CheckBoxOutlinedIcon,
-    Edit as EditIcon
-} from '@mui/icons-material';
-import { DB } from '../../../../utils/database';
-import { signOut } from 'aws-amplify/auth';
-import "../../../../css/modalComponents/settings.css"; 
-import Spacer from '../../../utils/Spacer';
-import { ToggleModal } from '../../../../types/generalTypes';
-// @ts-ignore
-import { v4 as uuidv4 } from 'uuid';
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CheckIcon from "@mui/icons-material/Check";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
+import RoomOutlinedIcon from "@mui/icons-material/RoomOutlined";
+import { Alert, Button, IconButton, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
+import { signOut } from "aws-amplify/auth";
+import React, { useState } from "react";
+import { Marker, User } from "../../../../types/dataTypes";
+import { ModalConfig, ToggleModal } from "../../../../types/generalTypes";
+import { DB } from "../../../../utils/database";
+import { initials } from "../../../../utils/format";
+import EmptyState from "../../../utils/EmptyState";
+import { MaterialPills, MaterialTile } from "../../../utils/Material";
+import ModalContent from "./modalUtils/ModalContent";
 
+type Page = "members" | "markers";
+type SetUserData = React.Dispatch<React.SetStateAction<User | undefined>>;
 
-namespace Props {
-    export interface Settings {
-        userData:User
-        theme:"light"|"dark"
-        setTheme:React.Dispatch<React.SetStateAction<Settings["theme"]>>
-        setUserData: React.Dispatch<React.SetStateAction<User|undefined>>
-        toggleModal: ToggleModal
-    }
-    export interface MemberSettings {
-        userData:User
-        theme:"light"|"dark"
-        setTheme:React.Dispatch<React.SetStateAction<Settings["theme"]>>
-        setUserData: React.Dispatch<React.SetStateAction<User|undefined>>
-    }
-    export interface AdminSettings extends Settings {
-        setPage: React.Dispatch<React.SetStateAction<"members" | "markers" | undefined>>
-    }
-    export interface AdminManager {
-        page: "members"|"markers"
-        userData:User
-        setUserData: React.Dispatch<React.SetStateAction<User|undefined>>
-        setPage: React.Dispatch<React.SetStateAction<"members" | "markers" | undefined>>
-        toggleModal: ToggleModal
-    }
+interface SettingsProps {
+  data?: ModalConfig["data"];
+  userData: User;
+  theme: "light" | "dark";
+  setTheme: React.Dispatch<React.SetStateAction<"light" | "dark">>;
+  setUserData: SetUserData;
+  toggleModal: ToggleModal;
 }
 
-const SettingsRow = ({children}:{children:JSX.Element|JSX.Element[]}) => (
-    <div className='row v-center space-between mt3 mb3'>
-        {children}
-    </div>
-);
+const fullName = (user: Pick<User, "firstName" | "lastName">) =>
+  `${user.firstName} ${user.lastName}`.trim();
 
-const SettingsLabel = ({icon, text}:{icon:JSX.Element, text:string}) => (
-    <Typography className='row v-center'>
-        <span style={{marginRight:"10px", marginTop:"6px"}}>{icon}</span>
-        <b>{text}</b>
-    </Typography>
-)
+/** Immutable update of the organization slice of user data. */
+function updateOrg(
+  setUserData: SetUserData,
+  update: (org: User["organization"]) => User["organization"],
+) {
+  setUserData((current) =>
+    current ? { ...current, organization: update(current.organization) } : current,
+  );
+}
 
-const SettingsAccordian = ({label,icon,children,onChange=()=>{}}:{label:string, icon:JSX.Element, children:JSX.Element|JSX.Element[], onChange?:()=>void}) => (
-    <Accordion style={{ width: "100%", boxShadow: "none" }} onChange={onChange}>
-        <AccordionSummary className='settings-accordian' expandIcon={<ExpandMoreIcon/>} style={{ padding: "0px" }}>
-            <Typography className='row v-center svg-right-10'>
-                {icon}
-                <b>{label}</b>
-            </Typography>
-        </AccordionSummary>
-        <AccordionDetails style={{ padding: "0px" }}>
-            {children}
-        </AccordionDetails>
-    </Accordion>
-);
+/* ---------- Main settings page ---------- */
 
-const SignOut = () => (
-    <div className='row hv-center m1'>
-        <Typography className='row vert-center'>
-            <b>Sign Out</b>
-        </Typography>
-        <IconButton onClick={() => signOut()}>
-            <ExitToAppIcon style={{color:'#e90707'}}/>
+function Preferences({
+  userData,
+  theme,
+  setTheme,
+  setUserData,
+}: Pick<SettingsProps, "userData" | "theme" | "setTheme" | "setUserData">) {
+  const setMapChoice = (mapChoice: User["mapChoice"]) => {
+    DB.updateUser({ id: userData.id, mapChoice });
+    setUserData((current) => (current ? { ...current, mapChoice } : current));
+  };
+
+  return (
+    <>
+      <div className="section-label">Preferences</div>
+      <div className="group">
+        <div className="group-row group-row--stack">
+          <div className="group-row-title" id="pref-appearance">
+            Appearance
+          </div>
+          <ToggleButtonGroup
+            exclusive
+            value={theme}
+            aria-labelledby="pref-appearance"
+            onChange={(_, value) => value && setTheme(value)}
+          >
+            <ToggleButton value="light">
+              <LightModeOutlinedIcon fontSize="small" /> Light
+            </ToggleButton>
+            <ToggleButton value="dark">
+              <DarkModeOutlinedIcon fontSize="small" /> Dark
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+        <div className="group-row group-row--stack">
+          <div className="group-row-body">
+            <div className="group-row-title" id="pref-maps">
+              Open addresses in
+            </div>
+            <div className="group-row-sub">
+              The app used for directions links
+            </div>
+          </div>
+          <ToggleButtonGroup
+            exclusive
+            value={userData.mapChoice}
+            aria-labelledby="pref-maps"
+            onChange={(_, value) => value && setMapChoice(value)}
+          >
+            <ToggleButton value="apple">Apple Maps</ToggleButton>
+            <ToggleButton value="google">Google Maps</ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function AccessCodeRow({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable: the code remains visible for manual copy */
+    }
+  };
+
+  return (
+    <div className="group-row">
+      <KeyOutlinedIcon className="group-row-icon" />
+      <div className="group-row-body">
+        <div className="group-row-sub">Crew access code</div>
+        <div className="access-code" aria-label={`Access code ${code.split("").join(" ")}`}>
+          {code}
+        </div>
+      </div>
+      <Tooltip title={copied ? "Copied" : "Copy code"} open={copied ? true : undefined}>
+        <IconButton aria-label="Copy access code" onClick={copy}>
+          {copied ? <CheckIcon /> : <ContentCopyIcon />}
         </IconButton>
+      </Tooltip>
     </div>
-);
-
-function MemberSettings({
-    userData,
-    theme,
-    setTheme,
-    setUserData
-} : Props.MemberSettings
-){
-    const updateMapChoice = useCallback((mapChoice:User["mapChoice"]) => {
-        DB.updateUser({id:userData.id, mapChoice});
-        setUserData(data => {
-            if (!data) return ({} as User); 
-            const dataMut = {...data};
-            dataMut.mapChoice = mapChoice;
-            return dataMut;
-        })
-    }, []); 
-
-    return <>
-        {/* <Divider className='w100 b mt2'>General</Divider> */}
-        <SettingsRow>
-            <SettingsAccordian
-                label='Mode'
-                icon={theme === "dark" ? <NightsStayIcon/> : <LightModeIcon/>}>
-                <div className='row hv-center'>
-                    <Button variant={theme === "dark" ? "outlined" : "text"} style={{color: theme === "dark" ? "" : "gray", width:"110px"}} onClick={e => setTheme("dark")}>
-                        {theme === "dark" ? <>
-                            <NightsStayIcon style={{marginRight:"5px"}}/> Dark
-                        </> : <>
-                            <NightsStayOutlinedIcon style={{marginRight:"5px"}}/> Dark
-                        </>}
-                    </Button>
-                    <Spacer width={20}/>
-                    <Button variant={theme === "light" ? "outlined" : "text"} style={{color: theme === "light" ? "" : "gray", width:"110px"}} onClick={e => setTheme("light")}>
-                        {theme === "light" ? <>
-                            <LightModeIcon style={{marginRight:"5px"}}/> Light
-                        </> : <>
-                            <LightModeOutlinedIcon style={{marginRight:"5px"}}/> Light
-                        </>}
-                    </Button> 
-                </div>
-            </SettingsAccordian>
-        </SettingsRow>
-        <SettingsRow>
-            <SettingsAccordian
-                label='Map Preference'
-                icon={<MapIcon/>}>
-                <div className='col v-center'>
-                    <span style={{color:"gray", fontSize:".8em", textAlign:"center"}}>The app that address links will bring you to</span>
-                    <div className='row hv-center' style={{marginTop:"10px"}}>
-                        <Button variant={userData.mapChoice === "apple" ? "outlined" : "text"} style={{color: userData.mapChoice === "apple" ? "" : "gray", width:"110px"}} onClick={e => updateMapChoice('apple')}>
-                            <AppleIcon style={{marginRight:"5px"}}/> Apple
-                        </Button>
-                        <Spacer width={20}/>
-                        <Button variant={userData.mapChoice === "google" ? "outlined" : "text"} style={{color: userData.mapChoice === "google" ? "" : "gray", width:"110px"}} onClick={e => updateMapChoice('google')}>
-                            <GoogleIcon style={{marginRight:"5px"}}/> Google
-                        </Button> 
-                    </div>
-                </div>
-            </SettingsAccordian>
-        </SettingsRow>
-    </>
+  );
 }
-function AdminSettings({
-    userData,
-    theme,
-    setTheme,
-    setUserData,
-    setPage
-} : Props.AdminSettings){
-    const [isCopied, setIsCopied] = useState<boolean>(false);
-    const copyAccessCode = () => {
-        navigator.clipboard.writeText(userData.organization.accessCode);
-        setIsCopied(someBool => !someBool);
-    }
 
-    return <>
-        {/* <Divider className='w100 b mt2'>Admin</Divider> */}
-        <SettingsRow>
-            <SettingsAccordian
-                label='Manage Organization'
-                icon={<SettingsIcon/>}>
-                <div className='col hv-center'>
-                    <Button variant={"outlined"} 
-                        onClick={e => setPage("members")}
-                        startIcon={<ManageAccountsIcon/>}>
-                        Manage Members
-                    </Button>
-                    <Spacer height={10}/>
-                    <Button variant={"outlined"} 
-                        startIcon={<RoomIcon/>}
-                        onClick={e => setPage("markers")}>
-                        Manage Markers                        
-                    </Button> 
-                </div>
-            </SettingsAccordian>
-        </SettingsRow>
-        <SettingsRow>
-            <SettingsAccordian
-                label='Access Code'
-                icon={<LockOpenIcon/>}>
-                <div className='row hv-center'>
-                    <span style={{background:"rgb(136,135,135,.4)", padding:"5px 10px 3px 12px", borderRadius:"10px", marginRight:"7px", fontSize:"1.2rem", letterSpacing:"3px"}}>{userData.organization.accessCode}</span>
-                    {!isCopied ? (
-                        <ContentCopyIcon onClick={copyAccessCode}/>
-                    ) : (
-                        <CheckIcon onClick={copyAccessCode}/>
-                    )}
-                </div>
-            </SettingsAccordian>
-        </SettingsRow>
-    </>
+function NavRow({
+  icon,
+  title,
+  detail,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  detail: string;
+  onClick: () => void;
+}) {
+  return (
+    <button type="button" className="group-row" onClick={onClick}>
+      <span className="group-row-icon">{icon}</span>
+      <span className="group-row-body">
+        <span className="group-row-title">{title}</span>
+        <span className="group-row-sub">{detail}</span>
+      </span>
+      <ChevronRightIcon className="group-row-icon" />
+    </button>
+  );
 }
-function AdminManager({
-    page,
-    userData,
-    setPage,
-    setUserData,
-    toggleModal
-} : Props.AdminManager
-){
-    const [userActionType, setUserActionType] = useState<"remove"|"promote">();
-    const [userActionTarget, setUserActionTarget] = useState<User>();
-    const [markerActionType, setMarkerActionType] = useState<"remove"|"edit">();
-    const [markerActionTarget, setMarkerActionTarget] = useState<Marker>();  
 
-    async function handleUserAction(){
-        if (userActionType === "promote" && userActionTarget) {
-            DB.updateUser({role:"admin", id:userActionTarget.id}).then(result => {
-                console.log(result); 
-            });
-            setUserData(data => {
-                if (data) {
-                    const dataMut = {...data};
-                    for (const i in data.organization.users){
-                        if (dataMut.organization.users[i].id === userActionTarget.id){
-                            dataMut.organization.users[i].role = "admin";
-                        }
-                    }
-                    return dataMut; 
-                }
-            })
-        }
-        else if (userActionType === "remove" && userActionTarget) {
-            DB.deleteUser({userId:userActionTarget.id});
-            setUserData(data => {
-                if (data) {
-                    const dataMut = {...data};
-                    dataMut.organization.users = dataMut.organization.users.filter(user => user.id !== userActionTarget.id);
-                    return dataMut; 
-                }
-            })
-        }
-        setUserActionType(undefined); 
-    }
-    async function handleMarkerAction(){
-        if (markerActionType === "remove" && markerActionTarget) {
-            setUserData(data => {
-                if (data) {
-                    const dataMut = {...data};
-                    dataMut.organization.markers = dataMut.organization.markers.filter(marker => marker.id !== markerActionTarget.id);
-                    return dataMut; 
-                }
-            })
-        }
-    }
+/* ---------- Admin sub-pages ---------- */
 
-    if (page === "members") return (userData.organization.users.filter(user => user.id !== userData.id).length > 0) ? <>
-        {userData.organization.users.filter(user => user.id !== userData.id).sort((a,b) => a.role === 'admin' ? -1 : 1).map((user, index) => {
-            return (<>
-                <Spacer height={10}/>
-                <SettingsAccordian
-                    label={`${user.firstName} ${user.lastName}`}
-                    icon={user.role==="admin" ? <AdminPanelSettingsIcon color="success"/> : <PersonIcon/> }
-                    onChange={() => {
-                        if (userActionTarget?.id === user.id) setUserActionTarget(undefined)
-                    }}>
-                    {(!userActionType || (userActionTarget?.id !== user.id)) ? (
-                        <div className='row hv-center'>
-                            <Button color="error" startIcon={<DeleteForeverIcon/>} variant='outlined' onClick={()=>{setUserActionType("remove"); setUserActionTarget(user)}}>
-                                Remove
-                            </Button>
-                            <Spacer width={15}/>
-                            {user.role!=="admin" ? (
-                                <Button color="success" startIcon={<AdminPanelSettingsIcon color="success"/>} variant='outlined' onClick={()=>{setUserActionType("promote"); setUserActionTarget(user)}}>
-                                    Promote
-                                </Button>
-                            ) : (
-                                <></>
-                            )}
-                        </div>
-                    ) : (
-                        (userActionType === "remove") ? (
-                            <Button color="error" variant='outlined' onClick={handleUserAction}>
-                                <span>
-                                    Remove <u>{user.firstName} {user.lastName}</u> from Organization
-                                </span>
-                            </Button>
-                        ) : (
-                            <Button color="success" variant='outlined' onClick={handleUserAction}>
-                                <span>
-                                    Promote <u>{user.firstName} {user.lastName}</u> to Admin
-                                </span>
-                            </Button>
-                        )
-                    )}
-                </SettingsAccordian>
-            </>)
-        })}
-    </> : <>
-        <Typography
-            style={{
-                margin:"15px",
-                textAlign:"center",
-                textTransform:"capitalize"
-            }}>There are currently no members in your organization</Typography>
+function PageHeader({
+  title,
+  onBack,
+}: {
+  title: string;
+  onBack: () => void;
+}) {
+  return (
+    <>
+      <Button
+        className="page-back"
+        size="small"
+        color="primary"
+        startIcon={<ArrowBackIcon />}
+        onClick={onBack}
+      >
+        Settings
+      </Button>
+      <h3 className="page-title">{title}</h3>
     </>
-    else if (page === "markers") return <>
-        {userData.organization.markers.map((marker, index) => {
-            return (<>
-                <Spacer height={10}/>
-                <SettingsAccordian
-                    label={marker.name}
-                    icon={ <RoomIcon/> }
-                    onChange={() => {
-                        if (markerActionTarget?.id === marker.id) setMarkerActionTarget(undefined)
-                    }}>
-                    {((markerActionType !== "remove") || (markerActionTarget?.id !== marker.id)) ? (
-                        <div className='row hv-center'>
-                            <Button color="error" startIcon={<DeleteForeverIcon/>} variant='outlined' onClick={()=>{setMarkerActionType("remove"); setMarkerActionTarget(marker)}}>
-                                Remove
-                            </Button>
-                            <Spacer width={15}/>
-                            <Button startIcon={<EditIcon/>} variant='outlined' onClick={()=>{
-                                    console.log("Marker", marker);
-                                    toggleModal(true, {
-                                        type: "edit-marker",
-                                        data: marker
-                                    })
-                                }}>
-                                Edit
-                            </Button>
-                        </div>
-                    ) : (
-                        (markerActionType === "remove") ? (
-                            <Button color="error" variant='outlined' onClick={handleMarkerAction}>
-                                <span>
-                                    Remove <u>{marker.name}</u> from Organization
-                                </span>
-                            </Button>
-                        ) : (
-                            <></>
-                        )
-                    )}
-                    
-                </SettingsAccordian>
-            </>)
-        })}
+  );
+}
+
+function ConfirmRow({
+  message,
+  confirmLabel,
+  tone = "error",
+  onCancel,
+  onConfirm,
+}: {
+  message: string;
+  confirmLabel: string;
+  tone?: "error" | "primary";
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="inline-confirm" role="alertdialog" aria-label={message}>
+      <p>{message}</p>
+      <Button size="small" variant="outlined" onClick={onCancel}>
+        Cancel
+      </Button>
+      <Button size="small" variant="contained" color={tone} onClick={onConfirm}>
+        {confirmLabel}
+      </Button>
+    </div>
+  );
+}
+
+function MembersPage({
+  userData,
+  setUserData,
+  onBack,
+}: {
+  userData: User;
+  setUserData: SetUserData;
+  onBack: () => void;
+}) {
+  const [pending, setPending] = useState<{ id: string; action: "remove" | "promote" }>();
+  const [error, setError] = useState("");
+
+  const others = userData.organization.users
+    .filter((user) => user.id !== userData.id)
+    .sort((a, b) => Number(b.role === "admin") - Number(a.role === "admin"));
+
+  async function confirm(member: User, action: "remove" | "promote") {
+    const previous = userData.organization.users;
+    setPending(undefined);
+    setError("");
+    updateOrg(setUserData, (org) => ({
+      ...org,
+      users:
+        action === "remove"
+          ? org.users.filter((u) => u.id !== member.id)
+          : org.users.map((u) => (u.id === member.id ? { ...u, role: "admin" as const } : u)),
+    }));
+    try {
+      if (action === "remove") await DB.deleteUser({ userId: member.id });
+      else await DB.updateUser({ id: member.id, role: "admin" });
+    } catch {
+      updateOrg(setUserData, (org) => ({ ...org, users: previous }));
+      setError(`Couldn’t ${action} ${fullName(member)}. Please try again.`);
+    }
+  }
+
+  return (
+    <>
+      <PageHeader title="Members" onBack={onBack} />
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {others.length === 0 ? (
+        <EmptyState
+          icon={<GroupOutlinedIcon />}
+          title="No other members yet"
+          description={`Share your access code (${userData.organization.accessCode}) so your crew can join.`}
+        />
+      ) : (
+        <ul className="card-list card-list--flat">
+          {others.map((member) => {
+            const isPending = pending?.id === member.id;
+            return (
+              <li className="card" key={member.id}>
+                <div className="card-main card-main--static">
+                  <span className="avatar">{initials(member.firstName, member.lastName)}</span>
+                  {isPending ? (
+                    <ConfirmRow
+                      message={
+                        pending.action === "remove"
+                          ? `Remove ${fullName(member)}?`
+                          : `Make ${fullName(member)} an admin?`
+                      }
+                      confirmLabel={pending.action === "remove" ? "Remove" : "Promote"}
+                      tone={pending.action === "remove" ? "error" : "primary"}
+                      onCancel={() => setPending(undefined)}
+                      onConfirm={() => confirm(member, pending.action)}
+                    />
+                  ) : (
+                    <>
+                      <span className="card-body">
+                        <span className="card-title truncate">{fullName(member)}</span>
+                        <span className="pill-row">
+                          <span
+                            className={`pill pill--plain ${member.role === "admin" ? "pill--brand" : ""}`}
+                          >
+                            {member.role === "admin" ? "Admin" : "Member"}
+                          </span>
+                        </span>
+                      </span>
+                      {member.role !== "admin" && (
+                        <Tooltip title="Make admin">
+                          <IconButton
+                            aria-label={`Make ${fullName(member)} an admin`}
+                            onClick={() => setPending({ id: member.id, action: "promote" })}
+                          >
+                            <AdminPanelSettingsOutlinedIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      <Tooltip title="Remove">
+                        <IconButton
+                          aria-label={`Remove ${fullName(member)}`}
+                          onClick={() => setPending({ id: member.id, action: "remove" })}
+                        >
+                          <DeleteOutlineIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </>
-    else return <></>
-}   
+  );
+}
+
+function MarkersPage({
+  userData,
+  setUserData,
+  toggleModal,
+  onBack,
+}: {
+  userData: User;
+  setUserData: SetUserData;
+  toggleModal: ToggleModal;
+  onBack: () => void;
+}) {
+  const [pendingId, setPendingId] = useState<string>();
+  const [error, setError] = useState("");
+  const { markers } = userData.organization;
+
+  async function remove(marker: Marker) {
+    const previous = markers;
+    setPendingId(undefined);
+    setError("");
+    updateOrg(setUserData, (org) => ({
+      ...org,
+      markers: org.markers.filter((m) => m.id !== marker.id),
+    }));
+    try {
+      await DB.deleteMarker({ id: marker.id });
+    } catch {
+      updateOrg(setUserData, (org) => ({ ...org, markers: previous }));
+      setError(`Couldn’t remove ${marker.name}. Please try again.`);
+    }
+  }
+
+  return (
+    <>
+      <PageHeader title="Manage drop sites" onBack={onBack} />
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {markers.length === 0 ? (
+        <EmptyState
+          icon={<RoomOutlinedIcon />}
+          title="No drop sites yet"
+          description="Sites your crew saves will show up here."
+          action={
+            <Button variant="contained" onClick={() => toggleModal(true, { type: "add-marker" })}>
+              Add a drop site
+            </Button>
+          }
+        />
+      ) : (
+        <ul className="card-list card-list--flat">
+          {markers.map((marker) => (
+            <li className="card" key={marker.id}>
+              <div className="card-main card-main--static">
+                <MaterialTile type={marker.type} />
+                {pendingId === marker.id ? (
+                  <ConfirmRow
+                    message={`Remove ${marker.name}?`}
+                    confirmLabel="Remove"
+                    onCancel={() => setPendingId(undefined)}
+                    onConfirm={() => remove(marker)}
+                  />
+                ) : (
+                  <>
+                    <span className="card-body">
+                      <span className="card-title truncate">{marker.name}</span>
+                      <MaterialPills type={marker.type} />
+                    </span>
+                    <Tooltip title="Edit">
+                      <IconButton
+                        aria-label={`Edit ${marker.name}`}
+                        onClick={() => toggleModal(true, { type: "edit-marker", data: marker })}
+                      >
+                        <EditOutlinedIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Remove">
+                      <IconButton
+                        aria-label={`Remove ${marker.name}`}
+                        onClick={() => setPendingId(marker.id)}
+                      >
+                        <DeleteOutlineIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+/* ---------- Entry ---------- */
 
 export default function Settings({
-    userData,
-    theme,
-    setTheme,
-    setUserData,
-    toggleModal
-}:Props.Settings){
-    const [page, setPage] = useState<"members"|"markers">();
+  data,
+  userData,
+  theme,
+  setTheme,
+  setUserData,
+  toggleModal,
+}: SettingsProps) {
+  const [page, setPage] = useState<Page | undefined>(
+    data?.page === "members" || data?.page === "markers" ? data.page : undefined,
+  );
+  const isAdmin = userData.role === "admin";
+  const { users, markers, accessCode, name: orgName } = userData.organization;
 
-    if (page) return (
-        <div id="settings-modal">
-            <Button 
-                color="primary" 
-                style={{padding:"0px", justifyContent:"left"}}
-                onClick={()=>setPage(undefined)}
-                startIcon={<ArrowBackIcon style={{marginTop:"1px"}}/>}>
-                Settings
-            </Button>
-            <AdminManager
-                page={page}
-                userData={userData}
-                setPage={setPage}
-                setUserData={setUserData}
-                toggleModal={toggleModal}/>
-        </div>
-    ); 
-
-    if (userData.role === "member") return (
-        <div id="settings-modal">
-            <MemberSettings
-                theme={theme}
-                setTheme={setTheme}
-                userData={userData}
-                setUserData={setUserData}/>
-            <SignOut/>
-        </div>
-    )
-
+  if (isAdmin && page === "members") {
     return (
-        <div id="settings-modal">
-            <MemberSettings
-                theme={theme}
-                setTheme={setTheme}
-                userData={userData}
-                setUserData={setUserData}/>
-            <AdminSettings
-                theme={theme}
-                setTheme={setTheme}
-                userData={userData}
-                setUserData={setUserData}
-                setPage={setPage}
-                toggleModal={toggleModal}/>
-            <SignOut/>
+      <ModalContent>
+        <MembersPage
+          userData={userData}
+          setUserData={setUserData}
+          onBack={() => setPage(undefined)}
+        />
+      </ModalContent>
+    );
+  }
+  if (isAdmin && page === "markers") {
+    return (
+      <ModalContent>
+        <MarkersPage
+          userData={userData}
+          setUserData={setUserData}
+          toggleModal={toggleModal}
+          onBack={() => setPage(undefined)}
+        />
+      </ModalContent>
+    );
+  }
+
+  const memberCount = Math.max(users.length - 1, 0);
+
+  return (
+    <ModalContent>
+      <div className="profile-card">
+        <span className="avatar avatar--lg">{initials(userData.firstName, userData.lastName)}</span>
+        <div>
+          <h3>{fullName(userData)}</h3>
+          <p>
+            {orgName} · {isAdmin ? "Admin" : "Member"}
+          </p>
         </div>
-    )
+      </div>
+
+      <Preferences
+        userData={userData}
+        theme={theme}
+        setTheme={setTheme}
+        setUserData={setUserData}
+      />
+
+      {isAdmin && (
+        <>
+          <div className="section-label">Organization</div>
+          <div className="group">
+            <AccessCodeRow code={accessCode} />
+            <NavRow
+              icon={<PersonAddAltOutlinedIcon />}
+              title="Members"
+              detail={memberCount === 1 ? "1 other member" : `${memberCount} other members`}
+              onClick={() => setPage("members")}
+            />
+            <NavRow
+              icon={<RoomOutlinedIcon />}
+              title="Manage drop sites"
+              detail={`${markers.length} saved ${markers.length === 1 ? "site" : "sites"}`}
+              onClick={() => setPage("markers")}
+            />
+          </div>
+        </>
+      )}
+
+      <div className="section-label">Account</div>
+      <div className="group">
+        <button
+          type="button"
+          className="group-row group-row--danger"
+          onClick={() => signOut()}
+        >
+          <LogoutIcon className="group-row-icon" />
+          <span className="group-row-body">
+            <span className="group-row-title">Sign out</span>
+          </span>
+        </button>
+      </div>
+    </ModalContent>
+  );
 }

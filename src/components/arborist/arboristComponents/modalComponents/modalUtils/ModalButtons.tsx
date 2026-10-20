@@ -1,9 +1,16 @@
-import React from 'react'
+import React from "react";
 
-export default function ModalButtons({children}:{children:JSX.Element|JSX.Element[]}) {
-    return (
-        <div className='modal-buttons-container'>
-            {children}
-        </div>
-    )
+/** Sticky action footer of a dialog. */
+export default function ModalButtons({
+  children,
+  split = false,
+}: {
+  children: React.ReactNode;
+  split?: boolean;
+}) {
+  return (
+    <div className={`dialog-footer${split ? " dialog-footer--split" : ""}`}>
+      {children}
+    </div>
+  );
 }

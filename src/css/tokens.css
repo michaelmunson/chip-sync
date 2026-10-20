@@ -1,0 +1,356 @@
+/* ==========================================================================
+   Chip Sync design tokens + base styles.
+   Every other stylesheet (and the MUI theme in utils/theme.ts) reads from here.
+   Dark mode is applied with <html data-theme="dark">.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Brand */
+  --brand-50: #eef7f1;
+  --brand-100: #dcefe3;
+  --brand-200: #bcdfca;
+  --brand-300: #8fc6a6;
+  --brand-400: #5fa881;
+  --brand-500: #3c8c66;
+  --brand-600: #2a7352;
+  --brand-700: #216849;
+  --brand-800: #1a5339;
+  --brand-900: #123d2a;
+  --brand: var(--brand-700);
+  --brand-hover: var(--brand-800);
+  --brand-soft: var(--brand-50);
+  --brand-soft-strong: var(--brand-100);
+  --on-brand: #ffffff;
+
+  /* Neutrals */
+  --bg: #f4f6f3;
+  --surface: #ffffff;
+  --surface-2: #f7f9f6;
+  --surface-3: #eef1ed;
+  --line: #e4e8e2;
+  --line-strong: #d1d9d0;
+  --ink: #16201a;
+  --ink-2: #38463d;
+  --muted: #637268;
+  --faint: #8f9c94;
+
+  /* Semantic */
+  --danger: #b94a48;
+  --danger-soft: #fbeeee;
+  --warning: #b7791f;
+
+  /* Materials */
+  --chips-bg: #e3f3e9;
+  --chips-fg: #1d6141;
+  --chips-dot: #3c8c66;
+  --wood-bg: #fbeed6;
+  --wood-fg: #87560f;
+  --wood-dot: #d08a22;
+
+  /* Shape */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+
+  /* Elevation */
+  --sh-xs: 0 1px 2px rgb(16 32 24 / 0.06);
+  --sh-sm: 0 1px 3px rgb(16 32 24 / 0.08), 0 1px 2px rgb(16 32 24 / 0.05);
+  --sh-md: 0 8px 24px rgb(16 32 24 / 0.1), 0 2px 6px rgb(16 32 24 / 0.06);
+  --sh-lg: 0 28px 64px rgb(16 32 24 / 0.2), 0 4px 12px rgb(16 32 24 / 0.08);
+  --scrim: rgb(14 24 18 / 0.45);
+  --glass: rgb(255 255 255 / 0.86);
+
+  /* Focus */
+  --ring: 0 0 0 3px rgb(42 115 82 / 0.28);
+
+  /* Type */
+  --font: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Legacy aliases still referenced by a few stylesheets/components */
+  --mist: var(--bg);
+  --border: var(--line);
+  --brand-deep: var(--brand-800);
+  --brand-mint: var(--brand-300);
+  --theme-color-green: var(--brand);
+  --theme-linear-grad: linear-gradient(160deg, #f6faf7 0%, #e6f0e9 100%);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --brand: #6cc496;
+  --brand-hover: #8dd4ae;
+  --brand-soft: #1b2e24;
+  --brand-soft-strong: #234031;
+  --on-brand: #0c1a13;
+
+  --bg: #0d1410;
+  --surface: #151d18;
+  --surface-2: #1a241e;
+  --surface-3: #212d26;
+  --line: #26332b;
+  --line-strong: #34443a;
+  --ink: #e9f0eb;
+  --ink-2: #c4d1c8;
+  --muted: #94a69b;
+  --faint: #6c7d72;
+
+  --danger: #ec8d8a;
+  --danger-soft: #2e1b1a;
+
+  --chips-bg: #1d3528;
+  --chips-fg: #93d6b1;
+  --chips-dot: #6cc496;
+  --wood-bg: #382c17;
+  --wood-fg: #ecc27d;
+  --wood-dot: #e0a244;
+
+  --sh-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+  --sh-sm: 0 1px 3px rgb(0 0 0 / 0.5);
+  --sh-md: 0 10px 28px rgb(0 0 0 / 0.45);
+  --sh-lg: 0 28px 64px rgb(0 0 0 / 0.6);
+  --scrim: rgb(0 0 0 / 0.6);
+  --glass: rgb(21 29 24 / 0.84);
+  --ring: 0 0 0 3px rgb(108 196 150 / 0.35);
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: var(--brand);
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--brand-200);
+  color: var(--brand-900);
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+/* ---------- Pills & tiles ---------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  background: var(--surface-3);
+  color: var(--ink-2);
+}
+
+.pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.pill--chips {
+  background: var(--chips-bg);
+  color: var(--chips-fg);
+}
+.pill--chips::before {
+  background: var(--chips-dot);
+  opacity: 1;
+}
+.pill--wood {
+  background: var(--wood-bg);
+  color: var(--wood-fg);
+}
+.pill--wood::before {
+  background: var(--wood-dot);
+  opacity: 1;
+}
+.pill--brand {
+  background: var(--brand-soft-strong);
+  color: var(--brand);
+}
+.pill--plain::before {
+  display: none;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tile {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--surface-3);
+  color: var(--ink-2);
+}
+.tile svg {
+  font-size: 22px;
+}
+.tile--chips {
+  background: var(--chips-bg);
+  color: var(--chips-fg);
+}
+.tile--wood {
+  background: var(--wood-bg);
+  color: var(--wood-fg);
+}
+.tile--both {
+  background: linear-gradient(135deg, var(--chips-bg) 50%, var(--wood-bg) 50%);
+  color: var(--ink-2);
+}
+.tile--brand {
+  background: var(--brand-soft-strong);
+  color: var(--brand);
+}
+.tile--lg {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+}
+.tile--lg svg {
+  font-size: 28px;
+}
+
+.avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--brand-soft-strong);
+  color: var(--brand);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.avatar--lg {
+  width: 52px;
+  height: 52px;
+  font-size: 18px;
+}
+
+/* ---------- Text helpers ---------- */
+.eyebrow {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Empty state ---------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 48px 28px;
+  text-align: center;
+}
+.empty-state .tile {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  margin-bottom: 10px;
+}
+.empty-state .tile svg {
+  font-size: 28px;
+}
+.empty-state h3 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.empty-state p {
+  max-width: 300px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.empty-state .MuiButton-root {
+  margin-top: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

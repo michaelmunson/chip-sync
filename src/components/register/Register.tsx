@@ -1,360 +1,294 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { SetUserData } from '../../types/generalTypes';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import { 
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Typography,
-    Button,
-    Divider,
-    TextField,
-    Checkbox
-} from '@mui/material';
-import "../../css/register.css"; 
-import Container from '../utils/Container';
-import Spacer from '../utils/Spacer';
-import { DB } from '../../utils/database';
-import { BeatLoader } from 'react-spinners';
-/* 
-Select Arborist or Gardner
-- Arborist:
-    - Create or Join Organization:
-        - Create:
-            * first name
-            * last name
-            * org name
-            * location (zip code)
-        - Join:
-            * first name
-            * last name
-            * access code
-- Gardner
-    * first name
-    * last name
-    * contact info
-*/
+import React, { useState } from "react";
+import CheckIcon from "@mui/icons-material/Check";
+import ForestOutlinedIcon from "@mui/icons-material/ForestOutlined";
+import YardOutlinedIcon from "@mui/icons-material/YardOutlined";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  CircularProgress,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
+import { SetUserData } from "../../types/generalTypes";
+import { DB } from "../../utils/database";
+import { Geo } from "../../utils/location";
+import Logo from "../utils/Logo";
 
-interface InputAccordianProps {
-    summary: string
-    children: JSX.Element | JSX.Element[]
-    expanded: string | boolean
-    panelId: string
-    canExpand: Set<string>
-    isDone: Set<string>
-    handleChange: (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => void
-};
+type RegType = "gardner" | "arborist";
+type Mode = "join" | "create";
 
-function InputAccordian({ summary, children, expanded, handleChange, panelId, canExpand, isDone }: InputAccordianProps) {
-    const accref = useRef<any>(null);
-    
-    useEffect(() => {
-        if (expanded === panelId){
-            setTimeout(()=>accref?.current?.scrollIntoView(),250); 
-        }
-    }, [expanded, panelId]);
-    
-    return (
-        <Accordion
-            ref={accref}
-            expanded={expanded === panelId}
-            onChange={handleChange(panelId)}
-            disabled={!canExpand.has(panelId)}
-            className='bg-white'
-            style={{
-                borderRadius: "20px",
-                margin: "15px",
-                width:'90%',
-                maxWidth:'500px',
-                background:"white",
-                backgroundColor:"white",
-                opacity: (isDone.has(panelId) && expanded !== panelId) ? ".7" : ""
-            }}>
-            <AccordionSummary
-                // onClick={(e:any) => setTimeout(()=>e.target.scrollIntoView(),200)}
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1bh-content"
-                id="panel1bh-header"
-            >
-                <Typography sx={{ width: '100%', flexShrink: 0, fontSize: "1.3em", display: "flex", alignItems: "center" }}>
-                    {isDone.has(panelId) ? (
-                        <CheckBoxIcon style={{ margin: "0px 5px 1.5px 0px", color: "green" }} />
-                    ) : (
-                        <CheckBoxOutlineBlankIcon style={{ margin: "0px 5px 1.5px 0px" }} />
-                    )}{summary}
-                </Typography>
-                {/* <Typography sx={{ color: 'text.secondary' }}>I am an accordion</Typography> */}
-            </AccordionSummary>
-            <AccordionDetails className='col h-center'>
-                {children}
-            </AccordionDetails>
-        </Accordion>
-    )
+const STEPS = ["Account", "Details", "Confirm"];
+
+function isKnownZip(zip: string) {
+  if (!/^\d{5}$/.test(zip)) return false;
+  try {
+    Geo.zipcodeToCoordinates(zip);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-export default function Register({
-    setUserData
-}:{
-    setUserData:SetUserData
-}) {
-    // DATA STATE
-    const [regType, setRegType] = useState<"gardner"|"arborist">();
-    const [arboristType, setArboristType] = useState<"join"|"create">("join"); 
-    const [firstName, setFirstName] = useState<string>("");
-    const [lastName, setLastName] = useState<string>("");
-    const [orgAccessCode, setOrgAccessCode] = useState<string>(""); 
-    const [orgName, setOrgName] = useState<string>(""); 
-    const [orgLocation, setOrgLocation] = useState<string>(""); 
-    const [isAgreed, setIsAgreed] = useState<boolean>(false);
-    const [incorrectAccessCode, setIncorrectAccessCode] = useState<boolean>(false);  
-    // ACCORDIAN STATE
-    const [canExpand, setCanExpand] = useState(new Set(['panel1']))
-    const [isDone, setIsDone] = useState(new Set<string>())
-    const [expanded, setExpanded] = useState<string>("panel1");
-    const [canSubmit, setCanSubmit] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false); 
-    const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-        setExpanded(isExpanded ? panel : "");
-    }
-    const toNext = (panel: string) => {
-        const nextPanel = "panel" + (parseInt(panel.replace("panel", "")) + 1);
-        setCanExpand(new Set([...canExpand, nextPanel]));
-        setIsDone(new Set([...isDone, panel]));
-        const [x, y]: Array<any> = [1, 2];
-        handleChange(nextPanel)(x, y);
-        if (panel === "panel5") {
-            setCanSubmit(true); 
+function Stepper({ step }: { step: number }) {
+  return (
+    <ol className="stepper" aria-label="Setup progress">
+      {STEPS.map((label, index) => (
+        <li
+          key={label}
+          data-state={index < step ? "done" : index === step ? "current" : "todo"}
+          aria-current={index === step ? "step" : undefined}
+        >
+          {label}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export default function Register({ setUserData }: { setUserData: SetUserData }) {
+  const [step, setStep] = useState(0);
+  const [regType, setRegType] = useState<RegType>();
+  const [mode, setMode] = useState<Mode>("join");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [accessCode, setAccessCode] = useState("");
+  const [orgName, setOrgName] = useState("");
+  const [zip, setZip] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const [badCode, setBadCode] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const zipInvalid = zip.length === 5 && !isKnownZip(zip);
+  const detailsValid =
+    firstName.trim() !== "" &&
+    lastName.trim() !== "" &&
+    (mode === "join" ? accessCode.trim() !== "" : orgName.trim() !== "" && isKnownZip(zip));
+
+  async function createAccount() {
+    setLoading(true);
+    setError("");
+    setBadCode(false);
+    try {
+      const names = { firstName: firstName.trim(), lastName: lastName.trim() };
+      if (mode === "create") {
+        const org = await DB.createOrganization({
+          name: orgName.trim(),
+          location: zip,
+          tier: JSON.stringify({ plan: "", type: "monthly", timestamp: Date.now() }),
+        });
+        setUserData(await DB.createAdmin({ ...names, organizationId: org.id }));
+      } else {
+        const user = await DB.createMember({ ...names, accessCode });
+        if (user) {
+          setUserData(user);
+        } else {
+          setBadCode(true);
+          setAgreed(false);
+          setStep(1);
         }
+      }
+    } catch {
+      setError("We couldn’t create your account. Check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-    /* ACCOUNT HANDLERS */
-    async function createAccount(){
-        setLoading(true);
-        if (regType === "arborist"){
-            if (arboristType === "create") {
-                const createOrgRes = await DB.createOrganization({
-                    name: orgName,
-                    location: orgLocation,
-                    tier: JSON.stringify({
-                        plan: "",
-                        type: "monthly",
-                        timestamp: Date.now()
-                    })
-                });
-                const organizationId = createOrgRes.id; 
-                const createAdminRes = await DB.createAdmin({
-                    firstName,
-                    lastName,
-                    organizationId
-                });
-                setUserData(createAdminRes); 
-            } 
-            else if (arboristType === "join") {
-                setIncorrectAccessCode(false); 
-                const createUserRes = await DB.createMember({
-                    firstName, 
-                    lastName,
-                    accessCode: orgAccessCode
-                });
-                if (createUserRes) {
-                    setUserData(createUserRes);
-                } else {
-                    setIncorrectAccessCode(true);
-                    toNext('panel1')
-                }
-            }
-        } 
-        setLoading(false); 
-    }
-    /* COMPONENTS */
-    function AccountTypeSelection(){
-        return <div className='row w100 space-evenly'>
-            <Button
-                variant={regType==="arborist"?"contained":"outlined"}
-                color="success"
-                className='select-type-button'
-                onClick={()=>{
-                    setRegType('arborist');
-                    toNext('panel1')
-                }}>
-                Arborist
-            </Button>
-            <Button
-                disabled={true}
-                color="success"
-                variant={regType==="gardner"?"contained":"outlined"}
-                className='select-type-button'
-                onClick={()=>{
-                    setRegType('gardner');
-                    toNext('panel1')
-                }}>
-                Gardner
-            </Button>
+  }
+
+  const accountStep = (
+    <div className="onboarding-step">
+      <h1>Set up your workspace</h1>
+      <p>Pick the account that fits how you work.</p>
+      <div className="onboarding-choice-grid">
+        <button
+          type="button"
+          className="choice"
+          aria-pressed={regType === "arborist"}
+          onClick={() => {
+            setRegType("arborist");
+            setStep(1);
+          }}
+        >
+          <span className="tile tile--brand" aria-hidden="true">
+            <ForestOutlinedIcon />
+          </span>
+          <span>
+            <strong>Arborist</strong>
+            <small>Share drop sites with your crew</small>
+          </span>
+          <span className="choice-check" aria-hidden="true">
+            <CheckIcon />
+          </span>
+        </button>
+        <button type="button" className="choice" disabled aria-disabled="true">
+          <span className="tile" aria-hidden="true">
+            <YardOutlinedIcon />
+          </span>
+          <span>
+            <strong>Gardener</strong>
+            <small>Coming soon</small>
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+
+  const detailsStep = (
+    <form
+      className="onboarding-step"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (detailsValid) setStep(2);
+      }}
+      noValidate
+    >
+      <h1>Tell us about you</h1>
+      <p>Your name and the crew you’re working with.</p>
+      <div className="onboarding-fields">
+        <div className="field-row">
+          <TextField
+            label="First name"
+            value={firstName}
+            autoComplete="given-name"
+            onChange={(event) => setFirstName(event.target.value)}
+          />
+          <TextField
+            label="Last name"
+            value={lastName}
+            autoComplete="family-name"
+            onChange={(event) => setLastName(event.target.value)}
+          />
         </div>
-    }
 
-    function accountDetails(){
-        function orgDetails(){
-            if (arboristType==="join") return (
-                <TextField
-                    style={{
-                        maxWidth:'390px', 
-                        width:'100%'
-                    }}
-                    sx={{
-                        input: {
-                            textTransform:"uppercase",
-                            letterSpacing:"4px",
-                            textAlign:"center"
-                        }
-                    }}
-                    onChange={(e) => setOrgAccessCode(e.target.value.toUpperCase())}
-                    label="Organization Access Code"
-                    error={incorrectAccessCode}
-                    helperText={incorrectAccessCode ? "Invalid Access Code" : "Request this code from your employer. It will be located in their settings panel."}
-                    autoComplete="new-password"
-                    inputProps={{maxLength:10}}/>
-            );
-            else if (arboristType === "create") return (<>
-                <TextField
-                    style={{maxWidth:'390px', width:'100%'}}
-                    onChange={(e) => setOrgName(e.target.value)}
-                    label="Organization Name"/>
-                <Spacer height={15}/>
-                <TextField
-                    style={{maxWidth:'390px', width:'100%'}}
-                    type='number'
-                    onChange={(e) => setOrgLocation(e.target.value)}
-                    label="Organization Location (Zip Code)"/>
-            </>);
+        <ToggleButtonGroup
+          exclusive
+          value={mode}
+          aria-label="Join or create a crew"
+          onChange={(_, value: Mode | null) => {
+            if (!value) return;
+            setMode(value);
+            setBadCode(false);
+          }}
+        >
+          <ToggleButton value="join">Join a crew</ToggleButton>
+          <ToggleButton value="create">Create a crew</ToggleButton>
+        </ToggleButtonGroup>
 
-            else return <></>
-        }
-
-        if (regType === "arborist") return <>
-            <div className='row w100 h-center'>
-                <TextField
-                    onChange={e => setFirstName(e.target.value)} 
-                    label="First Name"/>
-                <TextField 
-                    onChange={e => setLastName(e.target.value)}
-                    label="Last Name"/>
-            </div>
-
-            <Divider
-                style={{margin:'20px 0px', width:'100%'}}>
-                    Join or Create Organization
-            </Divider>
-            <div className='row w100 space-evenly'>
-                <Button 
-                    color="success"
-                    variant={arboristType==="join"?"contained":"outlined"}
-                    className='select-type-button'
-                    onClick={()=>{
-                        setArboristType('join');
-                        setOrgName("");
-                    }}>
-                    Join
-                </Button>
-                <Button
-                    color="success"
-                    variant={arboristType==="create"?"contained":"outlined"}
-                    className='select-type-button'
-                    onClick={()=>{
-                        setArboristType('create');
-                        setOrgAccessCode("");
-                        setOrgLocation(""); 
-                    }}>
-                    Create
-                </Button>
-            </div>
-            <Divider
-                style={{width:'100%', margin:'25px 0px'}}>
-                    Organization Details
-            </Divider>
-            {orgDetails()}
-        </>;
-
-        else return <>
-        
-        </>
-    }
-
-    function NextButton({ isDisabled, panel, callback }: { isDisabled: boolean, panel: string, callback?:()=>any }){
-        return <Button
-            variant={isDisabled?"text":"contained"}
-            onClick={() => {
-                toNext(panel);
-                if (callback){
-                    callback(); 
-                }
+        {mode === "join" ? (
+          <TextField
+            className="access-code-field"
+            label="Access code"
+            value={accessCode}
+            error={badCode}
+            helperText={
+              badCode
+                ? "That access code wasn’t recognized. Check it and try again."
+                : "Ask your admin. The code is in their Settings."
+            }
+            autoComplete="off"
+            inputProps={{ maxLength: 10 }}
+            onChange={(event) => {
+              setBadCode(false);
+              setAccessCode(event.target.value.toUpperCase());
             }}
-            disabled={isDisabled}
-            style={{ 
-                marginTop:"30px",
-                width:'100%'
-            }}>
-                Next
-            </Button>
-    }
+          />
+        ) : (
+          <>
+            <TextField
+              label="Organization name"
+              value={orgName}
+              autoComplete="organization"
+              onChange={(event) => setOrgName(event.target.value)}
+            />
+            <TextField
+              label="ZIP code"
+              value={zip}
+              error={zipInvalid}
+              helperText={
+                zipInvalid
+                  ? "Enter a valid US ZIP code."
+                  : "Sets where your map starts."
+              }
+              autoComplete="postal-code"
+              inputProps={{ inputMode: "numeric", maxLength: 5 }}
+              onChange={(event) => setZip(event.target.value.replace(/\D/g, ""))}
+            />
+          </>
+        )}
+      </div>
+      <div className="onboarding-actions">
+        <Button variant="outlined" onClick={() => setStep(0)}>
+          Back
+        </Button>
+        <Button type="submit" variant="contained" disabled={!detailsValid}>
+          Continue
+        </Button>
+      </div>
+    </form>
+  );
 
-    return (
-        <Container fadeIn>
-            <div className="onboarding-heading"><h1>Set up your workspace</h1><p>A few details to get your crew connected.</p></div>
-            <InputAccordian
-                summary='Account Type'
-                expanded={expanded}
-                panelId='panel1'
-                canExpand={canExpand}
-                isDone={isDone}
-                handleChange={handleChange}>
-                <AccountTypeSelection/>
-                <Spacer height={30}/>
-            </InputAccordian>
-            <InputAccordian
-                summary='Account Details'
-                expanded={expanded}
-                panelId='panel2'
-                canExpand={canExpand}
-                isDone={isDone}
-                handleChange={handleChange}>
-                {accountDetails()}
-                <NextButton isDisabled={
-                    !firstName || !lastName || (!orgAccessCode && arboristType==="join") || (arboristType==="create" && (!orgName || !orgLocation))
-                } panel='panel2'/>
-            </InputAccordian>
-            <InputAccordian
-                summary='Agreements'
-                expanded={expanded}
-                panelId='panel3'
-                canExpand={canExpand}
-                isDone={isDone}
-                handleChange={handleChange}>
-                <div className='row v-center'>
-                    <Checkbox onChange={e => {
-                        setIsAgreed(e.target.checked);
-                        if (e.target.checked){
-                            toNext('panel3'); 
-                        }
-                    }}/>
-                    <label>
-                        I agree to the <a target="_blank" rel="noreferrer" href="https://www.getchipsync.com/terms-and-conditions">Terms and Conditions</a>
-                    </label>
-                </div>
-                <Spacer height={15}/>
-            </InputAccordian>
-            <Button 
-                variant='contained' 
-                disabled={isDone.size !== 3 || loading} 
-                style={{marginTop:'20px'}}
-                onClick={() => createAccount()}>
-                {loading ? (
-                    <BeatLoader color="green"/>
-                ) : (
-                    <>Create Account</>
-                )}
-            </Button>
-        </Container>
-    )
+  const confirmStep = (
+    <div className="onboarding-step">
+      <h1>Almost there</h1>
+      <p>Review your details and agree to the terms to finish.</p>
+      <ul className="summary-list">
+        <li>
+          <span>Name</span>
+          <strong>
+            {firstName.trim()} {lastName.trim()}
+          </strong>
+        </li>
+        <li>
+          <span>{mode === "join" ? "Joining with code" : "New organization"}</span>
+          <strong>{mode === "join" ? accessCode : `${orgName.trim()} · ${zip}`}</strong>
+        </li>
+      </ul>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      <label className="onboarding-agree">
+        <Checkbox checked={agreed} onChange={(event) => setAgreed(event.target.checked)} />
+        <span>
+          I agree to the{" "}
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href="https://www.getchipsync.com/terms-and-conditions"
+          >
+            Terms and Conditions
+          </a>
+        </span>
+      </label>
+      <div className="onboarding-actions">
+        <Button variant="outlined" onClick={() => setStep(1)} disabled={loading}>
+          Back
+        </Button>
+        <Button
+          variant="contained"
+          disabled={!agreed || loading}
+          onClick={createAccount}
+          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
+        >
+          {loading ? "Creating account…" : "Create account"}
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="onboarding page-backdrop">
+      <div className="onboarding-card">
+        <div className="onboarding-brand">
+          <Logo size="small" />
+          <strong>Chip Sync</strong>
+        </div>
+        <Stepper step={step} />
+        {[accountStep, detailsStep, confirmStep][step]}
+      </div>
+    </div>
+  );
 }

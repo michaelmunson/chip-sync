@@ -1,30 +1,21 @@
-import React, { MutableRefObject, useEffect, useRef } from 'react';
-import logo from "../../images/logo-variants/logo-round.png"; 
-import { delay } from '../../utils/general';
+import React from 'react';
+import Logo from "./Logo";
 
 interface LoaderProps {
     isFullScreen:boolean
 }
 
 export default function Loader({isFullScreen}:LoaderProps) {
-
-    const Spinner = () => (
-        <img 
-            className="logo xxlarge breath"
-            src={logo} 
-            alt="Logo"/>
-    )
+    const spinner = (
+        <Logo type="round" size="xxlarge" className="breath" alt="Chip Sync" />
+    );
 
     if (isFullScreen) return (
-        <div 
-            className='row hv-center'
-            style={{
-                height:'100%',
-                width:'100%'
-            }}>
-            <Spinner/>
+        <div className="app-loader" role="status" aria-live="polite">
+            {spinner}
+            <span>Loading workspace</span>
         </div>
     )
-    
-    return <Spinner/>
+
+    return spinner;
 }

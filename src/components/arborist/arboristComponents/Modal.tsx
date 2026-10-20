@@ -1,6 +1,7 @@
 import React from "react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
-import { Dialog, DialogTitle, IconButton } from "@mui/material";
+import { Dialog, IconButton } from "@mui/material";
 import {
   Coordinates,
   ModalConfig,
@@ -26,6 +27,15 @@ interface ModalProps {
   currentLocation: Coordinates;
 }
 
+const TITLES: Record<ModalConfig["type"], string> = {
+  "marker-list": "Drop sites",
+  "add-marker": "Add a drop site",
+  notifications: "Activity",
+  "marker-details": "Site details",
+  settings: "Settings",
+  "edit-marker": "Edit drop site",
+};
+
 export default function Modal({
   open,
   userData,
@@ -38,7 +48,7 @@ export default function Modal({
 }: ModalProps) {
   const { type, data, goBackLocation } = modalConfig;
 
-  const ModalMap = {
+  const body = {
     "marker-list": () => (
       <MarkerList
         userData={userData}
@@ -46,7 +56,6 @@ export default function Modal({
         currentLocation={currentLocation}
       />
     ),
-
     "add-marker": () => (
       <AddMarker
         data={data}
@@ -55,7 +64,6 @@ export default function Modal({
         currentLocation={currentLocation}
       />
     ),
-
     notifications: () => (
       <Notifications
         data={data}
@@ -64,18 +72,16 @@ export default function Modal({
         setUserData={setUserData}
       />
     ),
-
     "marker-details": () => (
       <MarkerDetails
         data={data as Marker}
         userData={userData}
-        goBackLocation={goBackLocation}
         toggleModal={toggleModal}
       />
     ),
-
     settings: () => (
       <Settings
+        data={data}
         theme={theme}
         userData={userData}
         setTheme={setTheme}
@@ -83,7 +89,6 @@ export default function Modal({
         toggleModal={toggleModal}
       />
     ),
-
     "edit-marker": () => (
       <EditMarker
         data={data as Marker}
@@ -93,35 +98,41 @@ export default function Modal({
         currentLocation={currentLocation}
       />
     ),
-  };
+  }[type];
 
-  const titles = {
-    "marker-list": "Drop sites",
-    "add-marker": "Add a drop site",
-    notifications: "Activity",
-    "marker-details": "Site details",
-    settings: "Workspace settings",
-    "edit-marker": "Edit drop site",
+  /** Where the header back arrow leads, if anywhere. */
+  const goBack = (): (() => void) | undefined => {
+    if (type === "marker-details" && goBackLocation) {
+      return () => toggleModal(true, { type: goBackLocation });
+    }
+    if (type === "edit-marker" && data) {
+      return () => toggleModal(true, { type: "marker-details", data });
+    }
+    return undefined;
   };
+  const back = goBack();
 
   return (
     <Dialog
       id="modal"
-      className={`${type}-modal workspace-${theme}`}
       aria-labelledby="workspace-dialog-title"
       open={open}
       onClose={() => toggleModal(false)}
     >
-      <DialogTitle id="workspace-dialog-title" className="dialog-heading">
-        {titles[type]}
-        <IconButton
-          aria-label="Close dialog"
-          onClick={() => toggleModal(false)}
-        >
+      <header className={`dialog-header${back ? " dialog-header--back" : ""}`}>
+        {back && (
+          <IconButton aria-label="Back" onClick={back}>
+            <ArrowBackIcon />
+          </IconButton>
+        )}
+        <div className="dialog-heading">
+          <h2 id="workspace-dialog-title">{TITLES[type]}</h2>
+        </div>
+        <IconButton aria-label="Close dialog" onClick={() => toggleModal(false)}>
           <CloseIcon />
         </IconButton>
-      </DialogTitle>
-      {ModalMap[type]()}
+      </header>
+      {body()}
     </Dialog>
   );
 }

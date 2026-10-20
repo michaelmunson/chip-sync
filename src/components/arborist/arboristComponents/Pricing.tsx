@@ -1,11 +1,10 @@
 import "../../../css/payment.css"; 
-import React, { useEffect, useState } from 'react';
-import { ButtonGroup, Button } from '@mui/material';
+import React, { useState } from 'react';
+import { Button, CircularProgress, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import payment from "../../../utils/payment";
 import { Organization, User } from "../../../types/dataTypes";
 import { DB } from "../../../utils/database";
-import { HashLoader } from "react-spinners";
 
 
 const pricingConfig = {
@@ -57,24 +56,24 @@ function PriceCard({plan, price, features, registerPayment}:PricingCardProps){
                 <h2><span>{plan}</span></h2>
             </div>
             <div className='price'>
-                $<span>{price}</span>/mo
+                $<span>{price}</span><small>/mo</small>
             </div>
             <div className='features'>
                 {features.map((feature, index) => {
                     return (
                         <p className='feature' key={`feature-${index}`}>
-                            <CheckIcon style={{fontSize:'1.2em', color:"green", marginRight:"10px"}}/> {feature}
+                            <CheckIcon className="feature-check" /> {feature}
                         </p>
                     )
                 })}
                 <Button 
-                    variant="outlined" 
-                    color="success" 
-                    style={{marginTop:"5px", fontWeight:"bold"}}
+                    variant={plan === "Pro" ? "contained" : "outlined"}
+                    color="primary"
+                    fullWidth
                     onClick={() => {
                         registerPayment(plan.toLowerCase() as Organization["tier"]["plan"])
                     }}>
-                    Purchase
+                    {plan === "Pro" ? "Get Pro" : "Purchase"}
                 </Button>
             </div>
         </div>
@@ -107,29 +106,30 @@ export default function PricingPage({
     }
 
     if (isLoading) return (
-        <div className="bg-grad" style={{
-            height:"100%",
-            width:"100%",
-            display:"flex",
-            justifyContent:"center",
-            alignItems:"center"
-        }}>
-            <HashLoader size={100} color="green"/>
+        <div className="pricing-loading">
+            <CircularProgress size={48} />
+            <span>Setting up billing</span>
         </div>
     )
 
     return (
-        <div id="payment" className="bg-grad">
-            <div style={{marginTop:"30px"}}>
-                <h1 className='header'>Pricing Plans</h1>
+        <div id="payment">
+            <div className="pricing-header">
+                <h1>Choose your plan</h1>
+                <p>Scale seats as your crew grows. Cancel anytime.</p>
             </div>
-            <div>
-                <ButtonGroup>
-                    <Button onClick={() => setBillingCycle("monthly")} variant={billingCycle === "monthly" ? "contained" : "outlined"} color='success'>Monthly</Button>
-                    <Button onClick={() => setBillingCycle("annually")} variant={billingCycle === "annually" ? "contained" : "outlined"} color='success'>Annually</Button>
-                </ButtonGroup>
+            <div className="billing-toggle">
+                <ToggleButtonGroup
+                    exclusive
+                    value={billingCycle}
+                    onChange={(_, value) => value && setBillingCycle(value)}
+                    aria-label="Billing cycle"
+                >
+                    <ToggleButton value="monthly">Monthly</ToggleButton>
+                    <ToggleButton value="annually">Annually</ToggleButton>
+                </ToggleButtonGroup>
             </div>
-            <div className='price-card-container space-between'>
+            <div className='price-card-container'>
                 {pricingConfig.plans.map((data,index) => {
                     return (
                         <PriceCard
@@ -142,11 +142,10 @@ export default function PricingPage({
                     )
                 })}
             </div>
-            <div>
-                <p className='pricing-disclaimer'>
-                    <b style={{color:"darkred"}}>*</b> Employee accounts that exceed plan alotment are charged at <wbr/> <b>${pricingConfig.exceeder} / employee / mo</b>
-                </p>
-            </div>
+            <p className='pricing-disclaimer'>
+                <b className="disclaimer-mark">*</b> Seats beyond your plan allotment are billed at{" "}
+                <b>${pricingConfig.exceeder} / employee / mo</b>
+            </p>
         </div>
     )
 }

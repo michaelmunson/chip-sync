@@ -10,17 +10,20 @@ const user = {
   notifications: [{ opened: false }, { opened: true }],
 } as User;
 
-test("workspace tools open their respective workflows and expose unread activity", () => {
-  const toggleModal = jest.fn();
-  render(<Controls userData={user} toggleModal={toggleModal} />);
+test("workspace header identifies the crew and its site count", () => {
+  render(<Controls userData={user} toggleModal={vi.fn()} />);
   expect(screen.getByText("Green Tree Crew")).toBeTruthy();
-  expect(
-    screen.getByRole("button", { name: "Notifications, 1 unread" }),
-  ).toBeTruthy();
+  expect(screen.getByText("1 drop site")).toBeTruthy();
+});
+
+test("workspace tools open their respective workflows and expose unread activity", () => {
+  const toggleModal = vi.fn();
+  render(<Controls userData={user} toggleModal={toggleModal} />);
+  expect(screen.getByRole("button", { name: "Activity, 1 unread" })).toBeTruthy();
   const workflows = [
     ["Sites", "marker-list"],
     ["Add site", "add-marker"],
-    ["Notifications, 1 unread", "notifications"],
+    ["Activity, 1 unread", "notifications"],
     ["Settings", "settings"],
   ];
   workflows.forEach(([name, type]) => {
