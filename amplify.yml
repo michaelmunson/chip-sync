@@ -5,7 +5,10 @@ frontend:
       commands:
         - nvm install 22
         - nvm use 22
-        - npm ci
+        - node -v
+        - npm -v
+        # npm ci breaks on Amplify Gen 2 lockfiles (bundled OpenTelemetry deps).
+        - npm install --no-audit --no-fund
     build:
       commands:
         - npm run build
