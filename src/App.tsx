@@ -7,6 +7,7 @@ import { DB } from './utils/database';
 import Loader from './components/utils/Loader';
 import Register from './components/register/Register';
 import ArboristApp from './components/arborist/ArboristApp';
+import GardnerApp from './components/gardner/GardnerApp';
 
 type AppProps = {
     user?:CognitoUser,
@@ -33,9 +34,7 @@ function App({user, signOut}:AppProps) {
         return <ArboristApp userData={userData} setUserData={setUserData}/>
     }
 
-    return (
-        <>User Has Account</>
-    )
+    return <GardnerApp userData={userData} setUserData={setUserData}/>;
 }
 
 export default withAuthenticator(App, {

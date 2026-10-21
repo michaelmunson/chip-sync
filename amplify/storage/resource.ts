@@ -7,5 +7,9 @@ export const storage = defineStorage({
     'marker-images/*': [
       allow.authenticated.to(['read', 'write', 'delete']),
     ],
+    // Gardener service-request photos; crews need to read them to price the job.
+    'request-images/*': [
+      allow.authenticated.to(['read', 'write', 'delete']),
+    ],
   }),
 });

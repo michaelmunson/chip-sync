@@ -1,4 +1,16 @@
 version: 1
+backend:
+  phases:
+    preBuild:
+      commands:
+        - nvm install 22
+        - nvm use 22
+        # npm ci breaks on Amplify Gen 2 lockfiles (bundled OpenTelemetry deps).
+        - npm install --no-audit --no-fund
+    build:
+      commands:
+        # Deploys this branch's Gen 2 backend and writes amplify_outputs.json.
+        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
 frontend:
   phases:
     preBuild:
@@ -7,10 +19,12 @@ frontend:
         - nvm use 22
         - node -v
         - npm -v
-        # npm ci breaks on Amplify Gen 2 lockfiles (bundled OpenTelemetry deps).
         - npm install --no-audit --no-fund
     build:
       commands:
+        # Per-branch switch in the Amplify console: until it's "true" the site keeps using the
+        # committed Gen 1 staging outputs, so the Gen 2 backend can be deployed and filled first.
+        - if [ "$USE_GEN2_BACKEND" = "true" ]; then cp amplify_outputs.json src/amplify_outputs.json; fi
         - npm run build
   artifacts:
     baseDirectory: dist

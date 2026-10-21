@@ -98,6 +98,14 @@ export const Geo = {
         const {lat:latitude, lng:longitude} = res.results[0].geometry.location;
         return {latitude, longitude}; 
     },
+    /** Reverse geocode; resolves to "" when Google has no street address for the point. */
+    async coordsToAddress({latitude, longitude}:Coordinates):Promise<string>{
+        const key = await getGoogleMapsApiKey();
+        const params = new URLSearchParams({latlng: `${latitude},${longitude}`, key});
+        const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?${params}`);
+        const json = await res.json();
+        return json.results?.[0]?.formatted_address ?? "";
+    },
     
 }
 

@@ -144,6 +144,7 @@
 }
 .segmented-tabs .MuiTab-root {
   flex: 1 1 0;
+  flex-direction: row;
   min-width: 0 !important;
   min-height: 34px;
   padding: 4px 10px;

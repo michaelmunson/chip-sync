@@ -13,6 +13,12 @@ export function initials(first = "", last = ""): string {
   return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase() || "?";
 }
 
+/** Initials from a full or business name, skipping symbols: "Oak & Ash Tree Co" -> "OA". */
+export function nameInitials(name: string): string {
+  const [first = "", second = ""] = name.split(/\s+/).filter((word) => /^[\p{L}\p{N}]/u.test(word));
+  return initials(first, second);
+}
+
 export function formatDistance(miles: number | undefined): string {
   if (miles === undefined || Number.isNaN(miles)) return "";
   if (miles < 0.1) return "Nearby";

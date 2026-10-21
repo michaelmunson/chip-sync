@@ -1,4 +1,4 @@
-import { escapeHtml, formatDistance, formatPhone, initials, timeAgo } from "./format";
+import { escapeHtml, formatDistance, formatPhone, initials, nameInitials, timeAgo } from "./format";
 
 test("formatPhone formats US numbers and leaves others alone", () => {
   expect(formatPhone("2125550143")).toBe("(212) 555-0143");
@@ -9,6 +9,8 @@ test("formatPhone formats US numbers and leaves others alone", () => {
 test("initials falls back to a placeholder", () => {
   expect(initials("ada", "lovelace")).toBe("AL");
   expect(initials()).toBe("?");
+  expect(nameInitials("Oak & Ash Tree Co")).toBe("OA");
+  expect(nameInitials("  ")).toBe("?");
 });
 
 test("formatDistance", () => {

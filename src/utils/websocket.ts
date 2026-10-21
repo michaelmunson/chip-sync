@@ -82,9 +82,7 @@ export class NotificationGQLSocket extends WebSocket {
                 console.error("Connection error: ", data.payload.errors);
             },
             'data' : async (data:any) => {
-                // console.log('Data Recieved: ', data);
-                const notificationId = data.payload.data.onCreateNotification
-                this.callback(notificationId);
+                this.callback(data.payload.data.onCreateNotification);
             },
             'complete' : (data:any) => {
                 console.log('Subscription Unregistration Complete: ', data);
@@ -135,6 +133,9 @@ export class NotificationGQLSocket extends WebSocket {
             subscription MySubscription {
                 onCreateNotification(filter: {userNotificationsId: {eq: "${this.userId}"}}) {
                     id
+                    type
+                    data
+                    userNotificationsId
                 }
             }
         `;

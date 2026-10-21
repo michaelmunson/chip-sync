@@ -176,3 +176,165 @@
 .details-button:hover {
   background: #1a5339;
 }
+
+/* ---------- Service request pins ---------- */
+.marker-pill--logs {
+  background: #fbeed6;
+  color: #87560f;
+}
+.marker-pill--logs::before {
+  background: #d08a22;
+}
+.marker-pill--removal,
+.marker-pill--trim,
+.marker-pill--stump,
+.marker-pill--other {
+  background: #e3edf8;
+  color: #275684;
+}
+.marker-pill--removal::before,
+.marker-pill--trim::before,
+.marker-pill--stump::before,
+.marker-pill--other::before {
+  background: #3f7cbf;
+}
+.marker-offer {
+  margin: 0;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #eef3ef;
+  font-size: 12.5px;
+  color: #3d4a42;
+}
+
+.req-pin {
+  --pin: #e0773a;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 7px;
+  cursor: pointer;
+  filter: drop-shadow(0 3px 6px rgb(0 0 0 / 0.28));
+  transition: transform 140ms ease;
+  transform-origin: 50% 100%;
+}
+.req-pin:hover {
+  transform: scale(1.08);
+}
+.req-pin::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--pin);
+  border-right: 2.5px solid #fff;
+  border-bottom: 2.5px solid #fff;
+  transform: translateX(-50%) rotate(45deg);
+  border-bottom-right-radius: 3px;
+}
+.req-pin-head {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 2.5px solid #fff;
+  border-radius: 50%;
+  background: var(--pin);
+}
+.req-pin-head svg {
+  width: 20px;
+  height: 20px;
+  fill: #fff;
+}
+.req-pin--offered {
+  --pin: #3f7cbf;
+}
+.req-pin--booked {
+  --pin: #216849;
+}
+.req-pin--draft {
+  --pin: #216849;
+  cursor: grab;
+}
+.req-pin--draft:active {
+  cursor: grabbing;
+}
+.req-pin--draft .req-pin-head {
+  width: 44px;
+  height: 44px;
+  border-width: 3px;
+}
+.req-pin--draft .req-pin-head::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 3px solid #216849;
+  animation: req-pin-pulse 1.8s ease-out infinite;
+}
+.req-pin-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+}
+.req-pin-badge {
+  position: absolute;
+  z-index: 2;
+  top: -5px;
+  right: -7px;
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #c23b2c;
+  color: #fff;
+  font: 700 11px/1 "Plus Jakarta Sans", sans-serif;
+}
+.req-pin-label {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #16201a;
+  color: #fff;
+  font: 650 12px/1.3 "Plus Jakarta Sans", sans-serif;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+@keyframes req-pin-pulse {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .req-pin--draft .req-pin-head::before {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+.me-dot {
+  width: 16px;
+  height: 16px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #2f7de1;
+  box-shadow: 0 0 0 6px rgb(47 125 225 / 0.22), 0 1px 4px rgb(0 0 0 / 0.3);
+  transform: translateY(50%);
+}

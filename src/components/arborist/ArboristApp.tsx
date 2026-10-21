@@ -14,6 +14,8 @@ import Native from '../../utils/native';
 import payment from '../../utils/payment';
 import PricingPage from './arboristComponents/Pricing';
 import TrialStart from './arboristComponents/TrialStart';
+import { RequestsProvider } from '../requests/RequestsContext';
+import { useNotificationSocket } from '../../utils/notificationFeed';
 
 const MIN_UPDATE_DISTANCE = .2 // miles
 
@@ -27,7 +29,6 @@ export default function ArboristApp({
     setUserData
 } : ArboristAppProps
 ){
-    const [socket, setSocket] = useState<any>(); 
     const [theme, setTheme] = useState<"light"|"dark">(Theme.decide()); 
     const [currentLocation, setCurrentLocation] = useState<Coordinates>(Geo.zipcodeToCoordinates(userData.organization.location));
     const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -38,7 +39,7 @@ export default function ArboristApp({
         return () => { delete document.documentElement.dataset.theme; };
     }, [theme]);
     useEffect(updateCurrentLocation, []);
-    useEffect(subscribe, []); // removed userData dependency
+    useNotificationSocket(setUserData);
     useEffect(() => {
         const listener = Native.listen(async message => {
             if (typeof message.data !== 'string') return;
@@ -81,23 +82,6 @@ export default function ArboristApp({
             // Location permission denied/unavailable: keep the saved organization location.
         });
     }
-    function subscribe(){ 
-        setSocket((sock:any) => {
-            if (!sock) {
-                const newSock = DB.subscribeToNotification((data) => {
-                    console.log("SOCK DATA", data); 
-                    DB.getUser().then(user => {
-                        console.log("Updating User Data...", user); 
-                        if (user) setUserData(user);
-                    });
-                });
-                window.exports = {sock:newSock};
-                return newSock
-            } else {
-                return sock; 
-            }
-        })
-    }
 
     // if (payment.isRequirePayment(userData.organization.tier.plan)) return (
     //     <PricingPage
@@ -112,6 +96,7 @@ export default function ArboristApp({
     return (
         <ThemeProvider theme={Theme[theme]}>
             <CssBaseline/>
+            <RequestsProvider role="organization" userData={userData} setUserData={setUserData}>
             <main className="workspace" aria-label="Drop site map">
             <Map
                 theme={theme}
@@ -133,6 +118,7 @@ export default function ArboristApp({
                 toggleModal={toggleModal}
                 currentLocation={currentLocation}/>
             </main>
+            </RequestsProvider>
         </ThemeProvider>
     )
 }

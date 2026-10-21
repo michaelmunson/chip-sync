@@ -1,6 +1,6 @@
 import { generateClient } from "aws-amplify/api";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
-import { User, Organization, Marker, Notification } from "../types/dataTypes";
+import { User, Organization, Marker, Notification, GardenerContact } from "../types/dataTypes";
 import {
     getUser as getUserQuery,
     listOrganizations as listOrganizationsQuery,
@@ -54,10 +54,18 @@ namespace DBTypes {
         images:File[]
         userData: User
     }
+    export interface CreateGardner {
+        firstName:string
+        lastName:string
+        contact:GardenerContact
+    }
     export interface UpdateUser{
         id:string
         role?:User["role"]
         mapChoice?:User["mapChoice"]
+        firstName?:string
+        lastName?:string
+        contact?:GardenerContact
     }
     export interface UpdateMarker {
         id:string
@@ -67,7 +75,7 @@ namespace DBTypes {
         contact:Marker["contact"]
         address:string
     }
-    export type NotificationType = Notification.JoinReqNotification["type"] | Notification.MarkerNotification["type"]
+    export type NotificationType = Notification.Any["type"]
 }
 
 const client = generateClient();
@@ -99,24 +107,37 @@ const generateAccessCode = (length:number=7) => {
     return result;
 }
 
-export function cleanData(data:{[key:string]:any}):any{
-    if ("markers" in data && "items" in data?.markers){
+/** AWSJSON fields arrive as strings (sometimes double-encoded); anything unparseable is returned as-is. */
+export function parseJson(value:any):any{
+    let result = value;
+    for (let i = 0; i < 2 && typeof result === "string"; i++){
+        try { result = JSON.parse(result); } catch { return result; }
+    }
+    return result;
+}
+
+export function cleanData(data:{[key:string]:any}|null|undefined):any{
+    if (!data) return data;
+    if (data.markers && "items" in data.markers){
         data.markers = data.markers.items;
         for (const i in data.markers){
             if (data.markers[i].contact){
-                data.markers[i].contact = JSON.parse(data.markers[i].contact); 
+                data.markers[i].contact = parseJson(data.markers[i].contact); 
             }
         } 
     }
-    if ("users" in data && "items" in data?.users){
+    if (data.users && "items" in data.users){
         data.users = data.users.items; 
     }
-    if ("notifications" in data && "items" in data?.notifications){
+    if (data.notifications && "items" in data.notifications){
         data.notifications = data.notifications.items;
         for (const i in data.notifications){
-            if ("data" in data.notifications[i]){
-                data.notifications[i].data = JSON.parse(data.notifications[i].data);
-                data.notifications[i].data.contact = JSON.parse(data.notifications[i].data.contact);
+            const notification = data.notifications[i];
+            if ("data" in notification){
+                notification.data = parseJson(notification.data) ?? {};
+                if (notification.data && "contact" in notification.data){
+                    notification.data.contact = parseJson(notification.data.contact);
+                }
             }
         }
     }
@@ -124,10 +145,10 @@ export function cleanData(data:{[key:string]:any}):any{
         data.organization = cleanData(data.organization);
     }
     if ("contact" in data){
-        data.contact = JSON.parse(data.contact);
+        data.contact = parseJson(data.contact);
     }
     if ("tier" in data){
-        data.tier = JSON.parse(data.tier);
+        data.tier = parseJson(data.tier);
     }
     return data; 
 }
@@ -190,21 +211,35 @@ export const DB = {
             return data;
         }
     },
-    async createGardner(){
-    
-    },
-    async updateUser({id,role,mapChoice}:DBTypes.UpdateUser){
-        if (role || mapChoice) {
-            const input = role ? {id, role} : {id, mapChoice};
-            console.log("Input: ", input);
-            return await client.graphql({
-                query: updateUserMutation,
-                variables: {
-                    input
+    async createGardner({firstName,lastName,contact}:DBTypes.CreateGardner) : Promise<User> {
+        const res:any = await client.graphql({
+            query: createUserMutation,
+            variables: {
+                input : {
+                    id: await getUserId(),
+                    firstName,
+                    lastName,
+                    role:'gardner',
+                    contact: JSON.stringify(contact),
                 }
-            })
-        }
-        
+            }
+        });
+        return cleanData(res.data.createUser);
+    },
+    async updateUser({id,role,mapChoice,firstName,lastName,contact}:DBTypes.UpdateUser){
+        const input:AnyObject = {id};
+        if (role) input.role = role;
+        if (mapChoice) input.mapChoice = mapChoice;
+        if (firstName !== undefined) input.firstName = firstName;
+        if (lastName !== undefined) input.lastName = lastName;
+        if (contact !== undefined) input.contact = JSON.stringify(contact);
+        if (Object.keys(input).length === 1) return;
+        return await client.graphql({
+            query: updateUserMutation,
+            variables: {
+                input
+            }
+        });
     },
     async deleteUser({userId}:{userId:string}){
         return await client.graphql({
@@ -372,7 +407,8 @@ export const DB = {
                     type,
                     data: JSON.stringify(data),
                     opened: false,
-                    timestamp: 0
+                    // Seconds, because AppSync Int is 32-bit.
+                    timestamp: Math.floor(Date.now() / 1000)
                 }
             }
         }); 

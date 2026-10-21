@@ -3,11 +3,36 @@ import { useEffect, useState } from 'react';
 import { CircularProgress } from "@mui/material";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import "../../../css/map.css";
-import { Marker, User } from '../../../types/dataTypes';
+import { Marker, ServiceRequest, User } from '../../../types/dataTypes';
 import { Coordinates, ToggleModal } from '../../../types/generalTypes';
 import { Geo } from '../../../utils/location';
 import { activeInfoWindow, buildMarkerHtml, clearHold, darkStyle, getMapOptions, holdingArrowAnimation, icons, lightStyle, mapHoldData } from '../../../utils/map';
 import { getGoogleMapsApiKey } from '../../../utils/secrets';
+import { useRequests } from '../../requests/RequestsContext';
+import { buildRequestInfo, buildRequestPin, PinTone } from '../../../utils/requestPins';
+import { requestSummary } from '../../../utils/requestFormat';
+
+interface MapLayers {
+    sites: boolean
+    requests: boolean
+}
+
+const LAYERS_KEY = "chipsync.mapLayers";
+
+function loadLayers(): MapLayers {
+    try {
+        const saved = JSON.parse(localStorage.getItem(LAYERS_KEY) ?? "null");
+        if (saved && typeof saved.sites === "boolean" && typeof saved.requests === "boolean") return saved;
+    } catch { /* fall through to defaults */ }
+    return { sites: true, requests: true };
+}
+
+/** Open requests plus jobs booked with this crew; requests booked with other crews drop off. */
+function visibleRequests(requests: ServiceRequest[], organizationId: string) {
+    return requests.filter(request =>
+        request.status === "open" ||
+        (request.status === "accepted" && request.acceptedOrganizationId === organizationId));
+}
 
 interface MapProps {
     userData: User
@@ -28,9 +53,22 @@ export default function Map({
     const [map, setMap] = useState<any>(); 
     const [locationMarker, setLocationMarker] = useState<any>();
     const [mapMarkers, setMapMarkers] = useState<any[]>([]); 
+    const [requestMarkers, setRequestMarkers] = useState<any[]>([]);
+    const [layers, setLayers] = useState<MapLayers>(loadLayers);
+    const store = useRequests();
     const getLoader = () => {getGoogleMapsApiKey().then(apiKey => setLoader(new Loader({apiKey, version:"weekly"}))).catch(() => setLoadError(true))}
     /* USE EFFECTS */
     useEffect(getLoader, []);
+    useEffect(() => {
+        try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch { /* private mode */ }
+    }, [layers]);
+    useEffect(() => {
+        mapMarkers.forEach(marker => { marker.map = layers.sites ? map : null; });
+    }, [layers.sites, mapMarkers, map]);
+    useEffect(() => {
+        if (map) addRequestMarkers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [map, store.requests, store.offers, layers.requests]);
     useEffect(()=>{changeMapTheme()}, [theme]);
     useEffect(()=>{
         if (loader && !map){
@@ -186,6 +224,45 @@ export default function Map({
             return markers; 
         });
     }
+    async function addRequestMarkers(){
+        if (!loader) return;
+        const { InfoWindow } = await loader.importLibrary("maps");
+        const { AdvancedMarkerElement } = await loader.importLibrary("marker");
+        const markers = !layers.requests ? [] : visibleRequests(store.requests, userData.organization.id).map(request => {
+            const myOffer = store.offersFor(request.id)[0];
+            const tone: PinTone =
+                request.acceptedOrganizationId === userData.organization.id ? "booked"
+                : myOffer?.status === "pending" ? "offered"
+                : "open";
+            const marker = new AdvancedMarkerElement({
+                position: { lat: request.latitude, lng: request.longitude },
+                map,
+                title: requestSummary(request),
+                content: buildRequestPin({ services: request.services, tone }),
+                zIndex: tone === "booked" ? 30 : 20,
+            });
+            const infoWindow = new InfoWindow();
+            marker.addListener("click", () => {
+                activeInfoWindow.close();
+                activeInfoWindow.put(infoWindow);
+                infoWindow.setContent(buildRequestInfo({
+                    request,
+                    viewer: userData,
+                    myOffer,
+                    onOpen: () => {
+                        infoWindow.close();
+                        toggleModal(true, { type: "request-details", data: { requestId: request.id } });
+                    },
+                }));
+                infoWindow.open(marker.map, marker);
+            });
+            return marker;
+        });
+        setRequestMarkers(previous => {
+            previous.forEach(marker => { marker.map = null; });
+            return markers;
+        });
+    }
     async function addLocationMarker(mapElement?:any){
         if (!loader || !currentLocation) return; 
         const MAP = mapElement || map;
@@ -222,7 +299,35 @@ export default function Map({
         })
     }
 
+    const requestCount = visibleRequests(store.requests, userData.organization.id).length;
+    const toggleLayer = (layer: keyof MapLayers) => setLayers(current => ({ ...current, [layer]: !current[layer] }));
+
     return (
+        <>
+        {map && (
+            <div className="map-layers" role="group" aria-label="Show on map">
+                <button
+                    type="button"
+                    className="map-layer map-layer--sites"
+                    aria-pressed={layers.sites}
+                    onClick={() => toggleLayer("sites")}
+                >
+                    <span className="map-layer-dot" aria-hidden="true" />
+                    Drop sites
+                    <span className="map-layer-count">{userData.organization.markers.length}</span>
+                </button>
+                <button
+                    type="button"
+                    className="map-layer map-layer--requests"
+                    aria-pressed={layers.requests}
+                    onClick={() => toggleLayer("requests")}
+                >
+                    <span className="map-layer-dot" aria-hidden="true" />
+                    Requests
+                    <span className="map-layer-count">{requestCount}</span>
+                </button>
+            </div>
+        )}
         <div
             id="map" 
             className='map'
@@ -242,5 +347,6 @@ export default function Map({
                 )}
             </div>
         </div>
+        </>
     )
 }

@@ -50,7 +50,7 @@ function updateOrg(
 
 /* ---------- Main settings page ---------- */
 
-function Preferences({
+export function Preferences({
   userData,
   theme,
   setTheme,

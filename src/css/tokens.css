@@ -49,6 +49,14 @@
   --wood-fg: #87560f;
   --wood-dot: #d08a22;
 
+  /* Gardener requests: tree work + "needs attention" */
+  --work-bg: #e3edf8;
+  --work-fg: #275684;
+  --work-dot: #3f7cbf;
+  --open-bg: #fde9dc;
+  --open-fg: #9c4518;
+  --open-dot: #e0773a;
+
   /* Shape */
   --r-xs: 6px;
   --r-sm: 10px;
@@ -112,6 +120,13 @@
   --wood-bg: #382c17;
   --wood-fg: #ecc27d;
   --wood-dot: #e0a244;
+
+  --work-bg: #1a2a3b;
+  --work-fg: #9cc3ec;
+  --work-dot: #6fa6e0;
+  --open-bg: #3a2418;
+  --open-fg: #f2b08a;
+  --open-dot: #ec8b52;
 
   --sh-xs: 0 1px 2px rgb(0 0 0 / 0.4);
   --sh-sm: 0 1px 3px rgb(0 0 0 / 0.5);
@@ -224,6 +239,32 @@ p {
   background: var(--brand-soft-strong);
   color: var(--brand);
 }
+.pill--work {
+  background: var(--work-bg);
+  color: var(--work-fg);
+}
+.pill--work::before {
+  background: var(--work-dot);
+  opacity: 1;
+}
+.pill--open {
+  background: var(--open-bg);
+  color: var(--open-fg);
+}
+.pill--open::before {
+  background: var(--open-dot);
+  opacity: 1;
+}
+.pill--danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.pill--icon::before {
+  display: none;
+}
+.pill--icon svg {
+  font-size: 13px;
+}
 .pill--plain::before {
   display: none;
 }
@@ -262,6 +303,10 @@ p {
 .tile--brand {
   background: var(--brand-soft-strong);
   color: var(--brand);
+}
+.tile--work {
+  background: var(--work-bg);
+  color: var(--work-fg);
 }
 .tile--lg {
   width: 52px;

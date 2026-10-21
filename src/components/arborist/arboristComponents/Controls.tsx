@@ -1,4 +1,6 @@
 import AddLocationAltOutlined from "@mui/icons-material/AddLocationAltOutlined";
+import AssignmentOutlined from "@mui/icons-material/AssignmentOutlined";
+import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
 import FormatListBulletedOutlined from "@mui/icons-material/FormatListBulletedOutlined";
 import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
@@ -8,6 +10,7 @@ import "../../../css/controls.css";
 import { User } from "../../../types/dataTypes";
 import { ModalConfig, ToggleModal } from "../../../types/generalTypes";
 import Logo from "../../utils/Logo";
+import { useRequests } from "../../requests/RequestsContext";
 
 interface DockItemProps {
   icon: React.ReactNode;
@@ -17,7 +20,7 @@ interface DockItemProps {
   onClick: () => void;
 }
 
-function DockItem({ icon, label, ariaLabel, primary, onClick }: DockItemProps) {
+export function DockItem({ icon, label, ariaLabel, primary, onClick }: DockItemProps) {
   return (
     <button
       type="button"
@@ -31,6 +34,10 @@ function DockItem({ icon, label, ariaLabel, primary, onClick }: DockItemProps) {
   );
 }
 
+/** Unread activity, excluding chat messages (those are counted on Messages). */
+export const unreadActivity = (user: User) =>
+  user.notifications.filter((n) => !n.opened && n.type !== "new-message").length;
+
 export default function Controls({
   userData,
   toggleModal,
@@ -38,10 +45,11 @@ export default function Controls({
   userData: User;
   toggleModal: ToggleModal;
 }) {
-  const unread = userData.notifications.filter(
-    (notification) => !notification.opened,
-  ).length;
+  const { requests, unreadByConversation } = useRequests();
+  const unread = unreadActivity(userData);
+  const unreadChats = Object.keys(unreadByConversation).length;
   const siteCount = userData.organization.markers.length;
+  const openRequests = requests.filter((r) => r.status === "open").length;
   const open = (type: ModalConfig["type"]) => () => toggleModal(true, { type });
 
   return (
@@ -50,8 +58,18 @@ export default function Controls({
         <Logo size="small" />
         <div className="workspace-header-text">
           <strong className="truncate">{userData.organization.name}</strong>
-          <span>
-            {siteCount} drop {siteCount === 1 ? "site" : "sites"}
+          <span className="truncate">
+            <span>
+              {siteCount} drop {siteCount === 1 ? "site" : "sites"}
+            </span>
+            {openRequests > 0 && (
+              <>
+                {" · "}
+                <span>
+                  {openRequests} open {openRequests === 1 ? "request" : "requests"}
+                </span>
+              </>
+            )}
           </span>
         </div>
       </header>
@@ -61,6 +79,21 @@ export default function Controls({
           icon={<FormatListBulletedOutlined />}
           label="Sites"
           onClick={open("marker-list")}
+        />
+        <DockItem
+          icon={<AssignmentOutlined />}
+          label="Requests"
+          onClick={open("request-list")}
+        />
+        <DockItem
+          icon={
+            <Badge badgeContent={unreadChats} color="error">
+              <ChatBubbleOutline />
+            </Badge>
+          }
+          label="Messages"
+          ariaLabel={unreadChats ? `Messages, ${unreadChats} unread` : "Messages"}
+          onClick={open("messages")}
         />
         <DockItem
           icon={

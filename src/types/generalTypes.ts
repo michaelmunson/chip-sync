@@ -22,8 +22,11 @@ export interface Coordinates {
 
 export interface ModalConfig {
     type: "add-marker"|"settings"|"marker-list"|"notifications"|"marker-details"|"edit-marker"
+        |"request-list"|"request-details"|"request-form"|"offer-form"|"messages"|"chat"
     data?: AnyObject
     goBackLocation?:ModalConfig["type"]
+    /** Full config to return to from the header back arrow (takes precedence over goBackLocation). */
+    back?: ModalConfig
 }
 
 export type ToggleModal = (isOpen: boolean, config?: ModalConfig) => void; 

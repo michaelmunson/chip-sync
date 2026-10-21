@@ -1,3 +1,6 @@
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
@@ -11,9 +14,56 @@ import EmptyState from "../../../utils/EmptyState";
 import ModalButtons from "./modalUtils/ModalButtons";
 import ModalContent from "./modalUtils/ModalContent";
 
-type NotificationObject =
-  | Notification.JoinReqNotification
-  | Notification.MarkerNotification;
+type NotificationObject = Notification.Any;
+
+const firstName = (name?: string) => name?.trim().split(/\s+/)[0] || "The gardener";
+
+const REQUEST_COPY: Record<
+  Notification.RequestNotification["type"],
+  (data: Notification.RequestNotification["data"]) => React.ReactNode
+> = {
+  "new-service-request": () => (
+    <>
+      <b>New gardener request</b> near your crew
+    </>
+  ),
+  "new-offer": (d) => (
+    <>
+      <b>{d.organizationName}</b> sent you an offer
+    </>
+  ),
+  "offer-updated": (d) => (
+    <>
+      <b>{d.organizationName}</b> updated their offer
+    </>
+  ),
+  "offer-withdrawn": (d) => (
+    <>
+      <b>{d.organizationName}</b> withdrew their offer
+    </>
+  ),
+  "offer-accepted": (d) => (
+    <>
+      <b>{firstName(d.requesterName)}</b> accepted your offer
+    </>
+  ),
+  "offer-declined": (d) => (
+    <>
+      <b>{firstName(d.requesterName)}</b> declined your offer
+    </>
+  ),
+  "offer-closed": () => <>Another crew was booked for a request you offered on</>,
+  "request-cancelled": (d) => (
+    <>
+      <b>{firstName(d.requesterName)}</b> cancelled their request
+    </>
+  ),
+  "request-completed": (d) => (
+    <>
+      <b>{firstName(d.requesterName)}</b> marked a job complete
+    </>
+  ),
+};
 
 interface NotificationsProps {
   data?: ModalConfig["data"];
@@ -56,8 +106,37 @@ function describe(
         open: () => toggleModal(true, { type: "settings", data: { page: "members" } }),
       };
     }
+    case "offer-accepted":
+    case "new-service-request":
+    case "new-offer":
+    case "offer-updated":
+    case "offer-withdrawn":
+    case "offer-declined":
+    case "offer-closed":
+    case "request-cancelled":
+    case "request-completed": {
+      const { data } = notification;
+      if (!data?.serviceRequestId) return null;
+      const back = { type: "notifications" as const };
+      return {
+        icon:
+          notification.type === "offer-accepted" ? (
+            <HandshakeOutlinedIcon />
+          ) : notification.type === "new-service-request" ? (
+            <AssignmentOutlinedIcon />
+          ) : (
+            <LocalOfferOutlinedIcon />
+          ),
+        title: REQUEST_COPY[notification.type](data),
+        detail: data.summary ?? "",
+        open: () =>
+          notification.type === "offer-accepted" && data.conversationId
+            ? toggleModal(true, { type: "chat", data: { conversationId: data.conversationId }, back })
+            : toggleModal(true, { type: "request-details", data: { requestId: data.serviceRequestId }, back }),
+      };
+    }
     default:
-      return null; // e.g. gardener markers: nothing to show to arborists yet
+      return null; // chat messages are surfaced in Messages, not here
   }
 }
 
@@ -75,7 +154,7 @@ export default function Notifications({
       (item): item is typeof item & { view: NonNullable<typeof item.view> } =>
         item.view !== null,
     )
-    .sort((a, b) => (b.notification.timestamp ?? 0) - (a.notification.timestamp ?? 0));
+    .sort((a, b) => (b.notification.createdAt ?? "").localeCompare(a.notification.createdAt ?? ""));
 
   function markOpened(notification: NotificationObject) {
     if (notification.opened) return;
@@ -93,8 +172,11 @@ export default function Notifications({
   }
 
   function clearNotifications() {
-    userData.notifications.forEach((n) => DB.deleteNotification({ id: n.id }));
-    setUserData((current) => (current ? { ...current, notifications: [] } : current));
+    const cleared = new Set(visible.map(({ notification }) => notification.id));
+    cleared.forEach((id) => DB.deleteNotification({ id }));
+    setUserData((current) =>
+      current ? { ...current, notifications: current.notifications.filter((n) => !cleared.has(n.id)) } : current,
+    );
   }
 
   if (visible.length === 0) {
@@ -103,7 +185,11 @@ export default function Notifications({
         <EmptyState
           icon={<NotificationsNoneOutlinedIcon />}
           title="You’re all caught up"
-          description="New sites and crew updates will appear here."
+          description={
+            userData.role === "gardner"
+              ? "Offers and updates on your requests will appear here."
+              : "New sites, gardener requests, and crew updates will appear here."
+          }
         />
       </ModalContent>
     );

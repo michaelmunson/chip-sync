@@ -57,15 +57,18 @@ export default function Register({ setUserData }: { setUserData: SetUserData }) 
   const [orgName, setOrgName] = useState("");
   const [zip, setZip] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [phone, setPhone] = useState("");
   const [badCode, setBadCode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isGardener = regType === "gardner";
   const zipInvalid = zip.length === 5 && !isKnownZip(zip);
-  const detailsValid =
-    firstName.trim() !== "" &&
-    lastName.trim() !== "" &&
-    (mode === "join" ? accessCode.trim() !== "" : orgName.trim() !== "" && isKnownZip(zip));
+  const namesValid = firstName.trim() !== "" && lastName.trim() !== "";
+  const detailsValid = isGardener
+    ? namesValid && isKnownZip(zip)
+    : namesValid &&
+      (mode === "join" ? accessCode.trim() !== "" : orgName.trim() !== "" && isKnownZip(zip));
 
   async function createAccount() {
     setLoading(true);
@@ -73,7 +76,9 @@ export default function Register({ setUserData }: { setUserData: SetUserData }) 
     setBadCode(false);
     try {
       const names = { firstName: firstName.trim(), lastName: lastName.trim() };
-      if (mode === "create") {
+      if (isGardener) {
+        setUserData(await DB.createGardner({ ...names, contact: { phone: phone.trim(), zip } }));
+      } else if (mode === "create") {
         const org = await DB.createOrganization({
           name: orgName.trim(),
           location: zip,
@@ -116,19 +121,30 @@ export default function Register({ setUserData }: { setUserData: SetUserData }) 
           </span>
           <span>
             <strong>Arborist</strong>
-            <small>Share drop sites with your crew</small>
+            <small>Share drop sites &amp; take on gardener jobs</small>
           </span>
           <span className="choice-check" aria-hidden="true">
             <CheckIcon />
           </span>
         </button>
-        <button type="button" className="choice" disabled aria-disabled="true">
-          <span className="tile" aria-hidden="true">
+        <button
+          type="button"
+          className="choice"
+          aria-pressed={regType === "gardner"}
+          onClick={() => {
+            setRegType("gardner");
+            setStep(1);
+          }}
+        >
+          <span className="tile tile--chips" aria-hidden="true">
             <YardOutlinedIcon />
           </span>
           <span>
             <strong>Gardener</strong>
-            <small>Coming soon</small>
+            <small>Request chips, logs &amp; tree work</small>
+          </span>
+          <span className="choice-check" aria-hidden="true">
+            <CheckIcon />
           </span>
         </button>
       </div>
@@ -145,7 +161,11 @@ export default function Register({ setUserData }: { setUserData: SetUserData }) 
       noValidate
     >
       <h1>Tell us about you</h1>
-      <p>Your name and the crew you’re working with.</p>
+      <p>
+        {isGardener
+          ? "Crews use this to know who they’re working with."
+          : "Your name and the crew you’re working with."}
+      </p>
       <div className="onboarding-fields">
         <div className="field-row">
           <TextField
@@ -162,21 +182,44 @@ export default function Register({ setUserData }: { setUserData: SetUserData }) 
           />
         </div>
 
-        <ToggleButtonGroup
-          exclusive
-          value={mode}
-          aria-label="Join or create a crew"
-          onChange={(_, value: Mode | null) => {
-            if (!value) return;
-            setMode(value);
-            setBadCode(false);
-          }}
-        >
-          <ToggleButton value="join">Join a crew</ToggleButton>
-          <ToggleButton value="create">Create a crew</ToggleButton>
-        </ToggleButtonGroup>
+        {isGardener ? (
+          <>
+            <TextField
+              label="Home ZIP code"
+              value={zip}
+              error={zipInvalid}
+              helperText={zipInvalid ? "Enter a valid US ZIP code." : "Sets where your map starts."}
+              autoComplete="postal-code"
+              inputProps={{ inputMode: "numeric", maxLength: 5 }}
+              onChange={(event) => setZip(event.target.value.replace(/\D/g, ""))}
+            />
+            <TextField
+              type="tel"
+              label="Phone (optional)"
+              value={phone}
+              autoComplete="tel"
+              inputProps={{ inputMode: "tel" }}
+              helperText="Only shared with crews you book."
+              onChange={(event) => setPhone(event.target.value)}
+            />
+          </>
+        ) : (
+          <ToggleButtonGroup
+            exclusive
+            value={mode}
+            aria-label="Join or create a crew"
+            onChange={(_, value: Mode | null) => {
+              if (!value) return;
+              setMode(value);
+              setBadCode(false);
+            }}
+          >
+            <ToggleButton value="join">Join a crew</ToggleButton>
+            <ToggleButton value="create">Create a crew</ToggleButton>
+          </ToggleButtonGroup>
+        )}
 
-        {mode === "join" ? (
+        {isGardener ? null : mode === "join" ? (
           <TextField
             className="access-code-field"
             label="Access code"
@@ -240,10 +283,29 @@ export default function Register({ setUserData }: { setUserData: SetUserData }) 
             {firstName.trim()} {lastName.trim()}
           </strong>
         </li>
-        <li>
-          <span>{mode === "join" ? "Joining with code" : "New organization"}</span>
-          <strong>{mode === "join" ? accessCode : `${orgName.trim()} · ${zip}`}</strong>
-        </li>
+        {isGardener ? (
+          <>
+            <li>
+              <span>Account type</span>
+              <strong>Gardener</strong>
+            </li>
+            <li>
+              <span>Home ZIP</span>
+              <strong>{zip}</strong>
+            </li>
+            {phone.trim() && (
+              <li>
+                <span>Phone</span>
+                <strong>{phone.trim()}</strong>
+              </li>
+            )}
+          </>
+        ) : (
+          <li>
+            <span>{mode === "join" ? "Joining with code" : "New organization"}</span>
+            <strong>{mode === "join" ? accessCode : `${orgName.trim()} · ${zip}`}</strong>
+          </li>
+        )}
       </ul>
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>

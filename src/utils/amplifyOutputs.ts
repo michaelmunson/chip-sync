@@ -15,7 +15,13 @@ export type AmplifyOutputs = {
   };
 };
 
-/** Committed staging outputs; after `npm run sandbox`, copy root `amplify_outputs.json` here or to `src/amplify_outputs.json` and point this import at it. */
+// Written by the Amplify Hosting build (see amplify.yml) and gitignored; absent locally unless copied in.
+const generated = import.meta.glob<AmplifyOutputs>('../amplify_outputs.json', { eager: true, import: 'default' });
+
+/**
+ * The branch's deployed Gen 2 outputs when present, otherwise the committed staging outputs.
+ * To develop against a sandbox, copy the root `amplify_outputs.json` from `npm run sandbox` to `src/`.
+ */
 export function loadAmplifyOutputs(): AmplifyOutputs {
-  return exampleOutputs as AmplifyOutputs;
+  return Object.values(generated)[0] ?? (exampleOutputs as AmplifyOutputs);
 }

@@ -10,6 +10,8 @@ import "@aws-amplify/ui-react/styles.css";
 import "./css/tokens.css";
 import "./css/animations.css";
 import "./css/design-system.css";
+import "./css/modal.css";
+import "./css/requests.css";
 
 Amplify.configure(loadAmplifyOutputs() as Parameters<typeof Amplify.configure>[0]);
 
