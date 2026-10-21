@@ -250,9 +250,6 @@ export const createUser = /* GraphQL */ `
           longitude
           images
           type
-          kind
-          startDate
-          endDate
           createdAt
           updatedAt
           userMarkersId
@@ -322,9 +319,6 @@ export const updateUser = /* GraphQL */ `
           longitude
           images
           type
-          kind
-          startDate
-          endDate
           createdAt
           updatedAt
           userMarkersId
@@ -394,9 +388,6 @@ export const deleteUser = /* GraphQL */ `
           longitude
           images
           type
-          kind
-          startDate
-          endDate
           createdAt
           updatedAt
           userMarkersId

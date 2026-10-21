@@ -176,9 +176,6 @@ export const getUser = /* GraphQL */ `
           longitude
           images
           type
-          kind
-          startDate
-          endDate
           createdAt
           updatedAt
           userMarkersId
