@@ -2,8 +2,6 @@ import AddLocationAltOutlined from "@mui/icons-material/AddLocationAltOutlined";
 import AssignmentOutlined from "@mui/icons-material/AssignmentOutlined";
 import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
 import CloseIcon from "@mui/icons-material/Close";
-import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
-import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import YardOutlinedIcon from "@mui/icons-material/YardOutlined";
 import { Badge, Button, CssBaseline, IconButton } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -14,7 +12,7 @@ import { Coordinates, ModalConfig, SetUserData } from "../../types/generalTypes"
 import { Geo } from "../../utils/location";
 import { useNotificationSocket } from "../../utils/notificationFeed";
 import Theme from "../../utils/theme";
-import { DockItem, unreadActivity } from "../arborist/arboristComponents/Controls";
+import { DockItem, HeaderActions, unreadActivity } from "../arborist/arboristComponents/Controls";
 import { RequestFormDraft } from "../requests/RequestForm";
 import { RequestsProvider, useRequests } from "../requests/RequestsContext";
 import Logo from "../utils/Logo";
@@ -224,6 +222,11 @@ function GardenerWorkspace({
                 {pendingTotal > 0 && ` · ${pendingTotal} new ${pendingTotal === 1 ? "offer" : "offers"}`}
               </span>
             </div>
+            <HeaderActions
+              unread={unread}
+              onActivity={open("notifications")}
+              onSettings={open("settings")}
+            />
           </header>
 
           {showHint && (
@@ -267,17 +270,6 @@ function GardenerWorkspace({
               ariaLabel={unreadChats ? `Messages, ${unreadChats} unread` : "Messages"}
               onClick={open("messages")}
             />
-            <DockItem
-              icon={
-                <Badge badgeContent={unread} color="error">
-                  <NotificationsNoneOutlined />
-                </Badge>
-              }
-              label="Activity"
-              ariaLabel={unread ? `Activity, ${unread} unread` : "Activity"}
-              onClick={open("notifications")}
-            />
-            <DockItem icon={<SettingsOutlined />} label="Settings" onClick={open("settings")} />
             <DockItem
               primary
               icon={<AddLocationAltOutlined />}

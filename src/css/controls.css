@@ -10,8 +10,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  max-width: min(380px, calc(100% - 32px));
-  padding: 8px 18px 8px 8px;
+  max-width: min(420px, calc(100% - 32px));
+  padding: 8px;
   border: 1px solid var(--line);
   border-radius: var(--r-md);
   background: var(--glass);
@@ -19,6 +19,71 @@
   -webkit-backdrop-filter: blur(16px) saturate(1.3);
   box-shadow: var(--sh-md);
   animation: fade-down 0.4s var(--ease) both;
+}
+
+.workspace-header-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.workspace-header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+.workspace-header-icon:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+.workspace-header-icon:active {
+  transform: scale(0.96);
+}
+.workspace-header-icon:focus-visible {
+  outline: 0;
+  box-shadow: var(--ring);
+}
+.workspace-header-icon svg {
+  font-size: 22px;
+}
+.workspace-header-icon .MuiBadge-badge {
+  top: 2px;
+  right: 2px;
+}
+
+.route-menu {
+  min-width: 220px;
+}
+.route-menu-back {
+  gap: 4px;
+  font-weight: 700;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.route-menu-site {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+.route-menu-distance {
+  flex: none;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--muted);
 }
 
 .workspace-header img.logo {
@@ -315,7 +380,6 @@
     left: 12px;
     right: 12px;
     max-width: none;
-    padding-right: 14px;
   }
 
   .workspace-dock {

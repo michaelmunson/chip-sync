@@ -1,14 +1,18 @@
 import AddLocationAltOutlined from "@mui/icons-material/AddLocationAltOutlined";
 import AssignmentOutlined from "@mui/icons-material/AssignmentOutlined";
 import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import DirectionsOutlined from "@mui/icons-material/DirectionsOutlined";
 import FormatListBulletedOutlined from "@mui/icons-material/FormatListBulletedOutlined";
 import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
-import { Badge } from "@mui/material";
-import React from "react";
+import { Badge, Menu, MenuItem } from "@mui/material";
+import React, { useMemo, useState } from "react";
 import "../../../css/controls.css";
-import { User } from "../../../types/dataTypes";
-import { ModalConfig, ToggleModal } from "../../../types/generalTypes";
+import { Marker, User } from "../../../types/dataTypes";
+import { Coordinates, ModalConfig, ToggleModal } from "../../../types/generalTypes";
+import { formatDistance } from "../../../utils/format";
+import { Geo } from "../../../utils/location";
 import Logo from "../../utils/Logo";
 import { useRequests } from "../../requests/RequestsContext";
 
@@ -17,7 +21,7 @@ interface DockItemProps {
   label: string;
   ariaLabel?: string;
   primary?: boolean;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export function DockItem({ icon, label, ariaLabel, primary, onClick }: DockItemProps) {
@@ -38,12 +42,61 @@ export function DockItem({ icon, label, ariaLabel, primary, onClick }: DockItemP
 export const unreadActivity = (user: User) =>
   user.notifications.filter((n) => !n.opened && n.type !== "new-message").length;
 
+type RouteFilter = "chips" | "wood" | "both";
+
+const ROUTE_FILTERS: Array<{ value: RouteFilter; label: string }> = [
+  { value: "chips", label: "Chips" },
+  { value: "wood", label: "Logs" },
+  { value: "both", label: "Both" },
+];
+
+/** Sites that can take the selected material(s). */
+function matchesRouteFilter(marker: Marker, filter: RouteFilter) {
+  if (filter === "both") return marker.type === "both";
+  return marker.type === filter || marker.type === "both";
+}
+
+export function HeaderActions({
+  unread,
+  onActivity,
+  onSettings,
+}: {
+  unread: number;
+  onActivity: () => void;
+  onSettings: () => void;
+}) {
+  return (
+    <div className="workspace-header-actions">
+      <button
+        type="button"
+        className="workspace-header-icon"
+        aria-label={unread ? `Activity, ${unread} unread` : "Activity"}
+        onClick={onActivity}
+      >
+        <Badge badgeContent={unread} color="error">
+          <NotificationsNoneOutlined />
+        </Badge>
+      </button>
+      <button
+        type="button"
+        className="workspace-header-icon"
+        aria-label="Settings"
+        onClick={onSettings}
+      >
+        <SettingsOutlined />
+      </button>
+    </div>
+  );
+}
+
 export default function Controls({
   userData,
   toggleModal,
+  currentLocation,
 }: {
   userData: User;
   toggleModal: ToggleModal;
+  currentLocation: Coordinates;
 }) {
   const { requests, unreadByConversation } = useRequests();
   const unread = unreadActivity(userData);
@@ -51,6 +104,35 @@ export default function Controls({
   const siteCount = userData.organization.markers.length;
   const openRequests = requests.filter((r) => r.status === "open").length;
   const open = (type: ModalConfig["type"]) => () => toggleModal(true, { type });
+
+  const [routeAnchor, setRouteAnchor] = useState<HTMLElement | null>(null);
+  const [routeFilter, setRouteFilter] = useState<RouteFilter | null>(null);
+
+  const closestSites = useMemo(() => {
+    if (!routeFilter) return [];
+    return userData.organization.markers
+      .filter((marker) => matchesRouteFilter(marker, routeFilter))
+      .map((marker) => ({
+        ...marker,
+        distance: Geo.distance(marker, currentLocation),
+      }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 5);
+  }, [userData.organization.markers, currentLocation, routeFilter]);
+
+  const closeRouteMenu = () => {
+    setRouteAnchor(null);
+    setRouteFilter(null);
+  };
+
+  const openMaps = (marker: Marker) => {
+    const url = Geo.getAddressURL({
+      mapChoice: userData.mapChoice,
+      address: marker.address,
+    });
+    window.open(url, "_blank", "noopener,noreferrer");
+    closeRouteMenu();
+  };
 
   return (
     <>
@@ -72,6 +154,11 @@ export default function Controls({
             )}
           </span>
         </div>
+        <HeaderActions
+          unread={unread}
+          onActivity={open("notifications")}
+          onSettings={open("settings")}
+        />
       </header>
 
       <nav className="workspace-dock" aria-label="Workspace tools">
@@ -96,19 +183,13 @@ export default function Controls({
           onClick={open("messages")}
         />
         <DockItem
-          icon={
-            <Badge badgeContent={unread} color="error">
-              <NotificationsNoneOutlined />
-            </Badge>
-          }
-          label="Activity"
-          ariaLabel={unread ? `Activity, ${unread} unread` : "Activity"}
-          onClick={open("notifications")}
-        />
-        <DockItem
-          icon={<SettingsOutlined />}
-          label="Settings"
-          onClick={open("settings")}
+          icon={<DirectionsOutlined />}
+          label="Route"
+          ariaLabel="Route"
+          onClick={(event) => {
+            setRouteAnchor(event.currentTarget);
+            setRouteFilter(null);
+          }}
         />
         <DockItem
           primary
@@ -117,6 +198,42 @@ export default function Controls({
           onClick={open("add-marker")}
         />
       </nav>
+
+      <Menu
+        anchorEl={routeAnchor}
+        open={Boolean(routeAnchor)}
+        onClose={closeRouteMenu}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+        PaperProps={{ className: "route-menu" }}
+      >
+        {routeFilter === null ? (
+          ROUTE_FILTERS.map(({ value, label }) => (
+            <MenuItem key={value} onClick={() => setRouteFilter(value)}>
+              {label}
+            </MenuItem>
+          ))
+        ) : (
+          <>
+            <MenuItem className="route-menu-back" onClick={() => setRouteFilter(null)}>
+              <ChevronLeft fontSize="small" />
+              {ROUTE_FILTERS.find((f) => f.value === routeFilter)?.label}
+            </MenuItem>
+            {closestSites.length === 0 ? (
+              <MenuItem disabled>No nearby sites</MenuItem>
+            ) : (
+              closestSites.map((marker) => (
+                <MenuItem key={marker.id} onClick={() => openMaps(marker)}>
+                  <span className="route-menu-site">
+                    <span className="truncate">{marker.name}</span>
+                    <span className="route-menu-distance">{formatDistance(marker.distance)}</span>
+                  </span>
+                </MenuItem>
+              ))
+            )}
+          </>
+        )}
+      </Menu>
     </>
   );
 }

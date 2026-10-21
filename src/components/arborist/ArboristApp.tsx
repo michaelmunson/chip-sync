@@ -106,7 +106,8 @@ export default function ArboristApp({
             
             <Controls
                 userData={userData}
-                toggleModal={toggleModal}/>
+                toggleModal={toggleModal}
+                currentLocation={currentLocation}/>
 
             <Modal
                 open={modalOpen}
