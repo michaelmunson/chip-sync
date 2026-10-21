@@ -1,3 +1,6 @@
+import ApartmentOutlined from "@mui/icons-material/ApartmentOutlined";
+import ForestOutlined from "@mui/icons-material/ForestOutlined";
+import ConstructionOutlined from "@mui/icons-material/ConstructionOutlined";
 import DirectionsOutlinedIcon from "@mui/icons-material/DirectionsOutlined";
 import RoomOutlinedIcon from "@mui/icons-material/RoomOutlined";
 import SearchIcon from "@mui/icons-material/Search";
@@ -12,15 +15,17 @@ import {
   Tooltip,
 } from "@mui/material";
 import React, { useMemo, useState } from "react";
-import { Marker, User } from "../../../../types/dataTypes";
+import { Marker, MarkerKind, User } from "../../../../types/dataTypes";
 import { Coordinates, ToggleModal } from "../../../../types/generalTypes";
-import { Geo } from "../../../../utils/location";
 import { formatDistance } from "../../../../utils/format";
+import { Geo } from "../../../../utils/location";
+import { KIND_LABEL, markerKind } from "../../../../utils/markers";
 import EmptyState from "../../../utils/EmptyState";
 import { MaterialPills, MaterialTile } from "../../../utils/Material";
 import ModalContent from "./modalUtils/ModalContent";
 
-type Filter = "all" | "wood" | "chips" | "both";
+type KindFilter = "all" | MarkerKind;
+type MaterialFilter = "all" | "wood" | "chips" | "both";
 
 interface MarkerListProps {
   userData: User;
@@ -28,7 +33,14 @@ interface MarkerListProps {
   currentLocation: Coordinates;
 }
 
-const FILTERS: Array<{ value: Filter; label: string }> = [
+const KIND_FILTERS: Array<{ value: KindFilter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "dropSite", label: "Drops" },
+  { value: "facility", label: "Facilities" },
+  { value: "jobSite", label: "Job sites" },
+];
+
+const MATERIAL_FILTERS: Array<{ value: MaterialFilter; label: string }> = [
   { value: "all", label: "All" },
   { value: "chips", label: "Chips" },
   { value: "wood", label: "Wood" },
@@ -40,12 +52,29 @@ function shortAddress(address: string) {
   return address.split(",").slice(0, 2).join(",").trim();
 }
 
+function KindTile({ kind }: { kind: MarkerKind }) {
+  const icon =
+    kind === "facility" ? (
+      <ApartmentOutlined fontSize="small" />
+    ) : kind === "jobSite" ? (
+      <ConstructionOutlined fontSize="small" />
+    ) : (
+      <ForestOutlined fontSize="small" />
+    );
+  return (
+    <span className={`tile tile--${kind}`} aria-hidden="true">
+      {icon}
+    </span>
+  );
+}
+
 export default function MarkerList({
   userData,
   toggleModal,
   currentLocation,
 }: MarkerListProps) {
-  const [filter, setFilter] = useState<Filter>("all");
+  const [kindFilter, setKindFilter] = useState<KindFilter>("all");
+  const [materialFilter, setMaterialFilter] = useState<MaterialFilter>("all");
   const [query, setQuery] = useState("");
   const { markers } = userData.organization;
 
@@ -54,30 +83,40 @@ export default function MarkerList({
       markers
         .map((marker) => ({
           ...marker,
+          kind: markerKind(marker),
           distance: Geo.distance(marker, currentLocation),
         }))
         .sort((a, b) => a.distance - b.distance),
     [markers, currentLocation],
   );
 
-  const counts = useMemo(() => {
-    const result: Record<Filter, number> = { all: markers.length, chips: 0, wood: 0, both: 0 };
+  const kindCounts = useMemo(() => {
+    const result: Record<KindFilter, number> = {
+      all: markers.length,
+      dropSite: 0,
+      facility: 0,
+      jobSite: 0,
+    };
     markers.forEach((marker) => {
-      result[marker.type] += 1;
+      result[markerKind(marker)] += 1;
     });
     return result;
   }, [markers]);
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return withDistance.filter(
-      (marker) =>
-        (filter === "all" || marker.type === filter) &&
-        (!needle ||
-          marker.name.toLowerCase().includes(needle) ||
-          marker.address.toLowerCase().includes(needle)),
-    );
-  }, [withDistance, filter, query]);
+    return withDistance.filter((marker) => {
+      if (kindFilter !== "all" && marker.kind !== kindFilter) return false;
+      if (materialFilter !== "all") {
+        if (marker.kind !== "dropSite" || marker.type !== materialFilter) return false;
+      }
+      if (!needle) return true;
+      return (
+        marker.name.toLowerCase().includes(needle) ||
+        marker.address.toLowerCase().includes(needle)
+      );
+    });
+  }, [withDistance, kindFilter, materialFilter, query]);
 
   const open = (marker: Marker) =>
     toggleModal(true, {
@@ -87,7 +126,8 @@ export default function MarkerList({
     });
 
   const resetFilters = () => {
-    setFilter("all");
+    setKindFilter("all");
+    setMaterialFilter("all");
     setQuery("");
   };
 
@@ -96,14 +136,14 @@ export default function MarkerList({
       return (
         <EmptyState
           icon={<RoomOutlinedIcon />}
-          title="No drop sites found"
-          description="Save your first site to help your crew find a place for chips and wood."
+          title="No locations yet"
+          description="Add drop sites, facilities, or job sites so your crew knows where to go."
           action={
             <Button
               variant="contained"
               onClick={() => toggleModal(true, { type: "add-marker" })}
             >
-              Add a drop site
+              Add a location
             </Button>
           }
         />
@@ -113,7 +153,7 @@ export default function MarkerList({
       return (
         <EmptyState
           icon={<SearchOffOutlinedIcon />}
-          title="No matching sites"
+          title="No matching locations"
           description={`Nothing matches “${query.trim()}”. Try a different name or street.`}
           action={
             <Button variant="outlined" onClick={resetFilters}>
@@ -126,19 +166,21 @@ export default function MarkerList({
     return (
       <EmptyState
         icon={<RoomOutlinedIcon />}
-        title="No drop sites found"
-        description="Try another material filter or add a site for this material."
+        title="No locations found"
+        description="Try another filter or add a location of this type."
         action={
           <Button
             variant="contained"
             onClick={() => toggleModal(true, { type: "add-marker" })}
           >
-            Add a drop site
+            Add a location
           </Button>
         }
       />
     );
   };
+
+  const showMaterialTabs = kindFilter === "dropSite" || kindFilter === "all";
 
   return (
     <>
@@ -150,7 +192,7 @@ export default function MarkerList({
           placeholder="Search by name or address"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          inputProps={{ "aria-label": "Search sites" }}
+          inputProps={{ "aria-label": "Search locations" }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -161,11 +203,14 @@ export default function MarkerList({
         />
         <Tabs
           className="segmented-tabs"
-          value={filter}
-          onChange={(_, value: Filter) => setFilter(value)}
-          aria-label="Filter drop sites by material"
+          value={kindFilter}
+          onChange={(_, value: KindFilter) => {
+            setKindFilter(value);
+            if (value !== "dropSite" && value !== "all") setMaterialFilter("all");
+          }}
+          aria-label="Filter locations by type"
         >
-          {FILTERS.map(({ value, label }) => (
+          {KIND_FILTERS.map(({ value, label }) => (
             <Tab
               key={value}
               value={value}
@@ -173,12 +218,24 @@ export default function MarkerList({
               label={
                 <>
                   {label}
-                  <span className="tab-count">{counts[value]}</span>
+                  <span className="tab-count">{kindCounts[value]}</span>
                 </>
               }
             />
           ))}
         </Tabs>
+        {showMaterialTabs && (
+          <Tabs
+            className="segmented-tabs"
+            value={materialFilter}
+            onChange={(_, value: MaterialFilter) => setMaterialFilter(value)}
+            aria-label="Filter drop sites by material"
+          >
+            {MATERIAL_FILTERS.map(({ value, label }) => (
+              <Tab key={value} value={value} disableRipple label={label} />
+            ))}
+          </Tabs>
+        )}
       </div>
 
       <ModalContent flush>
@@ -193,13 +250,28 @@ export default function MarkerList({
                   className="card-main"
                   onClick={() => open(marker)}
                 >
-                  <MaterialTile type={marker.type} />
+                  {marker.kind === "dropSite" ? (
+                    <MaterialTile type={marker.type} />
+                  ) : (
+                    <KindTile kind={marker.kind} />
+                  )}
                   <span className="card-body">
                     <span className="card-title truncate">{marker.name}</span>
                     <span className="card-sub truncate">
-                      {shortAddress(marker.address)}
+                      {KIND_LABEL[marker.kind]} · {shortAddress(marker.address)}
                     </span>
-                    <MaterialPills type={marker.type} />
+                    {marker.kind === "dropSite" ? (
+                      <MaterialPills type={marker.type} />
+                    ) : marker.kind === "jobSite" && marker.startDate ? (
+                      <span className="pill-row">
+                        <span className="pill">
+                          {marker.startDate}
+                          {marker.endDate && marker.endDate !== marker.startDate
+                            ? ` – ${marker.endDate}`
+                            : ""}
+                        </span>
+                      </span>
+                    ) : null}
                   </span>
                   <span className="card-meta">
                     {formatDistance(marker.distance)}

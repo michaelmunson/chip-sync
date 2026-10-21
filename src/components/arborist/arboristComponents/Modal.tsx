@@ -23,6 +23,9 @@ import ConversationList, { counterpartName } from "../../chat/ConversationList";
 import ChatThread from "../../chat/ChatThread";
 import { RequestsAPI } from "../../../utils/serviceRequests";
 import { requestSummary } from "../../../utils/requestFormat";
+import JobList from "../../jobs/JobList";
+import JobForm from "../../jobs/JobForm";
+import JobDetails from "../../jobs/JobDetails";
 
 interface ModalProps {
   open: boolean;
@@ -36,17 +39,20 @@ interface ModalProps {
 }
 
 const TITLES: Partial<Record<ModalConfig["type"], string>> = {
-  "marker-list": "Drop sites",
-  "add-marker": "Add a drop site",
+  "marker-list": "Locations",
+  "add-marker": "Add a location",
   notifications: "Activity",
-  "marker-details": "Site details",
+  "marker-details": "Location details",
   settings: "Settings",
-  "edit-marker": "Edit drop site",
+  "edit-marker": "Edit location",
   "request-list": "Gardener requests",
   "request-details": "Request",
   "offer-form": "Your offer",
   messages: "Messages",
   chat: "Chat",
+  "job-list": "Jobs",
+  "job-form": "New job",
+  "job-details": "Job",
 };
 
 export default function Modal({
@@ -107,6 +113,7 @@ export default function Modal({
       <AddMarker
         data={data}
         userData={userData}
+        setUserData={setUserData}
         toggleModal={toggleModal}
         currentLocation={currentLocation}
       />
@@ -164,6 +171,17 @@ export default function Modal({
       <ChatThread key={data?.conversationId} conversationId={data?.conversationId} userData={userData} toggleModal={toggleModal} />
     ),
     "request-form": () => null,
+    "job-list": () => <JobList userData={userData} toggleModal={toggleModal} />,
+    "job-form": () => <JobForm userData={userData} toggleModal={toggleModal} />,
+    "job-details": () => (
+      <JobDetails
+        key={data?.jobId}
+        jobId={data?.jobId}
+        userData={userData}
+        toggleModal={toggleModal}
+        back={backConfig}
+      />
+    ),
   }[type];
 
   /** Where the header back arrow leads, if anywhere. */

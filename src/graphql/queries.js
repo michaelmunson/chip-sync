@@ -36,6 +36,9 @@ export const getOrganization = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           organizationMarkersId
@@ -147,6 +150,9 @@ export const getUser = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           organizationMarkersId
@@ -170,6 +176,9 @@ export const getUser = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           userMarkersId
@@ -239,6 +248,9 @@ export const getMarker = /* GraphQL */ `
       longitude
       images
       type
+      kind
+      startDate
+      endDate
       organization {
         id
         name
@@ -281,6 +293,9 @@ export const listMarkers = /* GraphQL */ `
         longitude
         images
         type
+        kind
+        startDate
+        endDate
         organization {
           id
           name

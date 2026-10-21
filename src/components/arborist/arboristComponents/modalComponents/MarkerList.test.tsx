@@ -14,6 +14,7 @@ const user = {
         name: "Garden site",
         address: "412 Maple Street, Brooklyn, NY",
         type: "chips",
+        kind: "dropSite",
         latitude: 0,
         longitude: 0,
       },
@@ -32,11 +33,13 @@ test("material filters show an actionable empty state and recover on All", () =>
     />,
   );
   expect(screen.getByText("Garden site")).toBeTruthy();
-  fireEvent.click(screen.getByRole("tab", { name: /^Wood/ }));
-  expect(screen.getByText("No drop sites found")).toBeTruthy();
-  fireEvent.click(screen.getByRole("button", { name: "Add a drop site" }));
+  fireEvent.click(screen.getByRole("tab", { name: /^Drops/ }));
+  fireEvent.click(screen.getByRole("tab", { name: /^Wood$/ }));
+  expect(screen.getByText("No locations found")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Add a location" }));
   expect(toggleModal).toHaveBeenCalledWith(true, { type: "add-marker" });
-  fireEvent.click(screen.getByRole("tab", { name: /^All/ }));
+  const allTabs = screen.getAllByRole("tab", { name: /^All/ });
+  fireEvent.click(allTabs[allTabs.length - 1]);
   expect(screen.getByText("Garden site")).toBeTruthy();
 });
 
@@ -48,11 +51,11 @@ test("search narrows the list and can be cleared from the empty state", () => {
       toggleModal={vi.fn()}
     />,
   );
-  const search = screen.getByRole("searchbox", { name: "Search sites" });
+  const search = screen.getByRole("searchbox", { name: "Search locations" });
   fireEvent.change(search, { target: { value: "maple" } });
   expect(screen.getByText("Garden site")).toBeTruthy();
   fireEvent.change(search, { target: { value: "zzz" } });
-  expect(screen.getByText("No matching sites")).toBeTruthy();
+  expect(screen.getByText("No matching locations")).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
   expect(screen.getByText("Garden site")).toBeTruthy();
 });
@@ -76,5 +79,5 @@ test("sites refresh when organization data changes", () => {
     />,
   );
   expect(screen.queryByText("Garden site")).toBeNull();
-  expect(screen.getByText("No drop sites found")).toBeTruthy();
+  expect(screen.getByText("No locations yet")).toBeTruthy();
 });

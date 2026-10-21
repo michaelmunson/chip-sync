@@ -162,20 +162,26 @@ export default function Map({
 		const { AdvancedMarkerElement, PinElement } = await loader.importLibrary("marker");
         const markers = userData.organization.markers.map((markerData:Marker) => {
             const infoWindow = new InfoWindow();
-            const markerConfig = (type:Marker["type"]) => {
-                const markerStyle = "height:65px;"
-                return {
-                    get glyph(){
-                        const glyphImage:any = document.createElement("img");
-                        glyphImage.style = markerStyle;
-                        glyphImage.src = icons[type];
-                        return glyphImage;
+            const kind = markerData.kind ?? "dropSite";
+            const pin = new PinElement(
+                kind === "dropSite"
+                    ? {
+                        get glyph() {
+                            const glyphImage: any = document.createElement("img");
+                            glyphImage.style = "height:65px;";
+                            glyphImage.src = icons[markerData.type];
+                            return glyphImage;
+                        },
+                        background: "transparent",
+                        borderColor: "transparent",
+                    }
+                    : {
+                        glyph: kind === "facility" ? "F" : "J",
+                        background: kind === "facility" ? "#5c6b7a" : "#c45c26",
+                        borderColor: "#ffffff",
+                        glyphColor: "#ffffff",
                     },
-                    background: "transparent",
-                    borderColor: "transparent"
-                }
-            }
-            const pin = new PinElement(markerConfig(markerData.type));
+            );
 
             const marker = new AdvancedMarkerElement({
                 position: {

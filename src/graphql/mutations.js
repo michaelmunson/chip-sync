@@ -39,6 +39,9 @@ export const createOrganization = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           organizationMarkersId
@@ -91,6 +94,9 @@ export const updateOrganization = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           organizationMarkersId
@@ -143,6 +149,9 @@ export const deleteOrganization = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           organizationMarkersId
@@ -215,6 +224,9 @@ export const createUser = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           organizationMarkersId
@@ -238,6 +250,9 @@ export const createUser = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           userMarkersId
@@ -307,6 +322,9 @@ export const updateUser = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           userMarkersId
@@ -376,6 +394,9 @@ export const deleteUser = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           userMarkersId
@@ -406,6 +427,9 @@ export const createMarker = /* GraphQL */ `
       longitude
       images
       type
+      kind
+      startDate
+      endDate
       organization {
         id
         name
@@ -446,6 +470,9 @@ export const updateMarker = /* GraphQL */ `
       longitude
       images
       type
+      kind
+      startDate
+      endDate
       organization {
         id
         name
@@ -486,6 +513,9 @@ export const deleteMarker = /* GraphQL */ `
       longitude
       images
       type
+      kind
+      startDate
+      endDate
       organization {
         id
         name

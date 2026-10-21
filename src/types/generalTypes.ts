@@ -23,6 +23,7 @@ export interface Coordinates {
 export interface ModalConfig {
     type: "add-marker"|"settings"|"marker-list"|"notifications"|"marker-details"|"edit-marker"
         |"request-list"|"request-details"|"request-form"|"offer-form"|"messages"|"chat"
+        |"job-list"|"job-form"|"job-details"
     data?: AnyObject
     goBackLocation?:ModalConfig["type"]
     /** Full config to return to from the header back arrow (takes precedence over goBackLocation). */

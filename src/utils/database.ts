@@ -47,6 +47,9 @@ namespace DBTypes {
     }
     export interface CreateMarker {
         type:Marker["type"]
+        kind?: Marker["kind"]
+        startDate?: string | null
+        endDate?: string | null
         name:string
         description:string
         contact:Marker["contact"]
@@ -70,6 +73,9 @@ namespace DBTypes {
     export interface UpdateMarker {
         id:string
         type:Marker["type"]
+        kind?: Marker["kind"]
+        startDate?: string | null
+        endDate?: string | null
         name:string
         description:string
         contact:Marker["contact"]
@@ -123,6 +129,9 @@ export function cleanData(data:{[key:string]:any}|null|undefined):any{
         for (const i in data.markers){
             if (data.markers[i].contact){
                 data.markers[i].contact = parseJson(data.markers[i].contact); 
+            }
+            if (!data.markers[i].kind) {
+                data.markers[i].kind = "dropSite";
             }
         } 
     }
@@ -324,7 +333,7 @@ export const DB = {
         return result; 
     },
     /* MARKER */
-    async createMarker({type,name,address,description,contact,images,userData}:DBTypes.CreateMarker) : Promise<Marker> {
+    async createMarker({type,kind="dropSite",startDate=null,endDate=null,name,address,description,contact,images,userData}:DBTypes.CreateMarker) : Promise<Marker> {
         const organizationId = userData.organization.id; 
         const imageKeys = await S3.put({organizationId, images}); 
         const {latitude, longitude} = await Geo.addressToCoords(address); 
@@ -333,6 +342,9 @@ export const DB = {
             variables: {
                 input : {
                     type,
+                    kind,
+                    startDate: kind === "jobSite" ? startDate : null,
+                    endDate: kind === "jobSite" ? endDate : null,
                     name,
                     address,
                     description,
@@ -350,6 +362,9 @@ export const DB = {
                 type: "new-org-marker",
                 data: {
                     type,
+                    kind,
+                    startDate,
+                    endDate,
                     name,
                     address,
                     description,
@@ -362,6 +377,7 @@ export const DB = {
             });
         })
         const data = cleanData(res.data.createMarker);
+        if (data && !data.kind) data.kind = kind;
         console.log("Create Marker Res Cleaned: ", data);
         return data; 
     },
@@ -375,7 +391,7 @@ export const DB = {
             }
         })
     },
-    async updateMarker({id,type,name,address,description,contact}:DBTypes.UpdateMarker) : Promise<Marker> {
+    async updateMarker({id,type,kind="dropSite",startDate=null,endDate=null,name,address,description,contact}:DBTypes.UpdateMarker) : Promise<Marker> {
         // const imageKeys = await S3.put({organizationId, images}); 
         const {latitude, longitude} = await Geo.addressToCoords(address); 
         const res:any = await client.graphql({
@@ -384,6 +400,9 @@ export const DB = {
                 input : {
                     id,
                     type,
+                    kind,
+                    startDate: kind === "jobSite" ? startDate : null,
+                    endDate: kind === "jobSite" ? endDate : null,
                     name,
                     address,
                     description,
@@ -394,6 +413,7 @@ export const DB = {
             }
         });
         const data = cleanData(res.data.updateMarker);
+        if (data && !data.kind) data.kind = kind;
         console.log("Update Marker Res Cleaned: ", data);
         return data; 
     },

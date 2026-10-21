@@ -14,6 +14,9 @@ export interface Contact {
     phone: string
 }
 /* MAIN TYPES */
+/** Where a pin lives on the map. Drop sites accept material; facilities are permanent; job sites are dated. */
+export type MarkerKind = "dropSite" | "facility" | "jobSite"
+export type MaterialType = "wood" | "chips" | "both"
 export interface Marker {
     id: string
     name: string
@@ -23,9 +26,61 @@ export interface Marker {
     latitude: number
     longitude: number
     images: string[]
-    type: "wood"|"chips"|"both"
+    type: MaterialType
+    kind: MarkerKind
+    startDate?: string | null
+    endDate?: string | null
     organization: Organization
     distance?:number
+}
+export interface LocationAssignment {
+    id: string
+    organizationId: string
+    markerId: string
+    userId: string
+    note?: string | null
+    createdAt: string
+}
+export type JobStatus = "planned" | "active" | "done" | "cancelled"
+export type JobLocationRole = "facility" | "jobSite"
+export interface Job {
+    id: string
+    organizationId: string
+    name: string
+    status: JobStatus
+    produces: MaterialType[]
+    notes?: string | null
+    startDate?: string | null
+    endDate?: string | null
+    createdById: string
+    createdAt: string
+    updatedAt?: string
+}
+export interface JobLocation {
+    id: string
+    jobId: string
+    markerId: string
+    organizationId: string
+    role: JobLocationRole
+}
+export interface JobAssignment {
+    id: string
+    jobId: string
+    userId: string
+    organizationId: string
+    jobSiteMarkerId?: string | null
+    createdAt: string
+}
+export interface RoutingPlan {
+    id: string
+    jobId: string
+    userId: string
+    organizationId: string
+    facilityMarkerId?: string | null
+    jobSiteMarkerId?: string | null
+    dropSiteMarkerIds: string[]
+    materialFilter: MaterialType
+    createdAt: string
 }
 export interface GardnerMarker {
     id: string

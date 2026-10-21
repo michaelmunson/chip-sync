@@ -308,6 +308,18 @@ p {
   background: var(--work-bg);
   color: var(--work-fg);
 }
+.tile--dropSite {
+  background: var(--chips-bg);
+  color: var(--chips-fg);
+}
+.tile--facility {
+  background: var(--surface-3);
+  color: var(--ink-2);
+}
+.tile--jobSite {
+  background: var(--work-bg);
+  color: var(--work-fg);
+}
 .tile--lg {
   width: 52px;
   height: 52px;

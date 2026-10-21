@@ -52,7 +52,7 @@ vi.mock("../../../utils/location", () => ({
 test("workspace header identifies the crew and exposes activity and settings icons", () => {
   render(<Controls userData={user} toggleModal={vi.fn()} currentLocation={currentLocation} />);
   expect(screen.getByText("Green Tree Crew")).toBeTruthy();
-  expect(screen.getByText("3 drop sites")).toBeTruthy();
+  expect(screen.getByText("3 locations")).toBeTruthy();
   expect(screen.getByRole("button", { name: "Activity, 1 unread" })).toBeTruthy();
   expect(screen.getByRole("button", { name: "Settings" })).toBeTruthy();
   expect(screen.queryByRole("button", { name: "Activity, 1 unread" })?.closest("header")).toBeTruthy();
@@ -63,7 +63,8 @@ test("workspace tools open their respective workflows from the dock and header",
   render(<Controls userData={user} toggleModal={toggleModal} currentLocation={currentLocation} />);
   const workflows = [
     ["Sites", "marker-list"],
-    ["Add site", "add-marker"],
+    ["Jobs", "job-list"],
+    ["Add", "add-marker"],
     ["Activity, 1 unread", "notifications"],
     ["Settings", "settings"],
   ];

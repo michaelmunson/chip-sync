@@ -1,15 +1,29 @@
+import ApartmentOutlined from "@mui/icons-material/ApartmentOutlined";
 import CloseIcon from "@mui/icons-material/Close";
+import ForestOutlined from "@mui/icons-material/ForestOutlined";
+import ConstructionOutlined from "@mui/icons-material/ConstructionOutlined";
 import DirectionsOutlinedIcon from "@mui/icons-material/DirectionsOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import GroupOutlined from "@mui/icons-material/GroupOutlined";
 import NotesOutlinedIcon from "@mui/icons-material/NotesOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
-import { Button, Dialog, IconButton, Skeleton } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Checkbox,
+  CircularProgress,
+  Dialog,
+  FormControlLabel,
+  IconButton,
+  Skeleton,
+} from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
 import { Marker, User } from "../../../../types/dataTypes";
 import { ToggleModal } from "../../../../types/generalTypes";
 import { formatPhone } from "../../../../utils/format";
+import { JobsAPI } from "../../../../utils/jobs";
 import { Geo } from "../../../../utils/location";
+import { KIND_LABEL, markerKind } from "../../../../utils/markers";
 import { S3 } from "../../../../utils/storage";
 import { MaterialPills, MaterialTile } from "../../../utils/Material";
 import ModalButtons from "./modalUtils/ModalButtons";
@@ -62,6 +76,22 @@ function useMarkerImages(marker: Marker) {
   return images;
 }
 
+function KindHero({ kind }: { kind: ReturnType<typeof markerKind> }) {
+  const icon =
+    kind === "facility" ? (
+      <ApartmentOutlined />
+    ) : kind === "jobSite" ? (
+      <ConstructionOutlined />
+    ) : (
+      <ForestOutlined />
+    );
+  return (
+    <span className={`tile tile--lg tile--${kind}`} aria-hidden="true">
+      {icon}
+    </span>
+  );
+}
+
 export default function MarkerDetails({
   data,
   userData,
@@ -69,20 +99,80 @@ export default function MarkerDetails({
 }: MarkerDetailsProps) {
   const images = useMarkerImages(data);
   const [zoomed, setZoomed] = useState<string>();
+  const kind = markerKind(data);
   const directionsUrl = Geo.getAddressURL({
     mapChoice: userData.mapChoice,
     address: data.address,
   });
   const hasContact = Boolean(data.contact?.name || data.contact?.phone);
+  const members = useMemo(
+    () =>
+      (userData.organization.users ?? []).filter(
+        (user) => user.role === "admin" || user.role === "member",
+      ),
+    [userData.organization.users],
+  );
+
+  const [assignedIds, setAssignedIds] = useState<string[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(kind !== "dropSite");
+  const [savingMembers, setSavingMembers] = useState(false);
+  const [memberError, setMemberError] = useState("");
+
+  useEffect(() => {
+    if (kind === "dropSite") return;
+    let cancelled = false;
+    setLoadingMembers(true);
+    JobsAPI.listLocationAssignmentsForMarker(data.id)
+      .then((rows) => {
+        if (!cancelled) setAssignedIds(rows.map((r) => r.userId));
+      })
+      .catch(() => {
+        if (!cancelled) setMemberError("Couldn’t load assigned members.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingMembers(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [data.id, kind]);
+
+  const toggleMember = (userId: string) =>
+    setAssignedIds((current) =>
+      current.includes(userId) ? current.filter((id) => id !== userId) : [...current, userId],
+    );
+
+  const saveMembers = async () => {
+    setSavingMembers(true);
+    setMemberError("");
+    try {
+      await JobsAPI.setLocationMembers({
+        organizationId: userData.organization.id,
+        markerId: data.id,
+        userIds: assignedIds,
+      });
+    } catch {
+      setMemberError("Couldn’t save member assignments.");
+    } finally {
+      setSavingMembers(false);
+    }
+  };
 
   return (
     <>
       <ModalContent>
         <div className="detail-hero">
-          <MaterialTile type={data.type} large />
+          {kind === "dropSite" ? (
+            <MaterialTile type={data.type} large />
+          ) : (
+            <KindHero kind={kind} />
+          )}
           <div>
             <h3>{data.name}</h3>
-            <MaterialPills type={data.type} />
+            <div className="pill-row">
+              <span className="pill">{KIND_LABEL[kind]}</span>
+              {kind === "dropSite" && <MaterialPills type={data.type} />}
+            </div>
           </div>
         </div>
 
@@ -92,6 +182,12 @@ export default function MarkerDetails({
               {data.address}
             </a>
           </InfoRow>
+          {kind === "jobSite" && (data.startDate || data.endDate) && (
+            <InfoRow icon={<ConstructionOutlined />} label="Active dates">
+              {data.startDate}
+              {data.endDate && data.endDate !== data.startDate ? ` – ${data.endDate}` : ""}
+            </InfoRow>
+          )}
           {hasContact && (
             <InfoRow icon={<PersonOutlineIcon />} label="Contact">
               {data.contact.name && <div>{data.contact.name}</div>}
@@ -108,6 +204,48 @@ export default function MarkerDetails({
             </InfoRow>
           )}
         </div>
+
+        {kind !== "dropSite" && (
+          <div className="group">
+            <div className="section-label">
+              <GroupOutlined fontSize="small" /> Assigned members
+            </div>
+            {loadingMembers ? (
+              <Skeleton variant="rounded" height={72} />
+            ) : (
+              <div className="member-assign-list">
+                {members.length === 0 ? (
+                  <p className="muted">No org members yet.</p>
+                ) : (
+                  members.map((user) => (
+                    <FormControlLabel
+                      key={user.id}
+                      control={
+                        <Checkbox
+                          checked={assignedIds.includes(user.id)}
+                          onChange={() => toggleMember(user.id)}
+                        />
+                      }
+                      label={`${user.firstName} ${user.lastName}`.trim()}
+                    />
+                  ))
+                )}
+                {memberError && <p className="form-error">{memberError}</p>}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled={savingMembers || members.length === 0}
+                  startIcon={
+                    savingMembers ? <CircularProgress size={14} color="inherit" /> : undefined
+                  }
+                  onClick={saveMembers}
+                >
+                  {savingMembers ? "Saving…" : "Save members"}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
         {(images === null || images.length > 0) && (
           <>

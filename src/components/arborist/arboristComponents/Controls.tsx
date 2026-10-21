@@ -6,6 +6,7 @@ import DirectionsOutlined from "@mui/icons-material/DirectionsOutlined";
 import FormatListBulletedOutlined from "@mui/icons-material/FormatListBulletedOutlined";
 import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
+import WorkOutlineOutlined from "@mui/icons-material/WorkOutlineOutlined";
 import { Badge, Menu, MenuItem } from "@mui/material";
 import React, { useMemo, useState } from "react";
 import "../../../css/controls.css";
@@ -13,6 +14,7 @@ import { Marker, User } from "../../../types/dataTypes";
 import { Coordinates, ModalConfig, ToggleModal } from "../../../types/generalTypes";
 import { formatDistance } from "../../../utils/format";
 import { Geo } from "../../../utils/location";
+import { isDropSite, matchesMaterialFilter } from "../../../utils/markers";
 import Logo from "../../utils/Logo";
 import { useRequests } from "../../requests/RequestsContext";
 
@@ -50,10 +52,9 @@ const ROUTE_FILTERS: Array<{ value: RouteFilter; label: string }> = [
   { value: "both", label: "Both" },
 ];
 
-/** Sites that can take the selected material(s). */
+/** Drop sites that can take the selected material(s). */
 function matchesRouteFilter(marker: Marker, filter: RouteFilter) {
-  if (filter === "both") return marker.type === "both";
-  return marker.type === filter || marker.type === "both";
+  return isDropSite(marker) && matchesMaterialFilter(marker.type, filter);
 }
 
 export function HeaderActions({
@@ -104,6 +105,7 @@ export default function Controls({
   const siteCount = userData.organization.markers.length;
   const openRequests = requests.filter((r) => r.status === "open").length;
   const open = (type: ModalConfig["type"]) => () => toggleModal(true, { type });
+  const locationLabel = siteCount === 1 ? "location" : "locations";
 
   const [routeAnchor, setRouteAnchor] = useState<HTMLElement | null>(null);
   const [routeFilter, setRouteFilter] = useState<RouteFilter | null>(null);
@@ -142,7 +144,7 @@ export default function Controls({
           <strong className="truncate">{userData.organization.name}</strong>
           <span className="truncate">
             <span>
-              {siteCount} drop {siteCount === 1 ? "site" : "sites"}
+              {siteCount} {locationLabel}
             </span>
             {openRequests > 0 && (
               <>
@@ -166,6 +168,11 @@ export default function Controls({
           icon={<FormatListBulletedOutlined />}
           label="Sites"
           onClick={open("marker-list")}
+        />
+        <DockItem
+          icon={<WorkOutlineOutlined />}
+          label="Jobs"
+          onClick={open("job-list")}
         />
         <DockItem
           icon={<AssignmentOutlined />}
@@ -194,7 +201,7 @@ export default function Controls({
         <DockItem
           primary
           icon={<AddLocationAltOutlined />}
-          label="Add site"
+          label="Add"
           onClick={open("add-marker")}
         />
       </nav>

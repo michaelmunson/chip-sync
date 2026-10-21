@@ -674,3 +674,71 @@ button.group-row:hover {
   flex-direction: column;
   min-height: 0;
 }
+
+.member-assign-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.job-assignee-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.routing-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.routing-plan:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.routing-stops {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.routing-stops li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+
+.routing-stops li svg {
+  flex: none;
+  color: var(--ink-3);
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.plain-list li + li {
+  margin-top: 4px;
+}
+
+.muted {
+  color: var(--ink-3);
+  font-size: 0.92rem;
+}
+
+.form-error {
+  color: var(--danger, #b42318);
+  font-size: 0.9rem;
+}

@@ -38,6 +38,9 @@ export const onCreateOrganization = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           organizationMarkersId
@@ -89,6 +92,9 @@ export const onUpdateOrganization = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           organizationMarkersId
@@ -140,6 +146,9 @@ export const onDeleteOrganization = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           organizationMarkersId
@@ -205,6 +214,9 @@ export const onCreateUser = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           userMarkersId
@@ -271,6 +283,9 @@ export const onUpdateUser = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           userMarkersId
@@ -337,6 +352,9 @@ export const onDeleteUser = /* GraphQL */ `
           longitude
           images
           type
+          kind
+          startDate
+          endDate
           createdAt
           updatedAt
           userMarkersId
@@ -364,6 +382,9 @@ export const onCreateMarker = /* GraphQL */ `
       longitude
       images
       type
+      kind
+      startDate
+      endDate
       organization {
         id
         name
@@ -401,6 +422,9 @@ export const onUpdateMarker = /* GraphQL */ `
       longitude
       images
       type
+      kind
+      startDate
+      endDate
       organization {
         id
         name
@@ -438,6 +462,9 @@ export const onDeleteMarker = /* GraphQL */ `
       longitude
       images
       type
+      kind
+      startDate
+      endDate
       organization {
         id
         name
