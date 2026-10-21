@@ -50,9 +50,11 @@ export default function GardenerMap({
   onPlace.current = onPlacementChange;
 
   useEffect(() => {
-    getGoogleMapsApiKey()
-      .then((apiKey) => setLoader(new Loader({ apiKey, version: "weekly" })))
-      .catch(() => setLoadError(true));
+    try {
+      setLoader(new Loader({ apiKey: getGoogleMapsApiKey(), version: "weekly" }));
+    } catch {
+      setLoadError(true);
+    }
   }, []);
 
   useEffect(() => {

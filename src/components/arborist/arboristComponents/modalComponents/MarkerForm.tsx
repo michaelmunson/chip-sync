@@ -169,7 +169,8 @@ export default function MarkerForm({
         description: description.trim(),
         contact: { name: contactName.trim(), phone: contactPhone.trim() },
       });
-    } catch {
+    } catch (error) {
+      console.error(error);
       setError("We couldn’t save this location. Check your connection and try again.");
     } finally {
       setSaving(false);

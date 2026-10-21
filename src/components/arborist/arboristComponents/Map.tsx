@@ -56,7 +56,13 @@ export default function Map({
     const [requestMarkers, setRequestMarkers] = useState<any[]>([]);
     const [layers, setLayers] = useState<MapLayers>(loadLayers);
     const store = useRequests();
-    const getLoader = () => {getGoogleMapsApiKey().then(apiKey => setLoader(new Loader({apiKey, version:"weekly"}))).catch(() => setLoadError(true))}
+    const getLoader = () => {
+        try {
+            setLoader(new Loader({ apiKey: getGoogleMapsApiKey(), version: "weekly" }));
+        } catch {
+            setLoadError(true);
+        }
+    };
     /* USE EFFECTS */
     useEffect(getLoader, []);
     useEffect(() => {

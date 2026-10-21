@@ -13,6 +13,13 @@ namespace GeoTypes {
 
 const convertFromMiles = (miles:number, unit:GeoTypes.Unit) => ({mi:1,ft:5280,km:1.60934}[unit]) * miles;
 
+/** The maps key is website-restricted, so geocoding has to go through the JS API. */
+async function geocode(request: { address?: string; location?: { lat: number; lng: number } }) {
+    const { Geocoder } = await new Loader({ apiKey: getGoogleMapsApiKey(), version: "weekly" }).importLibrary("geocoding");
+    const { results } = await new Geocoder().geocode(request);
+    return results;
+}
+
 export const Geo = {
     getCurrentLocation():Promise<Coordinates>{
         return new Promise((resolve,reject) => {
@@ -60,9 +67,8 @@ export const Geo = {
         }
     },
     async getPredictionFunction({latitude, longitude}:Coordinates):Promise<()=>Promise<string[]>>{
-        const apiKey = await getGoogleMapsApiKey();
         const loader = new Loader({
-            apiKey,
+            apiKey: getGoogleMapsApiKey(),
             version:"weekly"
         });
         const {AutocompleteService} = await loader.importLibrary("places");
@@ -90,21 +96,19 @@ export const Geo = {
         return fn; 
     },
     async addressToCoords(address:string):Promise<Coordinates>{
-        const key = await getGoogleMapsApiKey();
-        const url = new URL(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${key}`);
-        const href = url.href;
-        let res:any = await fetch(href);
-        res = await res.json();
-        const {lat:latitude, lng:longitude} = res.results[0].geometry.location;
-        return {latitude, longitude}; 
+        const [result] = await geocode({ address });
+        const location = result?.geometry?.location;
+        if (!location) throw new Error("No coordinates found for that address");
+        return { latitude: location.lat(), longitude: location.lng() };
     },
     /** Reverse geocode; resolves to "" when Google has no street address for the point. */
     async coordsToAddress({latitude, longitude}:Coordinates):Promise<string>{
-        const key = await getGoogleMapsApiKey();
-        const params = new URLSearchParams({latlng: `${latitude},${longitude}`, key});
-        const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?${params}`);
-        const json = await res.json();
-        return json.results?.[0]?.formatted_address ?? "";
+        try {
+            const [result] = await geocode({ location: { lat: latitude, lng: longitude } });
+            return result?.formatted_address ?? "";
+        } catch {
+            return "";
+        }
     },
     
 }
