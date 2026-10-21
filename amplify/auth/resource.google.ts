@@ -17,11 +17,11 @@ export const auth = defineAuth({
         clientSecret: secret('GOOGLE_CLIENT_SECRET'),
       },
       callbackUrls: [
-        'http://localhost:3000/',
+        'http://localhost:9999/',
         'https://www.chipsync.io/',
       ],
       logoutUrls: [
-        'http://localhost:3000/',
+        'http://localhost:9999/',
         'https://www.chipsync.io/signout/',
       ],
     },

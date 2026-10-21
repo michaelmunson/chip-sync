@@ -82,7 +82,11 @@ export class NotificationGQLSocket extends WebSocket {
                 console.error("Connection error: ", data.payload.errors);
             },
             'data' : async (data:any) => {
-                this.callback(data.payload.data.onCreateNotification);
+                const notification = data.payload.data?.onCreateNotification;
+                // The belongs-to key is not a valid subscription filter, so other
+                // users' creates arrive here and are dropped.
+                if (!notification || notification.userNotificationsId !== this.userId) return;
+                this.callback(notification);
             },
             'complete' : (data:any) => {
                 console.log('Subscription Unregistration Complete: ', data);
@@ -131,7 +135,7 @@ export class NotificationGQLSocket extends WebSocket {
     registerSubscription(){
         const query = `
             subscription MySubscription {
-                onCreateNotification(filter: {userNotificationsId: {eq: "${this.userId}"}}) {
+                onCreateNotification {
                     id
                     type
                     data

@@ -27,8 +27,8 @@
         "profile",
         "aws.cognito.signin.user.admin"
       ],
-      "redirect_sign_in_uri": ["http://localhost:3000/", "https://www.chipsync.io/"],
-      "redirect_sign_out_uri": ["http://localhost:3000/", "https://www.chipsync.io/signout/"],
+      "redirect_sign_in_uri": ["http://localhost:9999/", "https://www.chipsync.io/"],
+      "redirect_sign_out_uri": ["http://localhost:9999/", "https://www.chipsync.io/signout/"],
       "response_type": "code"
     }
   },
