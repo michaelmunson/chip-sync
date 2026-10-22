@@ -1,6 +1,6 @@
 /* ==========================================================================
    Full-page screens that live outside the map workspace:
-   sign-in (Amplify), onboarding, trial, loading.
+   sign-in (Amplify), onboarding, loading.
    Tokens come from tokens.css.
    ========================================================================== */
 
@@ -383,89 +383,6 @@
 }
 
 /* ==========================================================================
-   Trial
-   ========================================================================== */
-#trial-start {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  padding: 32px 20px;
-  overflow-y: auto;
-}
-
-.trial-card {
-  width: min(100%, 460px);
-  margin: auto;
-  padding: 36px 32px 32px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  background: #fff;
-  box-shadow: var(--sh-md);
-  text-align: center;
-  animation: fade-up 0.5s var(--ease) both;
-}
-.trial-card .logo {
-  margin: 0 auto 22px;
-  height: 56px;
-  border-radius: 16px;
-  box-shadow: 0 8px 22px rgb(33 104 73 / 0.16);
-}
-.trial-badge {
-  display: inline-block;
-  margin-bottom: 14px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: var(--brand-soft-strong);
-  color: var(--brand-700);
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.trial-card h1 {
-  font-size: clamp(26px, 4vw, 32px);
-  line-height: 1.15;
-  font-weight: 750;
-  letter-spacing: -0.03em;
-  text-wrap: balance;
-}
-.trial-card > p {
-  margin: 12px auto 24px;
-  max-width: 340px;
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--muted);
-}
-.trial-features {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0 0 28px;
-  padding: 18px 20px;
-  list-style: none;
-  border-radius: var(--r-md);
-  background: var(--surface-2);
-  text-align: left;
-}
-.trial-features li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14.5px;
-  font-weight: 550;
-}
-.trial-features svg {
-  flex: none;
-  padding: 3px;
-  border-radius: 50%;
-  background: var(--brand-soft-strong);
-  color: var(--brand-700);
-  font-size: 22px;
-}
-
-/* ==========================================================================
    Loading
    ========================================================================== */
 .app-loader {
@@ -521,9 +438,5 @@
   .onboarding-choice-grid .choice-check {
     top: 50%;
     margin-top: -10px;
-  }
-
-  .trial-card {
-    padding: 28px 20px 24px;
   }
 }

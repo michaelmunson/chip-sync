@@ -10,7 +10,6 @@ import { Geo } from '../../utils/location';
 import Modal from './arboristComponents/Modal';
 import Theme from '../../utils/theme';
 import Native from '../../utils/native';
-import TrialStart from './arboristComponents/TrialStart';
 import { RequestsProvider } from '../requests/RequestsContext';
 import { useNotificationSocket } from '../../utils/notificationFeed';
 import PlacementPanel from '../gardner/PlacementPanel';
@@ -218,10 +217,6 @@ export default function ArboristApp({
         });
     }
 
-    if (userData.organization.tier.plan === "") return (
-        <TrialStart userData={userData} setUserData={setUserData}/>
-    )
-    
     return (
         <ThemeProvider theme={Theme[theme]}>
             <CssBaseline/>

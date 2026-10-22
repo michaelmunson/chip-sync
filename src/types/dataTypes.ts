@@ -241,7 +241,7 @@ export interface Organization {
     id:string
     name:string
     tier: {
-        plan: "basic"|"pro"|"enterprise"|"free"|"trial"|""
+        plan: "basic"|"pro"|"enterprise"|"free"|""
         cycle: "monthly"|"annually"
         timestamp: number
     }

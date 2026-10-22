@@ -5,7 +5,7 @@ The map stays the central workspace. A floating header card shows the crew name 
 ### Design system
 - `src/css/tokens.css`: all design tokens (color scale, materials, radii, elevation, motion), base styles, and shared primitives (`.pill`, `.tile`, `.avatar`, `.empty-state`). Dark mode is `<html data-theme="dark">`, set by `ArboristApp` from the Settings control.
 - `src/utils/theme.ts`: the MUI theme, reading the same tokens through CSS variables.
-- `src/css/{modal,controls,map,design-system,logo,payment}.css`: component styles. `design-system.css` also themes the Amplify Authenticator, onboarding wizard, trial card and loader.
+- `src/css/{modal,controls,map,design-system,logo,payment}.css`: component styles. `design-system.css` also themes the Amplify Authenticator, onboarding wizard and loader.
 - Chips are green and wood is amber everywhere (map markers, pills, tiles).
 
 ### Screens
@@ -14,14 +14,12 @@ The map stays the central workspace. A floating header card shows the crew name 
 - Site details: hero, info group, photo grid with lightbox.
 - Activity: card feed; join requests open Settings → Members.
 - Settings: profile, preferences, organization (access code, members, manage sites), sign out.
-- Register: three-step wizard. Trial: single card with loading and error handling.
+- Register: three-step wizard.
 
 ### Behavior changes beyond styling
 - Removing a drop site in Settings now calls `DB.deleteMarker`. Previously it only changed local state, so deleted sites returned on reload. Member remove/promote and site removal roll back and show an error if the request fails.
 - Register validates the ZIP code through geocoding and no longer uses `type=number`. The "Gardner" label is now "Gardener"; the stored value is unchanged.
 - Marker InfoWindow HTML escapes user-provided text.
-- Trial start no longer mutates `userData` in place.
-
 ### Validation
 - `npx tsc --noEmit`, `npx vitest run` (10 tests: navigation, filtering, search, empty states, formatters) and `npm run build` pass.
 - Every screen was checked in Chromium at desktop (light and dark) and 390px mobile against a mocked-data harness (not committed).
