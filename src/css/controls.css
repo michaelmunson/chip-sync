@@ -251,6 +251,9 @@
 .map-layer--requests[aria-pressed="true"] .map-layer-dot {
   background: var(--open-dot);
 }
+.map-layer--jobs[aria-pressed="true"] .map-layer-dot {
+  background: #7b5ab8;
+}
 .map-layer-count {
   min-width: 20px;
   padding: 1px 6px;
@@ -411,9 +414,18 @@
     top: calc(max(12px, env(safe-area-inset-top)) + 66px);
     right: 12px;
   }
+  .map-layers {
+    max-width: calc(100% - 24px);
+  }
   .map-layer {
     height: 30px;
+    gap: 5px;
+    padding: 0 7px 0 8px;
     font-size: 12.5px;
+  }
+  .map-layer-count {
+    min-width: 18px;
+    padding: 1px 5px;
   }
 
   .map-hint {

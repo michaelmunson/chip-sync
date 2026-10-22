@@ -11,12 +11,15 @@ import { getGoogleMapsApiKey } from '../../../utils/secrets';
 import { useRequests } from '../../requests/RequestsContext';
 import { buildRequestInfo, buildRequestPin, PinTone } from '../../../utils/requestPins';
 import { requestSummary } from '../../../utils/requestFormat';
+import { JobsAPI, JobSitePin } from '../../../utils/jobs';
+import { buildJobInfo, buildJobPin } from '../../../utils/jobPins';
 
 const toLatLng = ({ latitude, longitude }: Coordinates) => ({ lat: latitude, lng: longitude });
 
 interface MapLayers {
     sites: boolean
     requests: boolean
+    jobs: boolean
 }
 
 const LAYERS_KEY = "chipsync.mapLayers";
@@ -24,9 +27,11 @@ const LAYERS_KEY = "chipsync.mapLayers";
 function loadLayers(): MapLayers {
     try {
         const saved = JSON.parse(localStorage.getItem(LAYERS_KEY) ?? "null");
-        if (saved && typeof saved.sites === "boolean" && typeof saved.requests === "boolean") return saved;
+        if (saved && typeof saved.sites === "boolean" && typeof saved.requests === "boolean") {
+            return { sites: saved.sites, requests: saved.requests, jobs: saved.jobs !== false };
+        }
     } catch { /* fall through to defaults */ }
-    return { sites: true, requests: true };
+    return { sites: true, requests: true, jobs: true };
 }
 
 /** Open requests plus jobs booked with this crew; requests booked with other crews drop off. */
@@ -46,6 +51,8 @@ interface MapProps {
     onPlacementChange?: (position: Coordinates) => void
     /** Bumped whenever the map should pan to `placement` (e.g. after an address search). */
     focusKey?: number
+    /** Bumped whenever jobs may have changed (e.g. the job dialog closed) so the Jobs layer reloads. */
+    jobsRefreshKey?: number
 }
 
 export default function Map({
@@ -56,6 +63,7 @@ export default function Map({
     placement = null,
     onPlacementChange,
     focusKey = 0,
+    jobsRefreshKey = 0,
 } : MapProps
 ){
     const [loadError, setLoadError] = useState(false);
@@ -64,6 +72,8 @@ export default function Map({
     const [locationMarker, setLocationMarker] = useState<any>();
     const [mapMarkers, setMapMarkers] = useState<any[]>([]); 
     const [requestMarkers, setRequestMarkers] = useState<any[]>([]);
+    const [jobPins, setJobPins] = useState<JobSitePin[]>([]);
+    const [jobMarkers, setJobMarkers] = useState<any[]>([]);
     const [layers, setLayers] = useState<MapLayers>(loadLayers);
     const draftMarker = useRef<any>();
     const placing = useRef(false);
@@ -90,6 +100,17 @@ export default function Map({
         if (map) addRequestMarkers();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [map, store.requests, store.offers, layers.requests, placement]);
+    useEffect(() => {
+        let cancelled = false;
+        JobsAPI.listJobSitePins(userData.organization.id, userData.organization.markers)
+            .then(pins => { if (!cancelled) setJobPins(pins); })
+            .catch(() => { /* the Jobs layer just stays empty */ });
+        return () => { cancelled = true; };
+    }, [userData.organization.id, userData.organization.markers, jobsRefreshKey]);
+    useEffect(() => {
+        if (map) addJobMarkers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [map, jobPins, layers.jobs, placement]);
     useEffect(()=>{changeMapTheme()}, [theme]);
     useEffect(()=>{
         if (loader && !map){
@@ -338,6 +359,39 @@ export default function Map({
             return markers;
         });
     }
+    async function addJobMarkers(){
+        if (!loader) return;
+        const { InfoWindow } = await loader.importLibrary("maps");
+        const { AdvancedMarkerElement } = await loader.importLibrary("marker");
+        const markers = (!layers.jobs || placing.current) ? [] : jobPins.map(({ job, marker: site }) => {
+            const marker = new AdvancedMarkerElement({
+                position: { lat: site.latitude, lng: site.longitude },
+                map,
+                title: job.name,
+                content: buildJobPin(),
+                zIndex: 40,
+            });
+            const infoWindow = new InfoWindow();
+            marker.addListener("click", () => {
+                activeInfoWindow.close();
+                activeInfoWindow.put(infoWindow);
+                infoWindow.setContent(buildJobInfo({
+                    job,
+                    site,
+                    onOpen: () => {
+                        infoWindow.close();
+                        toggleModal(true, { type: "job-details", data: { jobId: job.id } });
+                    },
+                }));
+                infoWindow.open(marker.map, marker);
+            });
+            return marker;
+        });
+        setJobMarkers(previous => {
+            previous.forEach(marker => { marker.map = null; });
+            return markers;
+        });
+    }
     async function addLocationMarker(mapElement?:any){
         if (!loader || !currentLocation) return; 
         const MAP = mapElement || map;
@@ -375,6 +429,7 @@ export default function Map({
     }
 
     const requestCount = visibleRequests(store.requests, userData.organization.id).length;
+    const jobCount = new Set(jobPins.map(({ job }) => job.id)).size;
     const toggleLayer = (layer: keyof MapLayers) => setLayers(current => ({ ...current, [layer]: !current[layer] }));
 
     const isPlacing = placement !== null;
@@ -402,6 +457,16 @@ export default function Map({
                     <span className="map-layer-dot" aria-hidden="true" />
                     Requests
                     <span className="map-layer-count">{requestCount}</span>
+                </button>
+                <button
+                    type="button"
+                    className="map-layer map-layer--jobs"
+                    aria-pressed={layers.jobs}
+                    onClick={() => toggleLayer("jobs")}
+                >
+                    <span className="map-layer-dot" aria-hidden="true" />
+                    Jobs
+                    <span className="map-layer-count">{jobCount}</span>
                 </button>
             </div>
         )}

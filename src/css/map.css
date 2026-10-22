@@ -257,6 +257,9 @@
 .req-pin--booked {
   --pin: #216849;
 }
+.req-pin--job {
+  --pin: #7b5ab8;
+}
 .req-pin--draft {
   --pin: #216849;
   cursor: grab;

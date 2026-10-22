@@ -5,7 +5,7 @@ import { Alert, Button, MenuItem, Skeleton, TextField } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { JobStatus, Marker, User } from "../../types/dataTypes";
 import { ModalConfig, ToggleModal } from "../../types/generalTypes";
-import { JobsAPI, JobBundle } from "../../utils/jobs";
+import { JobsAPI, JobBundle, routeStopsForPlan } from "../../utils/jobs";
 import { Geo } from "../../utils/location";
 import { markerKind } from "../../utils/markers";
 import ModalButtons from "../arborist/arboristComponents/modalComponents/modalUtils/ModalButtons";
@@ -60,16 +60,6 @@ export default function JobDetails({
       cancelled = true;
     };
   }, [jobId]);
-
-  const openMaps = (markerId: string | null | undefined) => {
-    const marker = markers.find((m) => m.id === markerId);
-    if (!marker) return;
-    window.open(
-      Geo.getAddressURL({ mapChoice: userData.mapChoice, address: marker.address }),
-      "_blank",
-      "noopener,noreferrer",
-    );
-  };
 
   const setStatus = async (status: JobStatus) => {
     if (!bundle) return;
@@ -173,64 +163,52 @@ export default function JobDetails({
           {routingPlans.length === 0 ? (
             <p className="muted">No routing plans were generated.</p>
           ) : (
-            routingPlans.map((plan) => (
-              <div className="routing-plan" key={plan.id}>
-                <strong>{memberName(userData, plan.userId)}</strong>
-                <ol className="routing-stops">
-                  <li>
-                    <PlaceOutlined fontSize="small" />
-                    <span>
-                      Facility: {markerName(markers, plan.facilityMarkerId)}
-                    </span>
-                    {plan.facilityMarkerId && (
-                      <Button
-                        size="small"
-                        startIcon={<DirectionsOutlined />}
-                        onClick={() => openMaps(plan.facilityMarkerId)}
-                      >
-                        Map
-                      </Button>
-                    )}
-                  </li>
-                  <li>
-                    <PlaceOutlined fontSize="small" />
-                    <span>
-                      Job site: {markerName(markers, plan.jobSiteMarkerId)}
-                    </span>
-                    {plan.jobSiteMarkerId && (
-                      <Button
-                        size="small"
-                        startIcon={<DirectionsOutlined />}
-                        onClick={() => openMaps(plan.jobSiteMarkerId)}
-                      >
-                        Map
-                      </Button>
-                    )}
-                  </li>
-                  <li>
-                    <PlaceOutlined fontSize="small" />
-                    <span>
-                      Drop sites:{" "}
-                      {plan.dropSiteMarkerIds.length
-                        ? plan.dropSiteMarkerIds
-                            .map((id) => markerName(markers, id))
-                            .join(", ")
-                        : "None nearby"}
-                    </span>
-                  </li>
-                </ol>
-                {plan.dropSiteMarkerIds[0] && (
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<DirectionsOutlined />}
-                    onClick={() => openMaps(plan.dropSiteMarkerIds[0])}
-                  >
-                    Nearest drop
-                  </Button>
-                )}
-              </div>
-            ))
+            routingPlans.map((plan) => {
+              const stops = routeStopsForPlan(plan, markers);
+              const routeHref = Geo.getRouteURL({
+                mapChoice: userData.mapChoice,
+                stops: stops.map((m) => ({ latitude: m.latitude, longitude: m.longitude })),
+              });
+              const appName = userData.mapChoice === "google" ? "Google Maps" : "Apple Maps";
+              return (
+                <div className="routing-plan" key={plan.id}>
+                  <strong>{memberName(userData, plan.userId)}</strong>
+                  <ol className="routing-stops">
+                    <li>
+                      <PlaceOutlined fontSize="small" />
+                      <span>Start: your current location</span>
+                    </li>
+                    <li>
+                      <PlaceOutlined fontSize="small" />
+                      <span>
+                        Drop site:{" "}
+                        {plan.dropSiteMarkerIds[0]
+                          ? markerName(markers, plan.dropSiteMarkerIds[0])
+                          : "None nearby"}
+                      </span>
+                    </li>
+                    <li>
+                      <PlaceOutlined fontSize="small" />
+                      <span>Facility: {markerName(markers, plan.facilityMarkerId)}</span>
+                    </li>
+                  </ol>
+                  {routeHref ? (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<DirectionsOutlined />}
+                      href={routeHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open route in {appName}
+                    </Button>
+                  ) : (
+                    <p className="muted">No drop site or facility to route to.</p>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
 

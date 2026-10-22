@@ -159,7 +159,47 @@ export function buildRoutingStops({
   };
 }
 
+/**
+ * Ordered stops for a plan's driving route: (current location) → drop site → facility.
+ * Uses the closest drop site; stops whose marker no longer exists are skipped.
+ */
+export function routeStopsForPlan(
+  plan: Pick<RoutingPlan, "dropSiteMarkerIds" | "facilityMarkerId">,
+  markers: Marker[],
+): Marker[] {
+  const byId = (id?: string | null) => (id ? markers.find((m) => m.id === id) : undefined);
+  const dropSite = plan.dropSiteMarkerIds.map(byId).find(Boolean);
+  const facility = byId(plan.facilityMarkerId);
+  return [dropSite, facility].filter((m): m is Marker => Boolean(m));
+}
+
+/** Where a job is happening, for the map's Jobs layer. */
+export interface JobSitePin {
+  job: Job;
+  marker: Marker;
+}
+
 export const JobsAPI = {
+  /** Planned/active jobs paired with each of their job-site markers. */
+  async listJobSitePins(organizationId: string, markers: Marker[]): Promise<JobSitePin[]> {
+    const jobs = (await this.listJobs(organizationId)).filter(
+      (job) => job.status === "planned" || job.status === "active",
+    );
+    const pins = await Promise.all(
+      jobs.map(async (job) => {
+        const locations = await listAll<JobLocation>(Q.jobLocationsByJob, "jobLocationsByJob", {
+          jobId: job.id,
+        });
+        return locations
+          .filter((location) => location.role === "jobSite")
+          .map((location) => markers.find((m) => m.id === location.markerId))
+          .filter((marker): marker is Marker => Boolean(marker))
+          .map((marker) => ({ job, marker }));
+      }),
+    );
+    return pins.flat();
+  },
+
   async listJobs(organizationId: string): Promise<Job[]> {
     const items = await listAll<any>(Q.jobsByOrganization, "jobsByOrganization", { organizationId });
     return items.map(toJob);

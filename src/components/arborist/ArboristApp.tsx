@@ -50,6 +50,7 @@ export default function ArboristApp({
     const [resolving, setResolving] = useState(false);
     const [locating, setLocating] = useState(false);
     const [focusKey, setFocusKey] = useState(0);
+    const [jobsRefreshKey, setJobsRefreshKey] = useState(0);
     const geocodeSeq = useRef(0);
 
     /* USE EFFECTS */
@@ -58,6 +59,14 @@ export default function ArboristApp({
         return () => { delete document.documentElement.dataset.theme; };
     }, [theme]);
     useEffect(updateCurrentLocation, []);
+    // Jobs may have been created/edited in the dialog; reload the map's Jobs layer once it closes.
+    useEffect(() => {
+        if (!modalOpen) setJobsRefreshKey(key => key + 1);
+    }, [modalOpen]);
+    // Jobs may have been created/edited in the dialog; reload the map's Jobs layer once it closes.
+    useEffect(() => {
+        if (!modalOpen) setJobsRefreshKey(key => key + 1);
+    }, [modalOpen]);
     useNotificationSocket(setUserData);
     useEffect(() => {
         const listener = Native.listen(async message => {
@@ -226,6 +235,7 @@ export default function ArboristApp({
                 placement={placement?.position ?? null}
                 onPlacementChange={(position) => movePlacement(position)}
                 focusKey={focusKey}
+                jobsRefreshKey={jobsRefreshKey}
             />
             
             {placement ? (

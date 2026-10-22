@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { Marker } from "../types/dataTypes";
-import { buildRoutingStops, nearestDropSites } from "./jobs";
+import { buildRoutingStops, nearestDropSites, routeStopsForPlan } from "./jobs";
 
 vi.mock("./location", () => ({
   Geo: {
@@ -78,5 +78,31 @@ describe("buildRoutingStops", () => {
     expect(stops.facilityMarkerId).toBe("fac-b");
     expect(stops.jobSiteMarkerId).toBe("job-2");
     expect(stops.dropSiteMarkerIds).toEqual(["drop-1"]);
+  });
+});
+
+describe("routeStopsForPlan", () => {
+  const drop1 = marker({ id: "d1", name: "Near drop", type: "chips", kind: "dropSite" });
+  const drop2 = marker({ id: "d2", name: "Far drop", type: "chips", kind: "dropSite" });
+  const facility = marker({ id: "f1", name: "Mill", type: "both", kind: "facility" });
+  const markers = [drop2, facility, drop1];
+
+  test("goes to the closest drop site, then ends at the facility", () => {
+    const stops = routeStopsForPlan(
+      { dropSiteMarkerIds: ["d1", "d2"], facilityMarkerId: "f1" },
+      markers,
+    );
+    expect(stops.map((m) => m.id)).toEqual(["d1", "f1"]);
+  });
+
+  test("skips stops that are missing", () => {
+    expect(
+      routeStopsForPlan({ dropSiteMarkerIds: [], facilityMarkerId: "f1" }, markers).map((m) => m.id),
+    ).toEqual(["f1"]);
+    expect(
+      routeStopsForPlan({ dropSiteMarkerIds: ["gone", "d2"], facilityMarkerId: null }, markers).map(
+        (m) => m.id,
+      ),
+    ).toEqual(["d2"]);
   });
 });

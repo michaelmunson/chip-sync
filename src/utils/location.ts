@@ -45,6 +45,22 @@ export const Geo = {
             return url.href;
         }
     },
+    /**
+     * Multi-stop driving directions that start at the user's current location and visit `stops` in order
+     * (the last one is the destination). Both apps treat a missing/"Current Location" origin as the device's position.
+     */
+    getRouteURL({mapChoice,stops}:{mapChoice:"apple"|"google", stops:Coordinates[]}):string|null{
+        if (stops.length === 0) return null;
+        const points = stops.map(({latitude,longitude}) => `${latitude},${longitude}`);
+        if (mapChoice === "google") {
+            const destination = points[points.length - 1];
+            const waypoints = points.slice(0, -1);
+            const params = new URLSearchParams({ api: "1", travelmode: "driving", destination });
+            if (waypoints.length) params.set("waypoints", waypoints.join("|"));
+            return `https://www.google.com/maps/dir/?${params.toString()}`;
+        }
+        return `https://maps.apple.com/?saddr=Current%20Location&daddr=${points.join("+to:")}&dirflg=d`;
+    },
     distance(coords1:Coordinates, coords2:Coordinates, unit:GeoTypes.Unit="mi") : number {
         const {latitude:lat1, longitude:lon1} = coords1;
         const {latitude:lat2, longitude:lon2} = coords2;
