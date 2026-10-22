@@ -88,7 +88,7 @@ function liveDependencies(): Dependencies {
     const secretId = requiredEnv("H2H_SECRET_ARN");
 
     cached = {
-        appUrl: process.env.APP_URL || "https://www.chipsync.io",
+        appUrl: process.env.APP_URL || "https://chipsync.co",
         h2h: createH2HClient(async () => {
             const secret = await secrets.send(new GetSecretValueCommand({ SecretId: secretId }));
             return parseCredentials(secret.SecretString);

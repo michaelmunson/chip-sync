@@ -82,6 +82,21 @@ describe("processRecord", () => {
             "Chip Sync: Tree Co sent you an offer",
             expect.stringContaining("https://app.test"),
         );
+        expect(h2h.sendText).toHaveBeenCalledWith("+15551234567", expect.stringContaining("app.test"));
+    });
+
+    it("sends a branded HTML email and escapes user-provided text", async () => {
+        const { h2h, deps } = setup({ role: "admin", settings: allOn });
+        await processRecord(
+            record("new-message", { senderName: "Sam <b>", preview: '<script>alert("x")</script> hi & bye' }),
+            deps,
+        );
+        const [, , body] = h2h.sendEmail.mock.calls[0];
+        expect(body).toContain("<!DOCTYPE html>");
+        expect(body).toContain("Read message");
+        expect(body).toContain("&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt; hi &amp; bye");
+        expect(body).not.toContain("<script>");
+        expect(body).toContain('href="https://app.test"');
     });
 
     it("sends only the channels switched on", async () => {

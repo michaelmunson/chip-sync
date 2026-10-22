@@ -1,6 +1,6 @@
 import { defineAuth, referenceAuth } from '@aws-amplify/backend';
 
-/** Branch deployed by Amplify Hosting that serves www.chipsync.io. */
+/** Branch deployed by Amplify Hosting that serves the production site. */
 export const PRODUCTION_BRANCH = 'main';
 
 /**
