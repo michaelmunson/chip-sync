@@ -3,9 +3,6 @@ import { DB } from "./database";
 import Native from "./native";
 
 const payment = {
-    isRequirePayment(tier:Organization["tier"]["plan"]) : boolean {
-        return tier === "trial"; 
-    },
     registerPayment({organizationId, tier}:{organizationId:string, tier:Organization["tier"]}){
         if (Native.isNative){
             Native.sendMessage({
