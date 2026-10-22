@@ -1,7 +1,6 @@
 import { defineBackend } from '@aws-amplify/backend';
 import { StartingPosition } from 'aws-cdk-lib/aws-lambda';
 import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
-import { StreamViewType } from 'aws-cdk-lib/aws-dynamodb';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
@@ -25,10 +24,10 @@ const backend = defineBackend({
 
 // Text / email notifications: every in-app Notification row is also a trigger for `notify`,
 // which checks the recipient's settings before sending anything.
-const { cfnResources, tables } = backend.data.resources;
-cfnResources.amplifyDynamoDbTables['Notification'].streamSpecification = {
-  streamViewType: StreamViewType.NEW_IMAGE,
-};
+// Amplify already creates each model table with a NEW_AND_OLD_IMAGES stream. Don't override
+// `streamSpecification`: changing the view type disables the stream mid-deploy and the event
+// source mapping then fails with "Stream is Disabled".
+const { tables } = backend.data.resources;
 
 const notifyLambda = backend.notify.resources.lambda;
 notifyLambda.addEventSource(
