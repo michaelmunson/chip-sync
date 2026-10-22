@@ -20,6 +20,7 @@ import { ModalConfig, ToggleModal } from "../../../../types/generalTypes";
 import { DB } from "../../../../utils/database";
 import { initials } from "../../../../utils/format";
 import EmptyState from "../../../utils/EmptyState";
+import NotificationPreferences from "../../../utils/NotificationPreferences";
 import { MaterialPills, MaterialTile } from "../../../utils/Material";
 import ModalContent from "./modalUtils/ModalContent";
 
@@ -487,6 +488,8 @@ export default function Settings({
         setTheme={setTheme}
         setUserData={setUserData}
       />
+
+      <NotificationPreferences userData={userData} setUserData={setUserData} />
 
       {isAdmin && (
         <>

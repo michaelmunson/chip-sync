@@ -21,6 +21,8 @@ const schema = /* GraphQL */ `
     organization: Organization @belongsTo
     mapChoice: String @default(value: "apple")
     contact: AWSJSON
+    # Text / email notification preferences (see src/utils/notificationSettings.ts). Empty means all off.
+    notificationSettings: AWSJSON
     markers: [GardnerMarker] @hasMany
   }
 

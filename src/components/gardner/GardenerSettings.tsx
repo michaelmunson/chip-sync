@@ -9,6 +9,7 @@ import { initials } from "../../utils/format";
 import { Geo } from "../../utils/location";
 import { Preferences } from "../arborist/arboristComponents/modalComponents/Settings";
 import ModalContent from "../arborist/arboristComponents/modalComponents/modalUtils/ModalContent";
+import NotificationPreferences from "../utils/NotificationPreferences";
 
 export function isKnownZip(zip: string) {
   if (!/^\d{5}$/.test(zip)) return false;
@@ -122,6 +123,8 @@ export default function GardenerSettings({
       </form>
 
       <Preferences userData={userData} theme={theme} setTheme={setTheme} setUserData={setUserData} />
+
+      <NotificationPreferences userData={userData} setUserData={setUserData} />
 
       <div className="section-label">Account</div>
       <div className="group">

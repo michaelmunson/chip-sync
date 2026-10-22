@@ -240,6 +240,7 @@ export const createUser = /* GraphQL */ `
         __typename
       }
       mapChoice
+      notificationSettings
       contact
       markers {
         items {
@@ -309,6 +310,7 @@ export const updateUser = /* GraphQL */ `
         __typename
       }
       mapChoice
+      notificationSettings
       contact
       markers {
         items {

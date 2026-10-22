@@ -24,6 +24,7 @@ import { S3 } from "./storage";
 import { NotificationGQLSocket } from "./websocket";
 import { AnyObject } from "../types/generalTypes";
 import logger from "./logger";
+import { NotificationSettings, parseNotificationSettings } from "./notificationSettings";
 
 namespace DBTypes {
     export interface CreateOrg {
@@ -71,6 +72,7 @@ namespace DBTypes {
         firstName?:string
         lastName?:string
         contact?:GardenerContact
+        notificationSettings?:NotificationSettings
     }
     export interface UpdateMarker {
         id:string
@@ -163,6 +165,9 @@ export function cleanData(data:{[key:string]:any}|null|undefined):any{
     if ("contact" in data){
         data.contact = parseJson(data.contact);
     }
+    if ("notificationSettings" in data){
+        data.notificationSettings = parseNotificationSettings(data.notificationSettings);
+    }
     if ("tier" in data){
         data.tier = parseJson(data.tier);
     }
@@ -242,13 +247,14 @@ export const DB = {
         });
         return cleanData(res.data.createUser);
     },
-    async updateUser({id,role,mapChoice,firstName,lastName,contact}:DBTypes.UpdateUser){
+    async updateUser({id,role,mapChoice,firstName,lastName,contact,notificationSettings}:DBTypes.UpdateUser){
         const input:AnyObject = {id};
         if (role) input.role = role;
         if (mapChoice) input.mapChoice = mapChoice;
         if (firstName !== undefined) input.firstName = firstName;
         if (lastName !== undefined) input.lastName = lastName;
         if (contact !== undefined) input.contact = JSON.stringify(contact);
+        if (notificationSettings !== undefined) input.notificationSettings = JSON.stringify(notificationSettings);
         if (Object.keys(input).length === 1) return;
         return await client.graphql({
             query: updateUserMutation,
@@ -372,6 +378,8 @@ export const DB = {
                 userId: user.id,
                 type: "new-org-marker",
                 data: {
+                    // Lets the notify Lambda skip texting the person who added it.
+                    createdById: userData.id,
                     type,
                     kind,
                     startDate,

@@ -166,6 +166,7 @@ export const getUser = /* GraphQL */ `
         __typename
       }
       mapChoice
+      notificationSettings
       contact
       markers {
         items {

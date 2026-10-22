@@ -8,6 +8,8 @@ declare global {
 window.exports = window.exports || {};
 window.ReactNativeWebView = window.ReactNativeWebView || undefined;
 
+import type { NotificationSettings } from "../utils/notificationSettings"
+
 /* SUBTYPES */
 export interface Contact {
     name: string
@@ -229,6 +231,8 @@ export interface User {
     organization: Organization
     notifications: Notification.Any[]
     mapChoice: "apple"|"google"
+    /** Text / email preferences; parsed to all-off defaults when never saved. */
+    notificationSettings?: NotificationSettings
     // if gardner
     contact?: GardenerContact
     markers?: GardnerMarker[]

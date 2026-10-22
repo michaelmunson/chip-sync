@@ -46,6 +46,8 @@
     "@aws-amplify/backend": "^1.14.0",
     "@aws-amplify/backend-cli": "^1.4.0",
     "@aws-sdk/client-dynamodb": "^3.1154.0",
+    "@aws-sdk/client-secrets-manager": "^3.1155.0",
+    "@types/aws-lambda": "^8.10.164",
     "@vitejs/plugin-react": "^5.0.4",
     "aws-cdk": "^2.170.0",
     "aws-cdk-lib": "^2.170.0",
