@@ -1,4 +1,7 @@
 import DirectionsOutlined from "@mui/icons-material/DirectionsOutlined";
+import FactoryOutlined from "@mui/icons-material/FactoryOutlined";
+import MyLocationOutlined from "@mui/icons-material/MyLocationOutlined";
+import PersonOutlineOutlined from "@mui/icons-material/PersonOutlineOutlined";
 import PlaceOutlined from "@mui/icons-material/PlaceOutlined";
 import WorkOutlineOutlined from "@mui/icons-material/WorkOutlineOutlined";
 import { Alert, Button, MenuItem, Skeleton, TextField } from "@mui/material";
@@ -11,6 +14,7 @@ import { markerKind } from "../../utils/markers";
 import ModalButtons from "../arborist/arboristComponents/modalComponents/modalUtils/ModalButtons";
 import ModalContent from "../arborist/arboristComponents/modalComponents/modalUtils/ModalContent";
 import EmptyState from "../utils/EmptyState";
+import { JobMaterialPill, JobStatusPill } from "./JobStatusPill";
 
 function memberName(userData: User, userId: string) {
   const user = userData.organization.users.find((u) => u.id === userId);
@@ -120,105 +124,121 @@ export default function JobDetails({
           <div>
             <h3>{job.name}</h3>
             <div className="pill-row">
-              <span className="pill">{job.status}</span>
+              <JobStatusPill status={job.status} />
               {job.produces.map((p) => (
-                <span className="pill" key={p}>
-                  {p === "wood" ? "Logs" : p === "chips" ? "Chips" : "Both"}
-                </span>
+                <JobMaterialPill material={p} key={p} />
               ))}
             </div>
           </div>
         </div>
 
         {job.notes && (
-          <div className="group">
+          <>
             <div className="section-label">Notes</div>
-            <p>{job.notes}</p>
+            <div className="group">
+              <div className="info-row">
+                <div className="info-row-body">
+                  <div className="info-row-value pre-wrap">{job.notes}</div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="section-label">Crew</div>
+        {assignments.length === 0 ? (
+          <div className="group">
+            <div className="info-row">
+              <div className="info-row-body">
+                <div className="info-row-value muted">No one assigned.</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="group">
+            {assignments.map((a) => (
+              <div className="group-row" key={a.id}>
+                <PersonOutlineOutlined className="group-row-icon" />
+                <span className="group-row-body">
+                  <span className="group-row-title">{memberName(userData, a.userId)}</span>
+                  {a.jobSiteMarkerId && (
+                    <span className="group-row-sub">
+                      {markerName(markers, a.jobSiteMarkerId)}
+                    </span>
+                  )}
+                </span>
+              </div>
+            ))}
           </div>
         )}
 
-        <div className="group">
-          <div className="section-label">Crew</div>
-          {assignments.length === 0 ? (
-            <p className="muted">No one assigned.</p>
-          ) : (
-            <ul className="plain-list">
-              {assignments.map((a) => (
-                <li key={a.id}>
-                  <strong>{memberName(userData, a.userId)}</strong>
-                  {a.jobSiteMarkerId && (
-                    <span className="muted">
-                      {" "}
-                      · {markerName(markers, a.jobSiteMarkerId)}
+        <div className="section-label">Routes</div>
+        {routingPlans.length === 0 ? (
+          <div className="group">
+            <div className="info-row">
+              <div className="info-row-body">
+                <div className="info-row-value muted">No routes were generated.</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          routingPlans.map((plan) => {
+            const stops = routeStopsForPlan(plan, markers);
+            const routeHref = Geo.getRouteURL({
+              mapChoice: userData.mapChoice,
+              stops: stops.map((m) => ({ latitude: m.latitude, longitude: m.longitude })),
+            });
+            const appName = userData.mapChoice === "google" ? "Google Maps" : "Apple Maps";
+            return (
+              <div className="group routing-plan" key={plan.id}>
+                <div className="routing-plan-title">{memberName(userData, plan.userId)}</div>
+                <ol className="routing-stops">
+                  <li>
+                    <MyLocationOutlined fontSize="small" />
+                    <span>Your current location</span>
+                  </li>
+                  <li>
+                    <PlaceOutlined fontSize="small" />
+                    <span>
+                      {plan.dropSiteMarkerIds[0]
+                        ? markerName(markers, plan.dropSiteMarkerIds[0])
+                        : "No drop site nearby"}
+                      <small>Drop site</small>
                     </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                  </li>
+                  <li>
+                    <FactoryOutlined fontSize="small" />
+                    <span>
+                      {markerName(markers, plan.facilityMarkerId)}
+                      <small>Facility</small>
+                    </span>
+                  </li>
+                </ol>
+                {routeHref ? (
+                  <Button
+                    variant="outlined"
+                    startIcon={<DirectionsOutlined />}
+                    href={routeHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open in {appName}
+                  </Button>
+                ) : (
+                  <p className="muted">No drop site or facility to route to.</p>
+                )}
+              </div>
+            );
+          })
+        )}
 
-        <div className="group">
-          <div className="section-label">Routing plans</div>
-          {routingPlans.length === 0 ? (
-            <p className="muted">No routing plans were generated.</p>
-          ) : (
-            routingPlans.map((plan) => {
-              const stops = routeStopsForPlan(plan, markers);
-              const routeHref = Geo.getRouteURL({
-                mapChoice: userData.mapChoice,
-                stops: stops.map((m) => ({ latitude: m.latitude, longitude: m.longitude })),
-              });
-              const appName = userData.mapChoice === "google" ? "Google Maps" : "Apple Maps";
-              return (
-                <div className="routing-plan" key={plan.id}>
-                  <strong>{memberName(userData, plan.userId)}</strong>
-                  <ol className="routing-stops">
-                    <li>
-                      <PlaceOutlined fontSize="small" />
-                      <span>Start: your current location</span>
-                    </li>
-                    <li>
-                      <PlaceOutlined fontSize="small" />
-                      <span>
-                        Drop site:{" "}
-                        {plan.dropSiteMarkerIds[0]
-                          ? markerName(markers, plan.dropSiteMarkerIds[0])
-                          : "None nearby"}
-                      </span>
-                    </li>
-                    <li>
-                      <PlaceOutlined fontSize="small" />
-                      <span>Facility: {markerName(markers, plan.facilityMarkerId)}</span>
-                    </li>
-                  </ol>
-                  {routeHref ? (
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<DirectionsOutlined />}
-                      href={routeHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Open route in {appName}
-                    </Button>
-                  ) : (
-                    <p className="muted">No drop site or facility to route to.</p>
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>
-
+        <div className="section-label">Status</div>
         <TextField
           select
           label="Status"
           value={job.status}
           disabled={updating}
           onChange={(event) => setStatus(event.target.value as JobStatus)}
-          sx={{ mt: 1 }}
         >
           <MenuItem value="planned">Planned</MenuItem>
           <MenuItem value="active">Active</MenuItem>

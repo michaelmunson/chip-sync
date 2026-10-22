@@ -141,6 +141,27 @@
 .marker-pill--wood::before {
   background: #d08a22;
 }
+.marker-pill--planned {
+  background: #e3edf8;
+  color: #275684;
+}
+.marker-pill--planned::before {
+  background: #3f7cbf;
+}
+.marker-pill--done {
+  background: #eceeed;
+  color: #4b5750;
+}
+.marker-pill--done::before {
+  background: #8a948d;
+}
+.marker-pill--cancelled {
+  background: #fbeeee;
+  color: #b94a48;
+}
+.marker-pill--cancelled::before {
+  background: #b94a48;
+}
 .marker-address,
 .marker-contact {
   margin: 0;

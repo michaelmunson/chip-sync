@@ -1,6 +1,7 @@
 import { Loader } from '@googlemaps/js-api-loader';
-import { useEffect, useRef, useState } from 'react';
-import { CircularProgress } from "@mui/material";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { CircularProgress, Divider, ListItemText, Menu, MenuItem } from "@mui/material";
+import KeyboardArrowDownRounded from "@mui/icons-material/KeyboardArrowDownRounded";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import "../../../css/map.css";
 import { Marker, ServiceRequest, User } from '../../../types/dataTypes';
@@ -11,7 +12,8 @@ import { getGoogleMapsApiKey } from '../../../utils/secrets';
 import { useRequests } from '../../requests/RequestsContext';
 import { buildRequestInfo, buildRequestPin, PinTone } from '../../../utils/requestPins';
 import { requestSummary } from '../../../utils/requestFormat';
-import { JobsAPI, JobSitePin } from '../../../utils/jobs';
+import { JobsAPI, jobMarkerIds, MapJob } from '../../../utils/jobs';
+import { JOB_STATUS } from '../../jobs/JobStatusPill';
 import { buildJobInfo, buildJobPin } from '../../../utils/jobPins';
 
 const toLatLng = ({ latitude, longitude }: Coordinates) => ({ lat: latitude, lng: longitude });
@@ -72,7 +74,9 @@ export default function Map({
     const [locationMarker, setLocationMarker] = useState<any>();
     const [mapMarkers, setMapMarkers] = useState<any[]>([]); 
     const [requestMarkers, setRequestMarkers] = useState<any[]>([]);
-    const [jobPins, setJobPins] = useState<JobSitePin[]>([]);
+    const [mapJobs, setMapJobs] = useState<MapJob[]>([]);
+    const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+    const [jobsAnchor, setJobsAnchor] = useState<HTMLElement | null>(null);
     const [jobMarkers, setJobMarkers] = useState<any[]>([]);
     const [layers, setLayers] = useState<MapLayers>(loadLayers);
     const draftMarker = useRef<any>();
@@ -81,6 +85,16 @@ export default function Map({
     placing.current = placement !== null;
     onPlace.current = onPlacementChange;
     const store = useRequests();
+    const selectedJob = mapJobs.find(({ job }) => job.id === selectedJobId);
+    const focus = useMemo(() => (selectedJob ? jobMarkerIds(selectedJob) : null), [selectedJob]);
+    const jobPins = useMemo(() => {
+        const sitesById = new globalThis.Map(userData.organization.markers.map(marker => [marker.id, marker]));
+        return (selectedJob ? [selectedJob] : mapJobs).flatMap(({ job, locations, routingPlans }) =>
+            Array.from(jobMarkerIds({ locations, routingPlans }).jobSites)
+                .map(id => sitesById.get(id))
+                .filter((site): site is Marker => Boolean(site))
+                .map(site => ({ job, marker: site })));
+    }, [mapJobs, selectedJob, userData.organization.markers]);
     const getLoader = () => {
         try {
             setLoader(new Loader({ apiKey: getGoogleMapsApiKey(), version: "weekly" }));
@@ -94,19 +108,41 @@ export default function Map({
         try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch { /* private mode */ }
     }, [layers]);
     useEffect(() => {
-        mapMarkers.forEach(marker => { marker.map = layers.sites && !placing.current ? map : null; });
-    }, [layers.sites, mapMarkers, map, placement]);
+        mapMarkers.forEach(marker => {
+            // Focusing a job narrows the pins to its facilities and relevant drop sites (job sites get their own pin).
+            const show = focus
+                ? focus.facilities.has(marker.id) || focus.dropSites.has(marker.id)
+                : layers.sites;
+            marker.map = show && !placing.current ? map : null;
+        });
+    }, [layers.sites, mapMarkers, map, placement, focus]);
     useEffect(() => {
         if (map) addRequestMarkers();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [map, store.requests, store.offers, layers.requests, placement]);
+    }, [map, store.requests, store.offers, layers.requests, placement, selectedJobId]);
     useEffect(() => {
         let cancelled = false;
-        JobsAPI.listJobSitePins(userData.organization.id, userData.organization.markers)
-            .then(pins => { if (!cancelled) setJobPins(pins); })
+        JobsAPI.listMapJobs(userData.organization.id)
+            .then(jobs => { if (!cancelled) setMapJobs(jobs); })
             .catch(() => { /* the Jobs layer just stays empty */ });
         return () => { cancelled = true; };
-    }, [userData.organization.id, userData.organization.markers, jobsRefreshKey]);
+    }, [userData.organization.id, jobsRefreshKey]);
+    useEffect(() => {
+        if (selectedJobId && !mapJobs.some(({ job }) => job.id === selectedJobId)) setSelectedJobId(null);
+    }, [mapJobs, selectedJobId]);
+    useEffect(() => {
+        if (!map || !loader || !focus || placing.current) return;
+        const points = userData.organization.markers
+            .filter(marker => focus.jobSites.has(marker.id) || focus.facilities.has(marker.id) || focus.dropSites.has(marker.id))
+            .map(toLatLng);
+        if (points.length === 0) return;
+        loader.importLibrary("core").then(({ LatLngBounds }) => {
+            const bounds = new LatLngBounds();
+            points.forEach(point => bounds.extend(point));
+            map.fitBounds(bounds, 80);
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedJobId, map, loader]);
     useEffect(() => {
         if (map) addJobMarkers();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -324,7 +360,7 @@ export default function Map({
         if (!loader) return;
         const { InfoWindow } = await loader.importLibrary("maps");
         const { AdvancedMarkerElement } = await loader.importLibrary("marker");
-        const markers = (!layers.requests || placing.current) ? [] : visibleRequests(store.requests, userData.organization.id).map(request => {
+        const markers = (!layers.requests || selectedJobId || placing.current) ? [] : visibleRequests(store.requests, userData.organization.id).map(request => {
             const myOffer = store.offersFor(request.id)[0];
             const tone: PinTone =
                 request.acceptedOrganizationId === userData.organization.id ? "booked"
@@ -429,7 +465,12 @@ export default function Map({
     }
 
     const requestCount = visibleRequests(store.requests, userData.organization.id).length;
-    const jobCount = new Set(jobPins.map(({ job }) => job.id)).size;
+    const jobsOpen = Boolean(jobsAnchor);
+    const chooseJob = (id: string | null, visible = true) => {
+        setSelectedJobId(id);
+        setLayers(current => ({ ...current, jobs: visible }));
+        setJobsAnchor(null);
+    };
     const toggleLayer = (layer: keyof MapLayers) => setLayers(current => ({ ...current, [layer]: !current[layer] }));
 
     const isPlacing = placement !== null;
@@ -441,17 +482,19 @@ export default function Map({
                 <button
                     type="button"
                     className="map-layer map-layer--sites"
-                    aria-pressed={layers.sites}
+                    aria-pressed={focus ? true : layers.sites}
+                    disabled={Boolean(focus)}
                     onClick={() => toggleLayer("sites")}
                 >
                     <span className="map-layer-dot" aria-hidden="true" />
                     Drop sites
-                    <span className="map-layer-count">{userData.organization.markers.length}</span>
+                    <span className="map-layer-count">{focus ? focus.dropSites.size : userData.organization.markers.length}</span>
                 </button>
                 <button
                     type="button"
                     className="map-layer map-layer--requests"
-                    aria-pressed={layers.requests}
+                    aria-pressed={focus ? false : layers.requests}
+                    disabled={Boolean(focus)}
                     onClick={() => toggleLayer("requests")}
                 >
                     <span className="map-layer-dot" aria-hidden="true" />
@@ -462,12 +505,45 @@ export default function Map({
                     type="button"
                     className="map-layer map-layer--jobs"
                     aria-pressed={layers.jobs}
-                    onClick={() => toggleLayer("jobs")}
+                    aria-haspopup="menu"
+                    aria-expanded={jobsOpen}
+                    onClick={event => setJobsAnchor(event.currentTarget)}
                 >
                     <span className="map-layer-dot" aria-hidden="true" />
-                    Jobs
-                    <span className="map-layer-count">{jobCount}</span>
+                    <span className="map-layer-name">{selectedJob ? selectedJob.job.name : "Jobs"}</span>
+                    {!selectedJob && <span className="map-layer-count">{mapJobs.length}</span>}
+                    <KeyboardArrowDownRounded className="map-layer-caret" fontSize="small" />
                 </button>
+                <Menu
+                    anchorEl={jobsAnchor}
+                    open={jobsOpen}
+                    onClose={() => setJobsAnchor(null)}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    transformOrigin={{ vertical: "top", horizontal: "right" }}
+                    slotProps={{ paper: { sx: { mt: 1, minWidth: 220, maxWidth: 320 } } }}
+                >
+                    <MenuItem selected={layers.jobs && !selectedJobId} onClick={() => chooseJob(null)}>
+                        <ListItemText primary="All jobs" secondary="Show every job site" />
+                    </MenuItem>
+                    {mapJobs.map(({ job }) => (
+                        <MenuItem key={job.id} selected={job.id === selectedJobId} onClick={() => chooseJob(job.id)}>
+                            <ListItemText
+                                primary={job.name}
+                                secondary={JOB_STATUS[job.status].label}
+                                primaryTypographyProps={{ noWrap: true }}
+                            />
+                        </MenuItem>
+                    ))}
+                    {mapJobs.length === 0 && (
+                        <MenuItem disabled>
+                            <ListItemText primary="No planned or active jobs" />
+                        </MenuItem>
+                    )}
+                    <Divider />
+                    <MenuItem selected={!layers.jobs} onClick={() => chooseJob(null, false)}>
+                        <ListItemText primary="Hide jobs" />
+                    </MenuItem>
+                </Menu>
             </div>
         )}
         <div

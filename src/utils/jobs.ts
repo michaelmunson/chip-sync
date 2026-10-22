@@ -173,33 +173,31 @@ export function routeStopsForPlan(
   return [dropSite, facility].filter((m): m is Marker => Boolean(m));
 }
 
-/** Where a job is happening, for the map's Jobs layer. */
-export interface JobSitePin {
+/** A planned/active job with everything the map needs to show just that job. */
+export interface MapJob {
   job: Job;
-  marker: Marker;
+  locations: JobLocation[];
+  routingPlans: RoutingPlan[];
+}
+
+/**
+ * Marker ids to show on the map when focusing a job: its job sites and facilities,
+ * plus the drop sites its routing plans point at.
+ */
+export function jobMarkerIds({ locations, routingPlans }: Pick<MapJob, "locations" | "routingPlans">) {
+  const jobSites = new Set<string>();
+  const facilities = new Set<string>();
+  const dropSites = new Set<string>();
+  locations.forEach((l) => (l.role === "jobSite" ? jobSites : facilities).add(l.markerId));
+  routingPlans.forEach((plan) => {
+    if (plan.jobSiteMarkerId) jobSites.add(plan.jobSiteMarkerId);
+    if (plan.facilityMarkerId) facilities.add(plan.facilityMarkerId);
+    plan.dropSiteMarkerIds.forEach((id) => dropSites.add(id));
+  });
+  return { jobSites, facilities, dropSites };
 }
 
 export const JobsAPI = {
-  /** Planned/active jobs paired with each of their job-site markers. */
-  async listJobSitePins(organizationId: string, markers: Marker[]): Promise<JobSitePin[]> {
-    const jobs = (await this.listJobs(organizationId)).filter(
-      (job) => job.status === "planned" || job.status === "active",
-    );
-    const pins = await Promise.all(
-      jobs.map(async (job) => {
-        const locations = await listAll<JobLocation>(Q.jobLocationsByJob, "jobLocationsByJob", {
-          jobId: job.id,
-        });
-        return locations
-          .filter((location) => location.role === "jobSite")
-          .map((location) => markers.find((m) => m.id === location.markerId))
-          .filter((marker): marker is Marker => Boolean(marker))
-          .map((marker) => ({ job, marker }));
-      }),
-    );
-    return pins.flat();
-  },
-
   async listJobs(organizationId: string): Promise<Job[]> {
     const items = await listAll<any>(Q.jobsByOrganization, "jobsByOrganization", { organizationId });
     return items.map(toJob);
@@ -224,6 +222,22 @@ export const JobsAPI = {
   async updateJobStatus(jobId: string, status: JobStatus): Promise<Job> {
     const data = await gql(Q.updateJob, { input: { id: jobId, status } });
     return toJob(data.updateJob);
+  },
+
+  /** Planned and active jobs with their locations and routing plans. */
+  async listMapJobs(organizationId: string): Promise<MapJob[]> {
+    const jobs = (await this.listJobs(organizationId)).filter(
+      (job) => job.status === "planned" || job.status === "active",
+    );
+    return Promise.all(
+      jobs.map(async (job) => {
+        const [locations, routingPlans] = await Promise.all([
+          listAll<JobLocation>(Q.jobLocationsByJob, "jobLocationsByJob", { jobId: job.id }),
+          listAll<any>(Q.routingPlansByJob, "routingPlansByJob", { jobId: job.id }),
+        ]);
+        return { job, locations, routingPlans: routingPlans.map(toRoutingPlan) };
+      }),
+    );
   },
 
   async listLocationAssignmentsForMarker(markerId: string): Promise<LocationAssignment[]> {

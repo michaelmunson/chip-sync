@@ -691,37 +691,65 @@ button.group-row:hover {
 .routing-plan {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
+  gap: 14px;
+  padding: 16px;
 }
-
-.routing-plan:first-of-type {
-  border-top: 0;
-  padding-top: 0;
+.routing-plan + .routing-plan {
+  margin-top: 10px;
+}
+.routing-plan-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .routing-stops {
+  position: relative;
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
+}
+/* Dotted line joining the stops */
+.routing-stops::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 10px;
+  border-left: 2px dotted var(--line-strong, var(--line));
 }
 
 .routing-stops li {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  color: var(--ink-2);
-  font-size: 0.92rem;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.routing-stops li > span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.routing-stops li small {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
 }
 
 .routing-stops li svg {
+  position: relative;
   flex: none;
-  color: var(--ink-3);
+  padding: 1px 0;
+  background: var(--surface);
+  color: var(--muted);
 }
 
 .plain-list {

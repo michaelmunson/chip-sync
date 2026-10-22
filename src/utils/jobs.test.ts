@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { Marker } from "../types/dataTypes";
-import { buildRoutingStops, nearestDropSites, routeStopsForPlan } from "./jobs";
+import { buildRoutingStops, jobMarkerIds, nearestDropSites, routeStopsForPlan } from "./jobs";
 
 vi.mock("./location", () => ({
   Geo: {
@@ -104,5 +104,29 @@ describe("routeStopsForPlan", () => {
         (m) => m.id,
       ),
     ).toEqual(["d2"]);
+  });
+});
+
+describe("jobMarkerIds", () => {
+  test("collects job sites, facilities and the drop sites its plans use", () => {
+    const ids = jobMarkerIds({
+      locations: [
+        { id: "l1", jobId: "j", markerId: "s1", organizationId: "o", role: "jobSite" },
+        { id: "l2", jobId: "j", markerId: "f1", organizationId: "o", role: "facility" },
+      ],
+      routingPlans: [
+        {
+          id: "p1", jobId: "j", userId: "u", organizationId: "o", createdAt: "",
+          facilityMarkerId: "f1", jobSiteMarkerId: "s2", dropSiteMarkerIds: ["d1", "d2"], materialFilter: "chips",
+        },
+        {
+          id: "p2", jobId: "j", userId: "u2", organizationId: "o", createdAt: "",
+          facilityMarkerId: "f1", jobSiteMarkerId: "s1", dropSiteMarkerIds: ["d2", "d3"], materialFilter: "chips",
+        },
+      ],
+    });
+    expect([...ids.jobSites].sort()).toEqual(["s1", "s2"]);
+    expect([...ids.facilities]).toEqual(["f1"]);
+    expect([...ids.dropSites].sort()).toEqual(["d1", "d2", "d3"]);
   });
 });

@@ -2,26 +2,14 @@ import AddOutlined from "@mui/icons-material/AddOutlined";
 import WorkOutlineOutlined from "@mui/icons-material/WorkOutlineOutlined";
 import { Alert, Button, Skeleton, Tab, Tabs } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
-import { Job, JobStatus, User } from "../../types/dataTypes";
+import { Job, User } from "../../types/dataTypes";
 import { ToggleModal } from "../../types/generalTypes";
 import { JobsAPI } from "../../utils/jobs";
 import ModalContent from "../arborist/arboristComponents/modalComponents/modalUtils/ModalContent";
 import EmptyState from "../utils/EmptyState";
+import { JobStatusPill } from "./JobStatusPill";
 
 type TabFilter = "active" | "past";
-
-function statusLabel(status: JobStatus) {
-  switch (status) {
-    case "planned":
-      return "Planned";
-    case "active":
-      return "Active";
-    case "done":
-      return "Done";
-    case "cancelled":
-      return "Cancelled";
-  }
-}
 
 function ListSkeleton() {
   return (
@@ -167,7 +155,7 @@ export default function JobList({
                       {job.notes ? ` · ${job.notes}` : ""}
                     </span>
                     <span className="pill-row">
-                      <span className="pill">{statusLabel(job.status)}</span>
+                      <JobStatusPill status={job.status} />
                     </span>
                   </span>
                 </button>

@@ -254,6 +254,22 @@
 .map-layer--jobs[aria-pressed="true"] .map-layer-dot {
   background: #7b5ab8;
 }
+.map-layer:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.map-layer:disabled:hover {
+  background: none;
+}
+.map-layer-name {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-layer-caret {
+  margin: 0 -4px 0 -2px;
+  opacity: 0.7;
+}
 .map-layer-count {
   min-width: 20px;
   padding: 1px 6px;

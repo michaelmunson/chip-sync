@@ -31,7 +31,8 @@ export function buildJobInfo({
     const status = job.status.charAt(0).toUpperCase() + job.status.slice(1);
     node.innerHTML = `
         <h2>${escapeHtml(job.name)}</h2>
-        <p class="marker-contact">${escapeHtml(status)} · ${escapeHtml(site.name)}</p>
+        <div class="marker-pills"><span class="marker-pill marker-pill--${job.status}">${escapeHtml(status)}</span></div>
+        <p class="marker-contact">${escapeHtml(site.name)}</p>
         <p class="marker-address">${escapeHtml(site.address)}</p>
         <button type="button" class="details-button">View job</button>
     `;
