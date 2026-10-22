@@ -9,6 +9,7 @@ import {
     resolveDelivery,
     type NotificationSettings,
 } from "../../../src/utils/notificationSettings";
+import { jsonAttribute } from "./attributes";
 import { createH2HClient, parseCredentials, type H2HClient } from "./h2h";
 import { buildMessage } from "./message";
 
@@ -27,18 +28,6 @@ export interface Dependencies {
 type Image = Record<string, AttributeValue> | undefined;
 const str = (image: Image, key: string) => image?.[key]?.S;
 
-function parseData(raw: string | undefined): Record<string, any> {
-    let value: unknown = raw;
-    for (let i = 0; i < 2 && typeof value === "string"; i++) {
-        try {
-            value = JSON.parse(value);
-        } catch {
-            return {};
-        }
-    }
-    return value && typeof value === "object" ? (value as Record<string, any>) : {};
-}
-
 /**
  * Handles one Notification table record: when a new in-app notification maps to an
  * event the recipient turned on, sends them a text and / or email. Returns a short
@@ -51,7 +40,7 @@ export async function processRecord(record: DynamoDBRecord, deps: Dependencies):
     const type = str(image, "type");
     if (!userId || !type) return "skipped: missing user or type";
 
-    const data = parseData(str(image, "data"));
+    const data = jsonAttribute(image?.data);
     const event = eventForNotification(type, data);
     if (!event) return `skipped: ${type} is not configurable`;
     // e.g. the person who added a drop site doesn't need a text about their own action.
@@ -116,7 +105,7 @@ function liveDependencies(): Dependencies {
             if (!Item) return undefined;
             return {
                 role: str(Item, "role") ?? "",
-                settings: parseNotificationSettings(str(Item, "notificationSettings")),
+                settings: parseNotificationSettings(jsonAttribute(Item.notificationSettings)),
             };
         },
     };

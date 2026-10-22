@@ -5,14 +5,31 @@ import type { NotificationSettings } from "../../../src/utils/notificationSettin
 import { extractToken, createH2HClient, parseCredentials } from "./h2h";
 import { processRecord, type Dependencies, type Recipient } from "./handler";
 
-const record = (type: string, data: object, userId = "user-1", eventName = "INSERT"): DynamoDBRecord =>
+/** Minimal DynamoDB marshalling for test data. */
+const toAttr = (value: any): any => {
+    if (typeof value === "string") return { S: value };
+    if (typeof value === "number") return { N: String(value) };
+    if (typeof value === "boolean") return { BOOL: value };
+    if (value === null) return { NULL: true };
+    if (Array.isArray(value)) return { L: value.map(toAttr) };
+    return { M: Object.fromEntries(Object.entries(value).map(([k, v]) => [k, toAttr(v)])) };
+};
+
+// AppSync stores AWSJSON as a native DynamoDB map; `asString` covers older rows stored as JSON text.
+const record = (
+    type: string,
+    data: object,
+    userId = "user-1",
+    eventName = "INSERT",
+    asString = false,
+): DynamoDBRecord =>
     ({
         eventName,
         dynamodb: {
             NewImage: {
                 type: { S: type },
                 userNotificationsId: { S: userId },
-                data: { S: JSON.stringify(data) },
+                data: asString ? { S: JSON.stringify(data) } : toAttr(data),
             },
         },
     }) as DynamoDBRecord;
@@ -45,6 +62,12 @@ describe("processRecord", () => {
         expect(outcome).toContain("off");
         expect(h2h.sendText).not.toHaveBeenCalled();
         expect(h2h.sendEmail).not.toHaveBeenCalled();
+    });
+
+    it("reads notification data stored as JSON text as well as a native map", async () => {
+        const { h2h, deps } = setup({ role: "gardner", settings: allOn });
+        await processRecord(record("new-offer", { organizationName: "Tree Co" }, "user-1", "INSERT", true), deps);
+        expect(h2h.sendText).toHaveBeenCalledWith("+15551234567", expect.stringContaining("Tree Co sent you an offer"));
     });
 
     it("texts and emails a gardener about a new offer when both are on", async () => {
