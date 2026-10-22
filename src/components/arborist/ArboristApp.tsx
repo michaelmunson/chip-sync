@@ -1,23 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { User } from '../../types/dataTypes';
+import { MarkerKind, User } from '../../types/dataTypes';
 import Map from './arboristComponents/Map';
 import Controls from './arboristComponents/Controls';
 import { DB } from '../../utils/database';
 import { Coordinates, ModalConfig, NativeMessaging } from '../../types/generalTypes';
 import { Geo } from '../../utils/location';
 import Modal from './arboristComponents/Modal';
-import { S3 } from '../../utils/storage';
 import Theme from '../../utils/theme';
 import Native from '../../utils/native';
-import payment from '../../utils/payment';
-import PricingPage from './arboristComponents/Pricing';
 import TrialStart from './arboristComponents/TrialStart';
 import { RequestsProvider } from '../requests/RequestsContext';
 import { useNotificationSocket } from '../../utils/notificationFeed';
+import PlacementPanel from '../gardner/PlacementPanel';
+import { AddLocationOptions, JobFormDraft } from './arboristComponents/modalComponents/AddMarker';
+import { MarkerFormDraft } from './arboristComponents/modalComponents/MarkerForm';
 
 const MIN_UPDATE_DISTANCE = .2 // miles
+
+interface Placement {
+  position: Coordinates;
+  lockedKind?: MarkerKind;
+  jobDraft?: JobFormDraft;
+  selectAs?: "facility" | "jobSite";
+  /** Editing an existing marker's pin. */
+  markerId?: string;
+  draft?: MarkerFormDraft;
+  /** Where to return if the user cancels a "Move pin" round trip. */
+  origin?: { position: Coordinates; address: string };
+}
 
 interface ArboristAppProps {
     userData:User,
@@ -33,6 +45,13 @@ export default function ArboristApp({
     const [currentLocation, setCurrentLocation] = useState<Coordinates>(Geo.zipcodeToCoordinates(userData.organization.location));
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [modalConfig, setModalConfig] = useState<ModalConfig>({type:"add-marker"});
+    const [placement, setPlacement] = useState<Placement | null>(null);
+    const [placementAddress, setPlacementAddress] = useState("");
+    const [resolving, setResolving] = useState(false);
+    const [locating, setLocating] = useState(false);
+    const [focusKey, setFocusKey] = useState(0);
+    const geocodeSeq = useRef(0);
+
     /* USE EFFECTS */
     useEffect(() => {
         document.documentElement.dataset.theme = theme;
@@ -47,7 +66,7 @@ export default function ArboristApp({
             if (messageData.status === 200 && messageData.messageType === "payment"){
                 const tier = messageData.data.tier;
                 if (tier.cycle && tier.plan && tier.timestamp){
-                    const updateOrgRes:any = await DB.updateOrganization({organizationId:userData.organization.id, tier}); 
+                    await DB.updateOrganization({organizationId:userData.organization.id, tier}); 
                     const newUserData = await DB.getUser();
                     if (newUserData) setUserData(newUserData)
                 }
@@ -83,11 +102,112 @@ export default function ArboristApp({
         });
     }
 
-    // if (payment.isRequirePayment(userData.organization.tier.plan)) return (
-    //     <PricingPage
-    //         userData={userData}
-    //         setUserData={setUserData}/>
-    // )
+    const resolveAddress = useCallback((position: Coordinates) => {
+        const seq = ++geocodeSeq.current;
+        setResolving(true);
+        Geo.coordsToAddress(position)
+            .then((address) => seq === geocodeSeq.current && setPlacementAddress(address))
+            .catch(() => seq === geocodeSeq.current && setPlacementAddress(""))
+            .finally(() => seq === geocodeSeq.current && setResolving(false));
+    }, []);
+
+    const movePlacement = useCallback(
+        (position: Coordinates, knownAddress?: string) => {
+            setPlacement((current) => (current ? { ...current, position } : current));
+            if (knownAddress !== undefined) {
+                geocodeSeq.current++;
+                setResolving(false);
+                setPlacementAddress(knownAddress);
+            } else {
+                resolveAddress(position);
+            }
+        },
+        [resolveAddress],
+    );
+
+    const startAddLocation = useCallback((opts: AddLocationOptions = {}) => {
+        const position = opts.origin?.position ?? currentLocation;
+        const address = opts.origin?.address;
+        setModalOpen(false);
+        setPlacement({
+            position,
+            lockedKind: opts.lockedKind,
+            jobDraft: opts.jobDraft,
+            selectAs: opts.selectAs,
+            markerId: opts.markerId,
+            draft: opts.draft,
+            origin: opts.origin,
+        });
+        setFocusKey((k) => k + 1);
+        if (address !== undefined) setPlacementAddress(address);
+        else resolveAddress(position);
+    }, [currentLocation, resolveAddress]);
+
+    function locateMe() {
+        setLocating(true);
+        Geo.getCurrentLocation()
+            .then(({ latitude, longitude }) => {
+                const position = { latitude, longitude };
+                setCurrentLocation(position);
+                movePlacement(position);
+                setFocusKey((k) => k + 1);
+            })
+            .catch(() => {})
+            .finally(() => setLocating(false));
+    }
+
+    function finishPlacement(cancelled: boolean) {
+        if (!placement) return;
+        const { markerId, draft, origin, lockedKind, jobDraft, selectAs } = placement;
+        setPlacement(null);
+
+        if (cancelled && !origin) {
+            if (jobDraft) {
+                toggleModal(true, {
+                    type: "job-form",
+                    data: { draft: jobDraft },
+                    back: { type: "job-list" },
+                });
+            }
+            return;
+        }
+
+        const target =
+            cancelled && origin
+                ? origin
+                : { position: placement.position, address: placementAddress };
+
+        if (markerId) {
+            const marker = userData.organization.markers.find((m) => m.id === markerId);
+            if (marker) {
+                toggleModal(true, {
+                    type: "edit-marker",
+                    data: {
+                        marker,
+                        position: target.position,
+                        address: target.address,
+                        draft,
+                    },
+                });
+                return;
+            }
+        }
+
+        toggleModal(true, {
+            type: "add-marker",
+            data: {
+                position: target.position,
+                address: target.address,
+                draft,
+                lockedKind,
+                jobDraft,
+                selectAs,
+            },
+            back: jobDraft
+                ? { type: "job-form", data: { draft: jobDraft }, back: { type: "job-list" } }
+                : undefined,
+        });
+    }
 
     if (userData.organization.tier.plan === "") return (
         <TrialStart userData={userData} setUserData={setUserData}/>
@@ -102,12 +222,44 @@ export default function ArboristApp({
                 theme={theme}
                 userData={userData}
                 currentLocation={currentLocation}
-                toggleModal={toggleModal}/>
-            
-            <Controls
-                userData={userData}
                 toggleModal={toggleModal}
-                currentLocation={currentLocation}/>
+                placement={placement?.position ?? null}
+                onPlacementChange={(position) => movePlacement(position)}
+                focusKey={focusKey}
+            />
+            
+            {placement ? (
+                <PlacementPanel
+                    position={placement.position}
+                    address={placementAddress}
+                    resolving={resolving}
+                    editing={Boolean(placement.markerId || placement.origin)}
+                    locating={locating}
+                    title={
+                        placement.markerId || placement.origin
+                            ? "Move your pin"
+                            : placement.lockedKind === "facility"
+                              ? "Drop a pin for this facility"
+                              : placement.lockedKind === "jobSite"
+                                ? "Drop a pin for this job site"
+                                : "Drop a pin for this location"
+                    }
+                    description="Tap the map or drag the pin to the exact spot — your drop site, facility, or job site."
+                    onSearch={(position, address) => {
+                        movePlacement(position, address);
+                        setFocusKey((k) => k + 1);
+                    }}
+                    onUseMyLocation={locateMe}
+                    onCancel={() => finishPlacement(true)}
+                    onContinue={() => finishPlacement(false)}
+                />
+            ) : (
+                <Controls
+                    userData={userData}
+                    toggleModal={toggleModal}
+                    onAddLocation={() => startAddLocation()}
+                />
+            )}
 
             <Modal
                 open={modalOpen}
@@ -117,7 +269,9 @@ export default function ArboristApp({
                 setTheme={setTheme}
                 modalConfig={modalConfig}
                 toggleModal={toggleModal}
-                currentLocation={currentLocation}/>
+                currentLocation={currentLocation}
+                onAddLocation={startAddLocation}
+            />
             </main>
             </RequestsProvider>
         </ThemeProvider>

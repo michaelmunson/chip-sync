@@ -1,5 +1,6 @@
 import ApartmentOutlined from "@mui/icons-material/ApartmentOutlined";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ForestOutlined from "@mui/icons-material/ForestOutlined";
 import ConstructionOutlined from "@mui/icons-material/ConstructionOutlined";
 import DirectionsOutlinedIcon from "@mui/icons-material/DirectionsOutlined";
@@ -19,12 +20,14 @@ import {
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { Marker, User } from "../../../../types/dataTypes";
-import { ToggleModal } from "../../../../types/generalTypes";
+import { SetUserData, ToggleModal } from "../../../../types/generalTypes";
+import { DB } from "../../../../utils/database";
 import { formatPhone } from "../../../../utils/format";
 import { JobsAPI } from "../../../../utils/jobs";
 import { Geo } from "../../../../utils/location";
 import { KIND_LABEL, markerKind } from "../../../../utils/markers";
 import { S3 } from "../../../../utils/storage";
+import ConfirmDialog from "../../../utils/ConfirmDialog";
 import { MaterialPills, MaterialTile } from "../../../utils/Material";
 import ModalButtons from "./modalUtils/ModalButtons";
 import ModalContent from "./modalUtils/ModalContent";
@@ -32,6 +35,7 @@ import ModalContent from "./modalUtils/ModalContent";
 interface MarkerDetailsProps {
   data: Marker;
   userData: User;
+  setUserData: SetUserData;
   toggleModal: ToggleModal;
 }
 
@@ -95,10 +99,14 @@ function KindHero({ kind }: { kind: ReturnType<typeof markerKind> }) {
 export default function MarkerDetails({
   data,
   userData,
+  setUserData,
   toggleModal,
 }: MarkerDetailsProps) {
   const images = useMarkerImages(data);
   const [zoomed, setZoomed] = useState<string>();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const kind = markerKind(data);
   const directionsUrl = Geo.getAddressURL({
     mapChoice: userData.mapChoice,
@@ -117,6 +125,29 @@ export default function MarkerDetails({
   const [loadingMembers, setLoadingMembers] = useState(kind !== "dropSite");
   const [savingMembers, setSavingMembers] = useState(false);
   const [memberError, setMemberError] = useState("");
+
+  const removeLocation = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await DB.deleteMarker({ id: data.id });
+      setUserData((current) =>
+        current
+          ? {
+              ...current,
+              organization: {
+                ...current.organization,
+                markers: current.organization.markers.filter((m) => m.id !== data.id),
+              },
+            }
+          : current,
+      );
+      toggleModal(true, { type: "marker-list" });
+    } catch {
+      setDeleteError("Couldn’t delete this location. Please try again.");
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (kind === "dropSite") return;
@@ -275,11 +306,22 @@ export default function MarkerDetails({
         )}
       </ModalContent>
 
-      <ModalButtons>
+      {deleteError && <p className="form-error">{deleteError}</p>}
+
+      <ModalButtons split>
+        <Button
+          variant="text"
+          color="error"
+          startIcon={<DeleteOutlineIcon />}
+          onClick={() => setConfirmDelete(true)}
+        >
+          Delete
+        </Button>
+        <span className="grow" />
         <Button
           variant="outlined"
           startIcon={<EditOutlinedIcon />}
-          onClick={() => toggleModal(true, { type: "edit-marker", data })}
+          onClick={() => toggleModal(true, { type: "edit-marker", data: { marker: data } })}
         >
           Edit
         </Button>
@@ -310,6 +352,18 @@ export default function MarkerDetails({
         </IconButton>
         {zoomed && <img src={zoomed} alt={`Photo of ${data.name}`} />}
       </Dialog>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title={`Delete ${data.name}?`}
+        confirmLabel="Delete"
+        tone="error"
+        busy={deleting}
+        onCancel={() => !deleting && setConfirmDelete(false)}
+        onConfirm={removeLocation}
+      >
+        <p>This removes the location from your map for the whole crew. This can’t be undone.</p>
+      </ConfirmDialog>
     </>
   );
 }

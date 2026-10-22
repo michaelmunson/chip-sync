@@ -7,7 +7,7 @@ import {
 } from "../../../types/generalTypes";
 import { Marker, User } from "../../../types/dataTypes";
 import MarkerList from "./modalComponents/MarkerList";
-import AddMarker from "./modalComponents/AddMarker";
+import AddMarker, { AddLocationOptions } from "./modalComponents/AddMarker";
 import Notifications from "./modalComponents/Notifications";
 import MarkerDetails from "./modalComponents/MarkerDetails";
 import Settings from "./modalComponents/Settings";
@@ -26,6 +26,7 @@ import { requestSummary } from "../../../utils/requestFormat";
 import JobList from "../../jobs/JobList";
 import JobForm from "../../jobs/JobForm";
 import JobDetails from "../../jobs/JobDetails";
+import { MarkerFormDraft } from "./modalComponents/MarkerForm";
 
 interface ModalProps {
   open: boolean;
@@ -36,6 +37,7 @@ interface ModalProps {
   modalConfig: ModalConfig;
   toggleModal: ToggleModal;
   currentLocation: Coordinates;
+  onAddLocation: (opts?: AddLocationOptions) => void;
 }
 
 const TITLES: Partial<Record<ModalConfig["type"], string>> = {
@@ -64,6 +66,7 @@ export default function Modal({
   setUserData,
   setTheme,
   currentLocation,
+  onAddLocation,
 }: ModalProps) {
   const { type, data, goBackLocation, back: backConfig } = modalConfig;
   const store = useRequests();
@@ -101,12 +104,29 @@ export default function Modal({
     );
   };
 
+  const editMarkerBody = () => {
+    const marker = (data?.marker ?? data) as Marker;
+    return (
+      <EditMarker
+        data={marker}
+        userData={userData}
+        setUserData={setUserData}
+        toggleModal={toggleModal}
+        position={data?.position as Coordinates | undefined}
+        address={data?.address as string | undefined}
+        draft={data?.draft as MarkerFormDraft | undefined}
+        onChangeLocation={onAddLocation}
+      />
+    );
+  };
+
   const body = {
     "marker-list": () => (
       <MarkerList
         userData={userData}
         toggleModal={toggleModal}
         currentLocation={currentLocation}
+        onAddLocation={() => onAddLocation()}
       />
     ),
     "add-marker": () => (
@@ -115,7 +135,7 @@ export default function Modal({
         userData={userData}
         setUserData={setUserData}
         toggleModal={toggleModal}
-        currentLocation={currentLocation}
+        onChangeLocation={onAddLocation}
       />
     ),
     notifications: () => (
@@ -130,6 +150,7 @@ export default function Modal({
       <MarkerDetails
         data={data as Marker}
         userData={userData}
+        setUserData={setUserData}
         toggleModal={toggleModal}
       />
     ),
@@ -141,17 +162,10 @@ export default function Modal({
         setTheme={setTheme}
         setUserData={setUserData}
         toggleModal={toggleModal}
+        onAddLocation={() => onAddLocation()}
       />
     ),
-    "edit-marker": () => (
-      <EditMarker
-        data={data as Marker}
-        userData={userData}
-        setUserData={setUserData}
-        toggleModal={toggleModal}
-        currentLocation={currentLocation}
-      />
-    ),
+    "edit-marker": editMarkerBody,
     "request-list": () => (
       <CrewRequestBoard userData={userData} toggleModal={toggleModal} currentLocation={currentLocation} />
     ),
@@ -172,7 +186,14 @@ export default function Modal({
     ),
     "request-form": () => null,
     "job-list": () => <JobList userData={userData} toggleModal={toggleModal} />,
-    "job-form": () => <JobForm userData={userData} toggleModal={toggleModal} />,
+    "job-form": () => (
+      <JobForm
+        userData={userData}
+        toggleModal={toggleModal}
+        draft={data?.draft}
+        onAddLocation={onAddLocation}
+      />
+    ),
     "job-details": () => (
       <JobDetails
         key={data?.jobId}
@@ -190,8 +211,9 @@ export default function Modal({
     if (type === "marker-details" && goBackLocation) {
       return () => toggleModal(true, { type: goBackLocation });
     }
-    if (type === "edit-marker" && data) {
-      return () => toggleModal(true, { type: "marker-details", data });
+    if (type === "edit-marker") {
+      const marker = (data?.marker ?? data) as Marker;
+      return () => toggleModal(true, { type: "marker-details", data: marker });
     }
     return undefined;
   };
@@ -210,6 +232,8 @@ export default function Modal({
     title = data?.editing ? "Edit your offer" : "Make an offer";
     subtitle = request ? requestSummary(request) : undefined;
   }
+  if (type === "add-marker" && data?.lockedKind === "facility") title = "Add a facility";
+  if (type === "add-marker" && data?.lockedKind === "jobSite") title = "Add a job site";
 
   return (
     <DialogShell

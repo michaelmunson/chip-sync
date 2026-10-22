@@ -1,3 +1,4 @@
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import {
   Alert,
@@ -20,6 +21,10 @@ import {
 } from "../utils/Material";
 import ModalButtons from "../arborist/arboristComponents/modalComponents/modalUtils/ModalButtons";
 import ModalContent from "../arborist/arboristComponents/modalComponents/modalUtils/ModalContent";
+import {
+  AddLocationOptions,
+  JobFormDraft,
+} from "../arborist/arboristComponents/modalComponents/AddMarker";
 
 const MATERIAL_OPTIONS: Array<{ value: Material; title: string }> = [
   { value: "chips", title: "Chips" },
@@ -29,9 +34,13 @@ const MATERIAL_OPTIONS: Array<{ value: Material; title: string }> = [
 export default function JobForm({
   userData,
   toggleModal,
+  draft,
+  onAddLocation,
 }: {
   userData: User;
   toggleModal: ToggleModal;
+  draft?: JobFormDraft;
+  onAddLocation: (opts?: AddLocationOptions) => void;
 }) {
   const markers = userData.organization.markers.map((m) => ({ ...m, kind: markerKind(m) }));
   const facilities = useMemo(() => markers.filter(isFacility), [markers]);
@@ -44,13 +53,17 @@ export default function JobForm({
     [userData.organization.users],
   );
 
-  const [name, setName] = useState("");
-  const [notes, setNotes] = useState("");
-  const [materials, setMaterials] = useState<Set<Material>>(new Set());
-  const [facilityIds, setFacilityIds] = useState<string[]>([]);
-  const [jobSiteIds, setJobSiteIds] = useState<string[]>([]);
-  const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
-  const [assigneeSites, setAssigneeSites] = useState<Record<string, string>>({});
+  const [name, setName] = useState(draft?.name ?? "");
+  const [notes, setNotes] = useState(draft?.notes ?? "");
+  const [materials, setMaterials] = useState<Set<Material>>(
+    () => new Set((draft?.materials as Material[] | undefined) ?? []),
+  );
+  const [facilityIds, setFacilityIds] = useState<string[]>(draft?.facilityIds ?? []);
+  const [jobSiteIds, setJobSiteIds] = useState<string[]>(draft?.jobSiteIds ?? []);
+  const [assigneeIds, setAssigneeIds] = useState<string[]>(draft?.assigneeIds ?? []);
+  const [assigneeSites, setAssigneeSites] = useState<Record<string, string>>(
+    draft?.assigneeSites ?? {},
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -63,6 +76,23 @@ export default function JobForm({
       if (next.has(material)) next.delete(material);
       else next.add(material);
       return next;
+    });
+
+  const currentDraft = (): JobFormDraft => ({
+    name,
+    notes,
+    materials: [...materials],
+    facilityIds,
+    jobSiteIds,
+    assigneeIds,
+    assigneeSites,
+  });
+
+  const startAdd = (selectAs: "facility" | "jobSite") =>
+    onAddLocation({
+      lockedKind: selectAs,
+      selectAs,
+      jobDraft: currentDraft(),
     });
 
   const valid =
@@ -163,10 +193,18 @@ export default function JobForm({
           <section className="form-section">
             <div className="form-section-head">
               <h3>Facilities</h3>
-              <span>Optional start points</span>
+              <Button
+                size="small"
+                startIcon={<AddOutlinedIcon />}
+                onClick={() => startAdd("facility")}
+                disabled={saving}
+              >
+                Add
+              </Button>
             </div>
+            <p className="form-hint">Optional start points</p>
             {facilities.length === 0 ? (
-              <p className="muted">No facilities yet — add one from the map.</p>
+              <p className="muted">No facilities yet — add one above.</p>
             ) : (
               facilities.map((marker) => (
                 <FormControlLabel
@@ -186,8 +224,16 @@ export default function JobForm({
           <section className="form-section">
             <div className="form-section-head">
               <h3>Job sites</h3>
-              <span>Required</span>
+              <Button
+                size="small"
+                startIcon={<AddOutlinedIcon />}
+                onClick={() => startAdd("jobSite")}
+                disabled={saving}
+              >
+                Add
+              </Button>
             </div>
+            <p className="form-hint">Required</p>
             {jobSites.length === 0 ? (
               <p className="muted">Add a job site pin before creating a job.</p>
             ) : (

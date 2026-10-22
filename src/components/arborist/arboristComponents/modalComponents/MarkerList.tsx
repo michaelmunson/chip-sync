@@ -31,6 +31,7 @@ interface MarkerListProps {
   userData: User;
   toggleModal: ToggleModal;
   currentLocation: Coordinates;
+  onAddLocation: () => void;
 }
 
 const KIND_FILTERS: Array<{ value: KindFilter; label: string }> = [
@@ -72,6 +73,7 @@ export default function MarkerList({
   userData,
   toggleModal,
   currentLocation,
+  onAddLocation,
 }: MarkerListProps) {
   const [kindFilter, setKindFilter] = useState<KindFilter>("all");
   const [materialFilter, setMaterialFilter] = useState<MaterialFilter>("all");
@@ -139,10 +141,7 @@ export default function MarkerList({
           title="No locations yet"
           description="Add drop sites, facilities, or job sites so your crew knows where to go."
           action={
-            <Button
-              variant="contained"
-              onClick={() => toggleModal(true, { type: "add-marker" })}
-            >
+            <Button variant="contained" onClick={onAddLocation}>
               Add a location
             </Button>
           }
@@ -169,10 +168,7 @@ export default function MarkerList({
         title="No locations found"
         description="Try another filter or add a location of this type."
         action={
-          <Button
-            variant="contained"
-            onClick={() => toggleModal(true, { type: "add-marker" })}
-          >
+          <Button variant="contained" onClick={onAddLocation}>
             Add a location
           </Button>
         }

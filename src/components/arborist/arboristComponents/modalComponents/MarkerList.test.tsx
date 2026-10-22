@@ -25,11 +25,13 @@ const currentLocation = { latitude: 0, longitude: 0 };
 
 test("material filters show an actionable empty state and recover on All", () => {
   const toggleModal = vi.fn();
+  const onAddLocation = vi.fn();
   render(
     <MarkerList
       userData={user}
       currentLocation={currentLocation}
       toggleModal={toggleModal}
+      onAddLocation={onAddLocation}
     />,
   );
   expect(screen.getByText("Garden site")).toBeTruthy();
@@ -37,7 +39,7 @@ test("material filters show an actionable empty state and recover on All", () =>
   fireEvent.click(screen.getByRole("tab", { name: /^Wood$/ }));
   expect(screen.getByText("No locations found")).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Add a location" }));
-  expect(toggleModal).toHaveBeenCalledWith(true, { type: "add-marker" });
+  expect(onAddLocation).toHaveBeenCalled();
   const allTabs = screen.getAllByRole("tab", { name: /^All/ });
   fireEvent.click(allTabs[allTabs.length - 1]);
   expect(screen.getByText("Garden site")).toBeTruthy();
@@ -49,6 +51,7 @@ test("search narrows the list and can be cleared from the empty state", () => {
       userData={user}
       currentLocation={currentLocation}
       toggleModal={vi.fn()}
+      onAddLocation={vi.fn()}
     />,
   );
   const search = screen.getByRole("searchbox", { name: "Search locations" });
@@ -66,6 +69,7 @@ test("sites refresh when organization data changes", () => {
       userData={user}
       currentLocation={currentLocation}
       toggleModal={vi.fn()}
+      onAddLocation={vi.fn()}
     />,
   );
   rerender(
@@ -76,6 +80,7 @@ test("sites refresh when organization data changes", () => {
       }}
       currentLocation={currentLocation}
       toggleModal={vi.fn()}
+      onAddLocation={vi.fn()}
     />,
   );
   expect(screen.queryByText("Garden site")).toBeNull();

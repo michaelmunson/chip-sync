@@ -14,6 +14,10 @@ interface PlacementPanelProps {
   resolving: boolean;
   editing: boolean;
   locating: boolean;
+  /** Override the default gardener copy when reused (e.g. arborist add-location). */
+  title?: string;
+  description?: string;
+  continueLabel?: string;
   onSearch: (position: Coordinates, address: string) => void;
   onUseMyLocation: () => void;
   onCancel: () => void;
@@ -26,6 +30,9 @@ export default function PlacementPanel({
   resolving,
   editing,
   locating,
+  title,
+  description,
+  continueLabel,
   onSearch,
   onUseMyLocation,
   onCancel,
@@ -114,8 +121,13 @@ export default function PlacementPanel({
 
       <section className="placement-sheet" aria-labelledby="placement-title">
         <div className="placement-head">
-          <h2 id="placement-title">{editing ? "Move your pin" : "Drop a pin where the work is"}</h2>
-          <p>Tap the map or drag the pin to the exact spot — where chips should be dumped, or the tree that needs work.</p>
+          <h2 id="placement-title">
+            {title ?? (editing ? "Move your pin" : "Drop a pin where the work is")}
+          </h2>
+          <p>
+            {description ??
+              "Tap the map or drag the pin to the exact spot — where chips should be dumped, or the tree that needs work."}
+          </p>
         </div>
         <div className="placement-address" aria-live="polite">
           <PlaceOutlinedIcon fontSize="small" />
@@ -138,7 +150,7 @@ export default function PlacementPanel({
             Cancel
           </Button>
           <Button variant="contained" onClick={onContinue}>
-            {editing ? "Use this spot" : "Continue"}
+            {continueLabel ?? (editing ? "Use this spot" : "Continue")}
           </Button>
         </div>
       </section>

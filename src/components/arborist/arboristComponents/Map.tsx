@@ -1,5 +1,5 @@
 import { Loader } from '@googlemaps/js-api-loader';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CircularProgress } from "@mui/material";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import "../../../css/map.css";
@@ -11,6 +11,8 @@ import { getGoogleMapsApiKey } from '../../../utils/secrets';
 import { useRequests } from '../../requests/RequestsContext';
 import { buildRequestInfo, buildRequestPin, PinTone } from '../../../utils/requestPins';
 import { requestSummary } from '../../../utils/requestFormat';
+
+const toLatLng = ({ latitude, longitude }: Coordinates) => ({ lat: latitude, lng: longitude });
 
 interface MapLayers {
     sites: boolean
@@ -39,13 +41,21 @@ interface MapProps {
     theme: "light"|"dark"
     currentLocation: Coordinates
     toggleModal: ToggleModal
+    /** Pin being placed for a new/edited location; null when not placing. */
+    placement?: Coordinates | null
+    onPlacementChange?: (position: Coordinates) => void
+    /** Bumped whenever the map should pan to `placement` (e.g. after an address search). */
+    focusKey?: number
 }
 
 export default function Map({
     userData,
     theme,
     currentLocation,
-    toggleModal
+    toggleModal,
+    placement = null,
+    onPlacementChange,
+    focusKey = 0,
 } : MapProps
 ){
     const [loadError, setLoadError] = useState(false);
@@ -55,6 +65,11 @@ export default function Map({
     const [mapMarkers, setMapMarkers] = useState<any[]>([]); 
     const [requestMarkers, setRequestMarkers] = useState<any[]>([]);
     const [layers, setLayers] = useState<MapLayers>(loadLayers);
+    const draftMarker = useRef<any>();
+    const placing = useRef(false);
+    const onPlace = useRef(onPlacementChange);
+    placing.current = placement !== null;
+    onPlace.current = onPlacementChange;
     const store = useRequests();
     const getLoader = () => {
         try {
@@ -69,26 +84,66 @@ export default function Map({
         try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch { /* private mode */ }
     }, [layers]);
     useEffect(() => {
-        mapMarkers.forEach(marker => { marker.map = layers.sites ? map : null; });
-    }, [layers.sites, mapMarkers, map]);
+        mapMarkers.forEach(marker => { marker.map = layers.sites && !placing.current ? map : null; });
+    }, [layers.sites, mapMarkers, map, placement]);
     useEffect(() => {
         if (map) addRequestMarkers();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [map, store.requests, store.offers, layers.requests]);
+    }, [map, store.requests, store.offers, layers.requests, placement]);
     useEffect(()=>{changeMapTheme()}, [theme]);
     useEffect(()=>{
         if (loader && !map){
             loadMap().catch(() => setLoadError(true));
         }
-        else if (map) {
+        else if (map && !placement) {
             addLocationMarker(); 
         }
-    }, [loader, currentLocation, map]);
+    }, [loader, currentLocation, map, placement]);
     useEffect(()=>{
         if (map) {
             addMarkers(); 
         }
     }, [userData, map])
+
+    // Draft pin while placing; draggable, and moves wherever the map is tapped.
+    useEffect(() => {
+        if (!loader || !map) return;
+        if (!placement) {
+            if (draftMarker.current) draftMarker.current.map = null;
+            draftMarker.current = undefined;
+            map.setOptions({ draggableCursor: null });
+            return;
+        }
+        map.setOptions({ draggableCursor: "crosshair" });
+        loader.importLibrary("marker").then(({ AdvancedMarkerElement }) => {
+            if (!draftMarker.current) {
+                const marker = new AdvancedMarkerElement({
+                    map,
+                    position: toLatLng(placement),
+                    gmpDraggable: true,
+                    title: "Drag to the exact spot",
+                    content: buildRequestPin({ services: ["other"], tone: "draft", label: "New location" }),
+                    zIndex: 100,
+                });
+                marker.addListener("dragend", () => {
+                    const position = marker.position;
+                    const lat = typeof position.lat === "function" ? position.lat() : position.lat;
+                    const lng = typeof position.lng === "function" ? position.lng() : position.lng;
+                    onPlace.current?.({ latitude: lat, longitude: lng });
+                });
+                draftMarker.current = marker;
+            } else {
+                draftMarker.current.position = toLatLng(placement);
+            }
+        });
+    }, [loader, map, placement]);
+
+    useEffect(() => {
+        if (!map || !placement) return;
+        map.panTo(toLatLng(placement));
+        if (map.getZoom() < 16) map.setZoom(17);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [map, focusKey]);
 
     /* Utility Functions */
     async function loadMap(){
@@ -104,7 +159,15 @@ export default function Map({
         const MAP = new Map(document.getElementById("map"), mapOptions);
         MAP.mapTypes.set("styled_map", styledMapType);
 		MAP.setMapTypeId("styled_map");
+        MAP.addListener("click", (event: any) => {
+            if (!placing.current || !event.latLng) return;
+            onPlace.current?.({
+                latitude: event.latLng.lat(),
+                longitude: event.latLng.lng(),
+            });
+        });
         MAP.addListener('mousedown', (e:any) => {
+            if (placing.current) return;
 			const {x,y} = e.pixel;
 			
 			if (e.domEvent.touches) {
@@ -240,7 +303,7 @@ export default function Map({
         if (!loader) return;
         const { InfoWindow } = await loader.importLibrary("maps");
         const { AdvancedMarkerElement } = await loader.importLibrary("marker");
-        const markers = !layers.requests ? [] : visibleRequests(store.requests, userData.organization.id).map(request => {
+        const markers = (!layers.requests || placing.current) ? [] : visibleRequests(store.requests, userData.organization.id).map(request => {
             const myOffer = store.offersFor(request.id)[0];
             const tone: PinTone =
                 request.acceptedOrganizationId === userData.organization.id ? "booked"
@@ -314,9 +377,11 @@ export default function Map({
     const requestCount = visibleRequests(store.requests, userData.organization.id).length;
     const toggleLayer = (layer: keyof MapLayers) => setLayers(current => ({ ...current, [layer]: !current[layer] }));
 
+    const isPlacing = placement !== null;
+
     return (
         <>
-        {map && (
+        {map && !isPlacing && (
             <div className="map-layers" role="group" aria-label="Show on map">
                 <button
                     type="button"

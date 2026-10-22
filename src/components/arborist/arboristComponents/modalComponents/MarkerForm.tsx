@@ -1,12 +1,12 @@
 import ApartmentOutlined from "@mui/icons-material/ApartmentOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import ConstructionOutlined from "@mui/icons-material/ConstructionOutlined";
+import EditLocationAltOutlinedIcon from "@mui/icons-material/EditLocationAltOutlined";
 import ForestOutlined from "@mui/icons-material/ForestOutlined";
-import { Alert, Autocomplete, Button, CircularProgress, MenuItem, TextField } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import { Alert, Button, CircularProgress, MenuItem, TextField } from "@mui/material";
+import React, { useState } from "react";
 import { Marker, MarkerKind } from "../../../../types/dataTypes";
 import { Coordinates } from "../../../../types/generalTypes";
-import { Geo } from "../../../../utils/location";
 import { addDaysISO, KIND_LABEL, localISODate, markerKind } from "../../../../utils/markers";
 import {
   Material,
@@ -14,8 +14,11 @@ import {
   materialsOf,
   typeFromMaterials,
 } from "../../../utils/Material";
+import PhotoPicker from "../../../utils/PhotoPicker";
 import ModalButtons from "./modalUtils/ModalButtons";
 import ModalContent from "./modalUtils/ModalContent";
+
+type DatePreset = "today" | "week" | "custom";
 
 export interface MarkerFormValues {
   type: Marker["type"];
@@ -26,18 +29,41 @@ export interface MarkerFormValues {
   address: string;
   description: string;
   contact: { name: string; phone: string };
+  latitude: number;
+  longitude: number;
+  keepImages: string[];
+  newPhotos: File[];
+}
+
+/** Form state that survives a round trip to the map to move the pin. */
+export interface MarkerFormDraft {
+  kind: MarkerKind;
+  materials: Material[];
+  name: string;
+  address: string;
+  description: string;
+  contactName: string;
+  contactPhone: string;
+  startDate: string;
+  endDate: string;
+  datePreset: DatePreset;
+  keepImages: string[];
+  newPhotos: File[];
 }
 
 interface MarkerFormProps {
   initial?: Marker;
-  currentLocation: Coordinates;
+  position: Coordinates;
+  address: string;
+  draft?: MarkerFormDraft;
+  /** When set, the kind picker is hidden and this kind is locked. */
+  lockedKind?: MarkerKind;
   submitLabel: string;
   cancelLabel?: string;
   onSubmit: (values: MarkerFormValues) => Promise<void>;
   onCancel: () => void;
+  onChangeLocation: (draft: MarkerFormDraft) => void;
 }
-
-type Predictor = (input: string) => Promise<string[]>;
 
 const KIND_OPTIONS: Array<{ value: MarkerKind; title: string; hint: string; icon: React.ReactNode }> = [
   {
@@ -65,8 +91,6 @@ const MATERIAL_OPTIONS: Array<{ value: Material; title: string; hint: string }> 
   { value: "wood", title: "Wood", hint: "Logs & firewood" },
 ];
 
-type DatePreset = "today" | "week" | "custom";
-
 function presetFromDates(start: string | null, end: string | null): DatePreset {
   if (!start || !end) return "today";
   const today = localISODate();
@@ -77,57 +101,46 @@ function presetFromDates(start: string | null, end: string | null): DatePreset {
 
 export default function MarkerForm({
   initial,
-  currentLocation,
+  position,
+  address: initialAddress,
+  draft,
+  lockedKind,
   submitLabel,
   cancelLabel = "Cancel",
   onSubmit,
   onCancel,
+  onChangeLocation,
 }: MarkerFormProps) {
-  const initialKind = initial ? markerKind(initial) : "dropSite";
+  const initialKind = lockedKind ?? draft?.kind ?? (initial ? markerKind(initial) : "dropSite");
   const [kind, setKind] = useState<MarkerKind>(initialKind);
   const [materials, setMaterials] = useState<Set<Material>>(
-    new Set(initial && markerKind(initial) === "dropSite" ? materialsOf(initial.type) : []),
+    () =>
+      new Set(
+        draft?.materials ??
+          (initial && markerKind(initial) === "dropSite" ? materialsOf(initial.type) : []),
+      ),
   );
-  const [name, setName] = useState(initial?.name ?? "");
-  const [address, setAddress] = useState(initial?.address ?? "");
-  const [description, setDescription] = useState(initial?.description ?? "");
-  const [contactName, setContactName] = useState(initial?.contact?.name ?? "");
-  const [contactPhone, setContactPhone] = useState(initial?.contact?.phone ?? "");
-  const [startDate, setStartDate] = useState(initial?.startDate ?? localISODate());
-  const [endDate, setEndDate] = useState(initial?.endDate ?? localISODate());
+  const [name, setName] = useState(draft?.name ?? initial?.name ?? "");
+  const [address, setAddress] = useState(draft?.address ?? initialAddress);
+  const [description, setDescription] = useState(draft?.description ?? initial?.description ?? "");
+  const [contactName, setContactName] = useState(draft?.contactName ?? initial?.contact?.name ?? "");
+  const [contactPhone, setContactPhone] = useState(
+    draft?.contactPhone ?? initial?.contact?.phone ?? "",
+  );
+  const [startDate, setStartDate] = useState(
+    draft?.startDate ?? initial?.startDate ?? localISODate(),
+  );
+  const [endDate, setEndDate] = useState(draft?.endDate ?? initial?.endDate ?? localISODate());
   const [datePreset, setDatePreset] = useState<DatePreset>(
-    presetFromDates(initial?.startDate ?? null, initial?.endDate ?? null),
+    draft?.datePreset ??
+      presetFromDates(initial?.startDate ?? null, initial?.endDate ?? null),
   );
-  const [options, setOptions] = useState<string[]>([]);
+  const [keepImages, setKeepImages] = useState<string[]>(
+    draft?.keepImages ?? initial?.images ?? [],
+  );
+  const [newPhotos, setNewPhotos] = useState<File[]>(draft?.newPhotos ?? []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-
-  const predictor = useRef<Predictor>();
-  const debounce = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    let cancelled = false;
-    Geo.getPredictionFunction(currentLocation)
-      .then((fn) => {
-        if (!cancelled) predictor.current = fn as unknown as Predictor;
-      })
-      .catch(() => {
-        /* Address suggestions are optional; typing an address still works. */
-      });
-    return () => {
-      cancelled = true;
-      clearTimeout(debounce.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const suggest = (input: string) => {
-    clearTimeout(debounce.current);
-    if (input.trim().length < 3) return setOptions([]);
-    debounce.current = setTimeout(() => {
-      predictor.current?.(input).then(setOptions).catch(() => setOptions([]));
-    }, 250);
-  };
 
   const toggleMaterial = (material: Material) =>
     setMaterials((current) => {
@@ -153,6 +166,21 @@ export default function MarkerForm({
   const datesOk = kind !== "jobSite" || (Boolean(startDate) && Boolean(endDate) && endDate >= startDate);
   const valid = materialsOk && datesOk && name.trim() !== "" && address.trim() !== "";
 
+  const currentDraft = (): MarkerFormDraft => ({
+    kind,
+    materials: [...materials],
+    name,
+    address,
+    description,
+    contactName,
+    contactPhone,
+    startDate,
+    endDate,
+    datePreset,
+    keepImages,
+    newPhotos,
+  });
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!valid || saving) return;
@@ -168,10 +196,18 @@ export default function MarkerForm({
         address: address.trim(),
         description: description.trim(),
         contact: { name: contactName.trim(), phone: contactPhone.trim() },
+        latitude: position.latitude,
+        longitude: position.longitude,
+        keepImages,
+        newPhotos,
       });
-    } catch (error) {
-      console.error(error);
-      setError("We couldn’t save this location. Check your connection and try again.");
+    } catch (err) {
+      console.error(err);
+      setError(
+        newPhotos.length
+          ? "We couldn’t save this location. Check your connection, or try again without photos."
+          : "We couldn’t save this location. Check your connection and try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -187,33 +223,35 @@ export default function MarkerForm({
             </Alert>
           )}
 
-          <section className="form-section" aria-labelledby="form-kind">
-            <div className="form-section-head">
-              <h3 id="form-kind">Location type</h3>
-            </div>
-            <div className="choice-grid">
-              {KIND_OPTIONS.map(({ value, title, hint, icon }) => (
-                <button
-                  type="button"
-                  key={value}
-                  className="choice"
-                  aria-pressed={kind === value}
-                  onClick={() => setKind(value)}
-                >
-                  <span className={`tile tile--${value}`} aria-hidden="true">
-                    {icon}
-                  </span>
-                  <span>
-                    <strong>{title}</strong>
-                    <small>{hint}</small>
-                  </span>
-                  <span className="choice-check" aria-hidden="true">
-                    <CheckIcon />
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
+          {!lockedKind && (
+            <section className="form-section" aria-labelledby="form-kind">
+              <div className="form-section-head">
+                <h3 id="form-kind">Location type</h3>
+              </div>
+              <div className="choice-grid">
+                {KIND_OPTIONS.map(({ value, title, hint, icon }) => (
+                  <button
+                    type="button"
+                    key={value}
+                    className="choice"
+                    aria-pressed={kind === value}
+                    onClick={() => setKind(value)}
+                  >
+                    <span className={`tile tile--${value}`} aria-hidden="true">
+                      {icon}
+                    </span>
+                    <span>
+                      <strong>{title}</strong>
+                      <small>{hint}</small>
+                    </span>
+                    <span className="choice-check" aria-hidden="true">
+                      <CheckIcon />
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
 
           {kind === "dropSite" && (
             <section className="form-section" aria-labelledby="form-materials">
@@ -286,8 +324,16 @@ export default function MarkerForm({
           <section className="form-section" aria-labelledby="form-details">
             <div className="form-section-head">
               <h3 id="form-details">Location</h3>
-              <span>{KIND_LABEL[kind]}</span>
+              <Button
+                size="small"
+                startIcon={<EditLocationAltOutlinedIcon />}
+                onClick={() => onChangeLocation(currentDraft())}
+                disabled={saving}
+              >
+                Move pin
+              </Button>
             </div>
+            <p className="form-hint">{KIND_LABEL[kind]} at the pin you placed.</p>
             <TextField
               required
               label="Name"
@@ -295,18 +341,13 @@ export default function MarkerForm({
               autoComplete="off"
               onChange={(event) => setName(event.target.value)}
             />
-            <Autocomplete
-              freeSolo
-              filterOptions={(all) => all}
-              options={options}
-              inputValue={address}
-              onInputChange={(_, value, reason) => {
-                setAddress(value);
-                if (reason === "input") suggest(value);
-              }}
-              renderInput={(params) => (
-                <TextField {...params} required label="Address" autoComplete="off" />
-              )}
+            <TextField
+              required
+              label="Address"
+              value={address}
+              autoComplete="street-address"
+              helperText="Crews see this address and your pin on the map."
+              onChange={(event) => setAddress(event.target.value)}
             />
             <TextField
               multiline
@@ -322,6 +363,23 @@ export default function MarkerForm({
               }
               value={description}
               onChange={(event) => setDescription(event.target.value)}
+            />
+          </section>
+
+          <section className="form-section" aria-labelledby="form-photos">
+            <div className="form-section-head">
+              <h3 id="form-photos">Photos</h3>
+              <span>Optional, up to 8</span>
+            </div>
+            <p className="form-hint">
+              Show the entrance, staging area, or where material should go. Helps crews arrive prepared.
+            </p>
+            <PhotoPicker
+              existing={keepImages}
+              onExistingChange={setKeepImages}
+              files={newPhotos}
+              onFilesChange={setNewPhotos}
+              disabled={saving}
             />
           </section>
 

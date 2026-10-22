@@ -1,10 +1,7 @@
 import React from "react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import Controls from "./Controls";
 import { User } from "../../../types/dataTypes";
-import { Coordinates } from "../../../types/generalTypes";
-
-const currentLocation: Coordinates = { latitude: 40.7, longitude: -73.9 };
 
 const user = {
   firstName: "Alex",
@@ -42,15 +39,12 @@ const user = {
   notifications: [{ opened: false }, { opened: true }],
 } as User;
 
-vi.mock("../../../utils/location", () => ({
-  Geo: {
-    distance: (_a: Coordinates, _b: Coordinates) => 1.2,
-    getAddressURL: ({ address }: { address: string }) => `https://maps.example/?q=${address}`,
-  },
+vi.mock("../../requests/RequestsContext", () => ({
+  useRequests: () => ({ requests: [], unreadByConversation: {} }),
 }));
 
 test("workspace header identifies the crew and exposes activity and settings icons", () => {
-  render(<Controls userData={user} toggleModal={vi.fn()} currentLocation={currentLocation} />);
+  render(<Controls userData={user} toggleModal={vi.fn()} onAddLocation={vi.fn()} />);
   expect(screen.getByText("Green Tree Crew")).toBeTruthy();
   expect(screen.getByText("3 locations")).toBeTruthy();
   expect(screen.getByRole("button", { name: "Activity, 1 unread" })).toBeTruthy();
@@ -60,11 +54,13 @@ test("workspace header identifies the crew and exposes activity and settings ico
 
 test("workspace tools open their respective workflows from the dock and header", () => {
   const toggleModal = vi.fn();
-  render(<Controls userData={user} toggleModal={toggleModal} currentLocation={currentLocation} />);
+  const onAddLocation = vi.fn();
+  render(
+    <Controls userData={user} toggleModal={toggleModal} onAddLocation={onAddLocation} />,
+  );
   const workflows = [
     ["Sites", "marker-list"],
     ["Jobs", "job-list"],
-    ["Add", "add-marker"],
     ["Activity, 1 unread", "notifications"],
     ["Settings", "settings"],
   ];
@@ -72,28 +68,7 @@ test("workspace tools open their respective workflows from the dock and header",
     fireEvent.click(screen.getByRole("button", { name }));
     expect(toggleModal).toHaveBeenLastCalledWith(true, { type });
   });
-});
-
-test("route menu filters closest sites and opens maps", () => {
-  const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
-  render(<Controls userData={user} toggleModal={vi.fn()} currentLocation={currentLocation} />);
-
-  fireEvent.click(screen.getByRole("button", { name: "Route" }));
-  const menu = screen.getByRole("menu");
-  expect(within(menu).getByRole("menuitem", { name: "Chips" })).toBeTruthy();
-  expect(within(menu).getByRole("menuitem", { name: "Logs" })).toBeTruthy();
-  expect(within(menu).getByRole("menuitem", { name: "Both" })).toBeTruthy();
-
-  fireEvent.click(within(menu).getByRole("menuitem", { name: "Chips" }));
-  expect(within(menu).getByRole("menuitem", { name: /Oak Yard/ })).toBeTruthy();
-  expect(within(menu).getByRole("menuitem", { name: /Both Depot/ })).toBeTruthy();
-  expect(within(menu).queryByRole("menuitem", { name: /Pine Lot/ })).toBeNull();
-
-  fireEvent.click(within(menu).getByRole("menuitem", { name: /Oak Yard/ }));
-  expect(openSpy).toHaveBeenCalledWith(
-    "https://maps.example/?q=1 Oak St, Brooklyn, NY",
-    "_blank",
-    "noopener,noreferrer",
-  );
-  openSpy.mockRestore();
+  fireEvent.click(screen.getByRole("button", { name: "Add" }));
+  expect(onAddLocation).toHaveBeenCalled();
+  expect(screen.queryByRole("button", { name: "Route" })).toBeNull();
 });

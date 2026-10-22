@@ -54,6 +54,8 @@ namespace DBTypes {
         description:string
         contact:Marker["contact"]
         address:string
+        latitude?: number
+        longitude?: number
         images:File[]
         userData: User
     }
@@ -80,6 +82,11 @@ namespace DBTypes {
         description:string
         contact:Marker["contact"]
         address:string
+        latitude?: number
+        longitude?: number
+        keepImages?: string[]
+        newPhotos?: File[]
+        organizationId?: string
     }
     export type NotificationType = Notification.Any["type"]
 }
@@ -333,10 +340,14 @@ export const DB = {
         return result; 
     },
     /* MARKER */
-    async createMarker({type,kind="dropSite",startDate=null,endDate=null,name,address,description,contact,images,userData}:DBTypes.CreateMarker) : Promise<Marker> {
+    async createMarker({type,kind="dropSite",startDate=null,endDate=null,name,address,description,contact,images,userData,latitude: lat,longitude: lng}:DBTypes.CreateMarker) : Promise<Marker> {
         const organizationId = userData.organization.id; 
-        const imageKeys = await S3.put({organizationId, images}); 
-        const {latitude, longitude} = await Geo.addressToCoords(address); 
+        const imageKeys = images.length ? await S3.put({organizationId, images}) : [];
+        const coords =
+            lat != null && lng != null
+                ? { latitude: lat, longitude: lng }
+                : await Geo.addressToCoords(address);
+        const { latitude, longitude } = coords;
         const res:any = await client.graphql({
             query: createMarkerMutation,
             variables: {
@@ -391,9 +402,34 @@ export const DB = {
             }
         })
     },
-    async updateMarker({id,type,kind="dropSite",startDate=null,endDate=null,name,address,description,contact}:DBTypes.UpdateMarker) : Promise<Marker> {
-        // const imageKeys = await S3.put({organizationId, images}); 
-        const {latitude, longitude} = await Geo.addressToCoords(address); 
+    async updateMarker({
+        id,
+        type,
+        kind="dropSite",
+        startDate=null,
+        endDate=null,
+        name,
+        address,
+        description,
+        contact,
+        latitude: lat,
+        longitude: lng,
+        keepImages,
+        newPhotos = [],
+        organizationId,
+    }:DBTypes.UpdateMarker) : Promise<Marker> {
+        const coords =
+            lat != null && lng != null
+                ? { latitude: lat, longitude: lng }
+                : await Geo.addressToCoords(address);
+        const { latitude, longitude } = coords;
+        let images: string[] | undefined;
+        if (keepImages !== undefined && organizationId) {
+            const added = newPhotos.length
+                ? await S3.put({ organizationId, images: newPhotos })
+                : [];
+            images = [...keepImages, ...added];
+        }
         const res:any = await client.graphql({
             query: updateMarkerMutation,
             variables: {
@@ -408,7 +444,8 @@ export const DB = {
                     description,
                     contact: JSON.stringify(contact),
                     latitude,
-                    longitude                
+                    longitude,
+                    ...(images !== undefined ? { images } : {}),
                 }   
             }
         });

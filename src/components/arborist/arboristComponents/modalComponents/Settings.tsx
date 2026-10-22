@@ -33,6 +33,7 @@ interface SettingsProps {
   setTheme: React.Dispatch<React.SetStateAction<"light" | "dark">>;
   setUserData: SetUserData;
   toggleModal: ToggleModal;
+  onAddLocation: () => void;
 }
 
 const fullName = (user: Pick<User, "firstName" | "lastName">) =>
@@ -328,11 +329,13 @@ function MarkersPage({
   userData,
   setUserData,
   toggleModal,
+  onAddLocation,
   onBack,
 }: {
   userData: User;
   setUserData: SetUserData;
   toggleModal: ToggleModal;
+  onAddLocation: () => void;
   onBack: () => void;
 }) {
   const [pendingId, setPendingId] = useState<string>();
@@ -369,7 +372,7 @@ function MarkersPage({
           title="No drop sites yet"
           description="Sites your crew saves will show up here."
           action={
-            <Button variant="contained" onClick={() => toggleModal(true, { type: "add-marker" })}>
+            <Button variant="contained" onClick={onAddLocation}>
               Add a drop site
             </Button>
           }
@@ -396,7 +399,9 @@ function MarkersPage({
                     <Tooltip title="Edit">
                       <IconButton
                         aria-label={`Edit ${marker.name}`}
-                        onClick={() => toggleModal(true, { type: "edit-marker", data: marker })}
+                        onClick={() =>
+                          toggleModal(true, { type: "edit-marker", data: { marker } })
+                        }
                       >
                         <EditOutlinedIcon />
                       </IconButton>
@@ -429,6 +434,7 @@ export default function Settings({
   setTheme,
   setUserData,
   toggleModal,
+  onAddLocation,
 }: SettingsProps) {
   const [page, setPage] = useState<Page | undefined>(
     data?.page === "members" || data?.page === "markers" ? data.page : undefined,
@@ -454,6 +460,7 @@ export default function Settings({
           userData={userData}
           setUserData={setUserData}
           toggleModal={toggleModal}
+          onAddLocation={onAddLocation}
           onBack={() => setPage(undefined)}
         />
       </ModalContent>
