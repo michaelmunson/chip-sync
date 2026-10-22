@@ -1,7 +1,8 @@
 import { defineBackend } from '@aws-amplify/backend';
-import { StartingPosition } from 'aws-cdk-lib/aws-lambda';
-import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Stack } from 'aws-cdk-lib';
+import { CfnEventSourceMapping } from 'aws-cdk-lib/aws-lambda';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { notify } from './functions/notify/resource';
@@ -24,19 +25,49 @@ const backend = defineBackend({
 
 // Text / email notifications: every in-app Notification row is also a trigger for `notify`,
 // which checks the recipient's settings before sending anything.
-// Amplify already creates each model table with a NEW_AND_OLD_IMAGES stream. Don't override
-// `streamSpecification`: changing the view type disables the stream mid-deploy and the event
-// source mapping then fails with "Stream is Disabled".
+//
+// Amplify already creates each model table with a NEW_AND_OLD_IMAGES stream, so there's no need
+// to configure one. But don't use `tables['Notification'].tableStreamArn` (what DynamoEventSource
+// reads): Amplify's table manager reports the stream ARN it saw *before* updating the stream, so
+// after any stream change CloudFormation holds a disabled stream's ARN and the event source
+// mapping fails with "Stream ... is Disabled". Instead, ask DynamoDB for the table's current
+// stream on every deploy, after the table has been updated.
 const { tables } = backend.data.resources;
-
+const notificationTable = tables['Notification'];
 const notifyLambda = backend.notify.resources.lambda;
-notifyLambda.addEventSource(
-  new DynamoEventSource(tables['Notification'], {
-    startingPosition: StartingPosition.LATEST,
-    batchSize: 10,
-    retryAttempts: 2,
+const dataStack = Stack.of(notifyLambda);
+
+const currentStream = new AwsCustomResource(dataStack, 'NotificationTableCurrentStream', {
+  onUpdate: {
+    service: 'DynamoDB',
+    action: 'describeTable',
+    parameters: { TableName: notificationTable.tableName },
+    outputPaths: ['Table.LatestStreamArn'],
+    // New id each synth, so the lookup re-runs on every deploy.
+    physicalResourceId: PhysicalResourceId.of(`notification-stream-${Date.now()}`),
+  },
+  policy: AwsCustomResourcePolicy.fromStatements([
+    new PolicyStatement({ actions: ['dynamodb:DescribeTable'], resources: [notificationTable.tableArn] }),
+  ]),
+  installLatestAwsSdk: false,
+});
+
+notifyLambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ['dynamodb:DescribeStream', 'dynamodb:GetRecords', 'dynamodb:GetShardIterator', 'dynamodb:ListStreams'],
+    resources: [`${notificationTable.tableArn}/stream/*`],
   }),
 );
+const streamMapping = new CfnEventSourceMapping(dataStack, 'NotifyNotificationStreamMapping', {
+  functionName: notifyLambda.functionName,
+  eventSourceArn: currentStream.getResponseField('Table.LatestStreamArn'),
+  startingPosition: 'LATEST',
+  batchSize: 10,
+  maximumRetryAttempts: 2,
+});
+// The role (and its stream-read policy) must exist before Lambda validates the mapping.
+streamMapping.node.addDependency(notifyLambda.role!);
+
 tables['User'].grantReadData(notifyLambda);
 backend.notify.addEnvironment('USER_TABLE_NAME', tables['User'].tableName);
 backend.notify.addEnvironment('H2H_SECRET_ARN', H2H_SECRET_ARN);
