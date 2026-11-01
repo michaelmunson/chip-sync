@@ -7,6 +7,7 @@ export default defineConfig({
     port: 9999,
   },
   test: {
+    include: ["src/**/*.test.{ts,tsx}", "amplify/**/*.test.ts"],
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",

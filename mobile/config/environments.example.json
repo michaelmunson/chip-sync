@@ -1,0 +1,35 @@
+{
+  "development": {
+    "bundleIdentifier": "io.chipsync.dev",
+    "scheme": "chipsync-dev",
+    "resources": {
+      "userPoolId": "REPLACE_DEV_USER_POOL_ID",
+      "userPoolClientId": "REPLACE_DEV_CLIENT_ID",
+      "identityPoolId": "REPLACE_DEV_IDENTITY_POOL_ID",
+      "graphqlUrl": "REPLACE_DEV_APPSYNC_URL",
+      "storageBucket": "REPLACE_DEV_BUCKET"
+    }
+  },
+  "staging": {
+    "bundleIdentifier": "io.chipsync.staging",
+    "scheme": "chipsync-staging",
+    "resources": {
+      "userPoolId": "REPLACE_STAGING_USER_POOL_ID",
+      "userPoolClientId": "REPLACE_STAGING_CLIENT_ID",
+      "identityPoolId": "REPLACE_STAGING_IDENTITY_POOL_ID",
+      "graphqlUrl": "REPLACE_STAGING_APPSYNC_URL",
+      "storageBucket": "REPLACE_STAGING_BUCKET"
+    }
+  },
+  "production": {
+    "bundleIdentifier": "io.chipsync.app",
+    "scheme": "chipsync",
+    "resources": {
+      "userPoolId": "REPLACE_PRODUCTION_USER_POOL_ID",
+      "userPoolClientId": "REPLACE_PRODUCTION_CLIENT_ID",
+      "identityPoolId": "REPLACE_PRODUCTION_IDENTITY_POOL_ID",
+      "graphqlUrl": "REPLACE_PRODUCTION_APPSYNC_URL",
+      "storageBucket": "REPLACE_PRODUCTION_BUCKET"
+    }
+  }
+}

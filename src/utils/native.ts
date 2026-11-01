@@ -1,3 +1,10 @@
+declare global {
+    interface Window {
+        exports: any;
+        ReactNativeWebView: any;
+    }
+}
+
 import { AnyObject } from "../types/generalTypes";
 
 export interface NativeMessage {

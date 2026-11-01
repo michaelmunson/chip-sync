@@ -8,7 +8,7 @@ import {
     parseNotificationSettings,
     resolveDelivery,
     type NotificationSettings,
-} from "../../../src/utils/notificationSettings";
+} from "@chip-sync/domain/notificationSettings";
 import { jsonAttribute } from "./attributes";
 import { createH2HClient, parseCredentials, type H2HClient } from "./h2h";
 import { buildMessage } from "./message";

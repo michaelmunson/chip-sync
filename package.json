@@ -25,7 +25,8 @@
     "react-spinners": "^0.13.8",
     "typescript": "^5.9.3",
     "uuid": "^9.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "@chip-sync/domain": "0.1.0"
   },
   "engines": {
     "node": ">=20.19.0"
@@ -40,7 +41,18 @@
     "sandbox": "ampx sandbox",
     "sandbox:once": "ampx sandbox --once",
     "sync-outputs": "cp -f amplify_outputs.json src/amplify_outputs.example.json",
-    "sandbox:google-secrets": "ampx sandbox secret set GOOGLE_CLIENT_ID && ampx sandbox secret set GOOGLE_CLIENT_SECRET"
+    "sandbox:google-secrets": "ampx sandbox secret set GOOGLE_CLIENT_ID && ampx sandbox secret set GOOGLE_CLIENT_SECRET",
+    "mobile": "npm run start --workspace @chip-sync/mobile",
+    "typecheck:shared": "npm run typecheck --workspace @chip-sync/domain && npm run typecheck --workspace @chip-sync/api",
+    "test:shared": "vitest run --config packages/domain/vitest.config.ts && vitest run --config packages/api/vitest.config.ts",
+    "test:mobile": "vitest run --config mobile/vitest.config.ts",
+    "typecheck:mobile": "npm run typecheck --workspace @chip-sync/mobile",
+    "export:ios": "npm run export:ios --workspace @chip-sync/mobile",
+    "check:react": "node scripts/check-react-resolution.mjs",
+    "export:ios:validation": "tsx scripts/mobile-validation.ts export",
+    "check:mobile:dependencies": "tsx scripts/mobile-validation.ts dependencies",
+    "check:mobile:health": "tsx scripts/mobile-validation.ts health",
+    "prebuild:ios:validation": "tsx scripts/mobile-validation.ts prebuild"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.14.0",
@@ -57,5 +69,9 @@
     "tsx": "^4.19.0",
     "vite": "^7.1.10",
     "vitest": "^3.2.4"
-  }
+  },
+  "workspaces": [
+    "mobile",
+    "packages/*"
+  ]
 }

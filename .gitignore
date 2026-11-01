@@ -47,3 +47,12 @@ amplifytools.xcconfig
 # Amplify Gen 2
 .amplify/
 amplify_outputs.json
+
+# Expo native projects and environment-specific configuration
+mobile/.expo/
+mobile/ios/
+mobile/android/
+mobile/config/*.local.json
+mobile/config/outputs/
+mobile/.env*
+!mobile/.env.example

@@ -13,6 +13,9 @@ import "./css/design-system.css";
 import "./css/modal.css";
 import "./css/requests.css";
 
+window.exports = window.exports || {};
+window.ReactNativeWebView = window.ReactNativeWebView || undefined;
+
 Amplify.configure(loadAmplifyOutputs() as Parameters<typeof Amplify.configure>[0]);
 
 const root = ReactDOM.createRoot(

@@ -1,0 +1,16 @@
+{
+  "name": "@chip-sync/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@chip-sync/domain": "0.1.0"
+  }
+}

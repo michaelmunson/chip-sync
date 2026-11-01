@@ -1,7 +1,7 @@
 // @vitest-environment node
 import type { DynamoDBRecord } from "aws-lambda";
 import { describe, expect, it, vi } from "vitest";
-import type { NotificationSettings } from "../../../src/utils/notificationSettings";
+import type { NotificationSettings } from "@chip-sync/domain/notificationSettings";
 import { extractToken, createH2HClient, parseCredentials } from "./h2h";
 import { processRecord, type Dependencies, type Recipient } from "./handler";
 

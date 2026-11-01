@@ -1,4 +1,4 @@
-import type { NotificationEvent } from "../../../src/utils/notificationSettings";
+import type { NotificationEvent } from "@chip-sync/domain/notificationSettings";
 
 export interface NotificationMessage {
     /** Short text for SMS (one segment where possible). */

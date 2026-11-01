@@ -1,0 +1,25 @@
+name: Application checks
+on:
+  push:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # Match Amplify Hosting: its Gen 2 bundled dependencies need npm install.
+      - run: npm install --no-audit --no-fund
+      - run: npm run check:react
+      - run: npm run test:run
+      - run: npm run build
+      - run: npm run typecheck:shared
+      - run: npm run test:shared
+      - run: npm run typecheck:mobile
+      - run: npm run test:mobile
+      - run: npm run check:mobile:dependencies
+      - run: npm run check:mobile:health
+      - run: npm run export:ios:validation
