@@ -153,6 +153,16 @@ body,
   overflow: hidden;
 }
 
+/* iOS Safari: 100% can resolve to the large viewport, pushing bottom UI
+   (the dock) behind the browser toolbar. dvh tracks the visible area. */
+@supports (height: 100dvh) {
+  html,
+  body,
+  #root {
+    height: 100dvh;
+  }
+}
+
 body {
   background: var(--bg);
   color: var(--ink);
