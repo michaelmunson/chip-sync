@@ -1,5 +1,5 @@
 import DirectionsOutlined from "@mui/icons-material/DirectionsOutlined";
-import FactoryOutlined from "@mui/icons-material/FactoryOutlined";
+import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import MyLocationOutlined from "@mui/icons-material/MyLocationOutlined";
 import PersonOutlineOutlined from "@mui/icons-material/PersonOutlineOutlined";
 import PlaceOutlined from "@mui/icons-material/PlaceOutlined";
@@ -207,7 +207,7 @@ export default function JobDetails({
                     </span>
                   </li>
                   <li>
-                    <FactoryOutlined fontSize="small" />
+                    <HomeOutlined fontSize="small" />
                     <span>
                       {markerName(markers, plan.facilityMarkerId)}
                       <small>Facility</small>

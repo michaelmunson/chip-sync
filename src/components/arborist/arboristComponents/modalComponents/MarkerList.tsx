@@ -1,4 +1,4 @@
-import ApartmentOutlined from "@mui/icons-material/ApartmentOutlined";
+import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import ForestOutlined from "@mui/icons-material/ForestOutlined";
 import ConstructionOutlined from "@mui/icons-material/ConstructionOutlined";
 import DirectionsOutlinedIcon from "@mui/icons-material/DirectionsOutlined";
@@ -56,7 +56,7 @@ function shortAddress(address: string) {
 function KindTile({ kind }: { kind: MarkerKind }) {
   const icon =
     kind === "facility" ? (
-      <ApartmentOutlined fontSize="small" />
+      <HomeOutlined fontSize="small" />
     ) : kind === "jobSite" ? (
       <ConstructionOutlined fontSize="small" />
     ) : (

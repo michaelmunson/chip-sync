@@ -7,7 +7,7 @@ import "../../../css/map.css";
 import { Marker, ServiceRequest, User } from '../../../types/dataTypes';
 import { Coordinates, ToggleModal } from '../../../types/generalTypes';
 import { Geo } from '../../../utils/location';
-import { activeInfoWindow, buildMarkerHtml, clearHold, darkStyle, getMapOptions, holdingArrowAnimation, icons, lightStyle, mapHoldData } from '../../../utils/map';
+import { activeInfoWindow, buildMarkerHtml, clearHold, darkStyle, getMapOptions, holdingArrowAnimation, homeGlyph, icons, lightStyle, mapHoldData } from '../../../utils/map';
 import { getGoogleMapsApiKey } from '../../../utils/secrets';
 import { useRequests } from '../../requests/RequestsContext';
 import { buildRequestInfo, buildRequestPin, PinTone } from '../../../utils/requestPins';
@@ -302,7 +302,7 @@ export default function Map({
                         borderColor: "transparent",
                     }
                     : {
-                        glyph: kind === "facility" ? "F" : "J",
+                        glyph: kind === "facility" ? homeGlyph() : "J",
                         background: kind === "facility" ? "#5c6b7a" : "#c45c26",
                         borderColor: "#ffffff",
                         glyphColor: "#ffffff",

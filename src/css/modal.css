@@ -421,6 +421,9 @@ button.group-row:hover {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
+.choice-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
 .choice {
   position: relative;
   display: flex;

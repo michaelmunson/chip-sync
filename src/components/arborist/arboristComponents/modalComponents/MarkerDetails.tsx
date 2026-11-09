@@ -1,4 +1,4 @@
-import ApartmentOutlined from "@mui/icons-material/ApartmentOutlined";
+import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ForestOutlined from "@mui/icons-material/ForestOutlined";
@@ -83,7 +83,7 @@ function useMarkerImages(marker: Marker) {
 function KindHero({ kind }: { kind: ReturnType<typeof markerKind> }) {
   const icon =
     kind === "facility" ? (
-      <ApartmentOutlined />
+      <HomeOutlined />
     ) : kind === "jobSite" ? (
       <ConstructionOutlined />
     ) : (

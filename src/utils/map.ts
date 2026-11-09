@@ -367,3 +367,17 @@ export const buildMarkerHtml = ({
         </div>
     `;
 }
+
+/** White "home" glyph (Material Home) for facility pins. */
+export const homeGlyph = (): SVGElement => {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", "20");
+    svg.setAttribute("height", "20");
+    svg.setAttribute("fill", "#ffffff");
+    svg.setAttribute("aria-hidden", "true");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z");
+    svg.appendChild(path);
+    return svg;
+};

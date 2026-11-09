@@ -60,7 +60,7 @@ test("workspace tools open their respective workflows from the dock and header",
   );
   const workflows = [
     ["Sites", "marker-list"],
-    ["Jobs", "job-list"],
+    ["Route", "route"],
     ["Activity, 1 unread", "notifications"],
     ["Settings", "settings"],
   ];
@@ -70,5 +70,5 @@ test("workspace tools open their respective workflows from the dock and header",
   });
   fireEvent.click(screen.getByRole("button", { name: "Add" }));
   expect(onAddLocation).toHaveBeenCalled();
-  expect(screen.queryByRole("button", { name: "Route" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Jobs" })).toBeNull();
 });

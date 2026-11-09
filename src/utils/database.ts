@@ -25,6 +25,7 @@ import { NotificationGQLSocket } from "./websocket";
 import { AnyObject } from "../types/generalTypes";
 import logger from "./logger";
 import { NotificationSettings, parseNotificationSettings } from "./notificationSettings";
+import { createProfileReader } from "./profileQuery";
 
 namespace DBTypes {
     export interface CreateOrg {
@@ -94,6 +95,9 @@ namespace DBTypes {
 }
 
 const client = generateClient();
+const readProfile = createProfileReader((query, variables) =>
+    client.graphql({ query, variables }) as Promise<any>
+);
 
 const getIdToken = async () => {
     const session = await fetchAuthSession();
@@ -177,12 +181,7 @@ export function cleanData(data:{[key:string]:any}|null|undefined):any{
 export const DB = {
     /* USER */
     async getUser():Promise<User|void>{
-        const res:any = await client.graphql({
-            query:getUserQuery,
-            variables:{
-                id: await getUserId()
-            }
-        });
+        const res = await readProfile(getUserQuery, { id: await getUserId() });
         const userData = res?.data?.getUser;
         if (userData){
             return cleanData(userData);
@@ -275,12 +274,7 @@ export const DB = {
     },
     /* ORGANIZATION */
     async getOrganization({organizationId}:{organizationId:string}): Promise<Organization|null> {
-        const res:any = await client.graphql({
-            query: getOrganizationQuery,
-            variables: {
-                id: organizationId
-            }
-        });
+        const res = await readProfile(getOrganizationQuery, { id: organizationId });
         return cleanData(res.data.getOrganization); 
     },
     async getOrganizationByAccessCode({accessCode}:{accessCode:string}) : Promise<Organization|void> {
@@ -523,4 +517,4 @@ export const DB = {
         socket.init();
         return socket; 
     },
-}   
+}

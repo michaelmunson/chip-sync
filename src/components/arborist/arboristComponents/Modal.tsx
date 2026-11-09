@@ -26,6 +26,7 @@ import { requestSummary } from "../../../utils/requestFormat";
 import JobList from "../../jobs/JobList";
 import JobForm from "../../jobs/JobForm";
 import JobDetails from "../../jobs/JobDetails";
+import RoutePlanner from "../../route/RoutePlanner";
 import { MarkerFormDraft } from "./modalComponents/MarkerForm";
 
 interface ModalProps {
@@ -55,6 +56,7 @@ const TITLES: Partial<Record<ModalConfig["type"], string>> = {
   "job-list": "Jobs",
   "job-form": "New job",
   "job-details": "Job",
+  route: "Plan a route",
 };
 
 export default function Modal({
@@ -191,6 +193,14 @@ export default function Modal({
         userData={userData}
         toggleModal={toggleModal}
         draft={data?.draft}
+        onAddLocation={onAddLocation}
+      />
+    ),
+    route: () => (
+      <RoutePlanner
+        userData={userData}
+        toggleModal={toggleModal}
+        currentLocation={currentLocation}
         onAddLocation={onAddLocation}
       />
     ),

@@ -4,7 +4,7 @@ import ChatBubbleOutline from "@mui/icons-material/ChatBubbleOutline";
 import FormatListBulletedOutlined from "@mui/icons-material/FormatListBulletedOutlined";
 import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
-import WorkOutlineOutlined from "@mui/icons-material/WorkOutlineOutlined";
+import RouteOutlined from "@mui/icons-material/RouteOutlined";
 import { Badge } from "@mui/material";
 import React from "react";
 import "../../../css/controls.css";
@@ -123,9 +123,9 @@ export default function Controls({
           onClick={open("marker-list")}
         />
         <DockItem
-          icon={<WorkOutlineOutlined />}
-          label="Jobs"
-          onClick={open("job-list")}
+          icon={<RouteOutlined />}
+          label="Route"
+          onClick={open("route")}
         />
         <DockItem
           icon={<AssignmentOutlined />}

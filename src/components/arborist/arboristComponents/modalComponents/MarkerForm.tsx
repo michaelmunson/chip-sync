@@ -1,4 +1,4 @@
-import ApartmentOutlined from "@mui/icons-material/ApartmentOutlined";
+import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import ConstructionOutlined from "@mui/icons-material/ConstructionOutlined";
 import EditLocationAltOutlinedIcon from "@mui/icons-material/EditLocationAltOutlined";
@@ -76,7 +76,7 @@ const KIND_OPTIONS: Array<{ value: MarkerKind; title: string; hint: string; icon
     value: "facility",
     title: "Facility",
     hint: "HQ, office, or truck depot",
-    icon: <ApartmentOutlined fontSize="small" />,
+    icon: <HomeOutlined fontSize="small" />,
   },
   {
     value: "jobSite",

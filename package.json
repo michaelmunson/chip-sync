@@ -34,6 +34,7 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
+    "start:polling": "CHOKIDAR_USEPOLLING=1 CHOKIDAR_INTERVAL=300 vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest",

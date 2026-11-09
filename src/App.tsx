@@ -8,6 +8,7 @@ import Loader from './components/utils/Loader';
 import Register from './components/register/Register';
 import ArboristApp from './components/arborist/ArboristApp';
 import GardnerApp from './components/gardner/GardnerApp';
+import { Alert, Button } from '@mui/material';
 
 type AppProps = {
     user?:CognitoUser,
@@ -17,16 +18,36 @@ type AppProps = {
 function App({user, signOut}:AppProps) {
     const [loading, setLoading] = useState<boolean>(true);
     const [userData, setUserData] = useState<User>();
+    const [loadError, setLoadError] = useState(false);
+    const [loadAttempt, setLoadAttempt] = useState(0);
     
     useEffect(() => {
-        DB.getUser().then(user => {
-            console.log("User: ", user); 
-            if (user) setUserData(user); 
-            setLoading(false);
-        });
-    }, []);
+        let active = true;
+        setLoading(true);
+        setLoadError(false);
+        DB.getUser()
+            .then(user => {
+                if (active && user) setUserData(user);
+            })
+            .catch(error => {
+                console.error("Could not load workspace", error);
+                if (active) setLoadError(true);
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+        return () => { active = false; };
+    }, [loadAttempt]);
 
     if (loading) return <Loader isFullScreen={true}/>
+
+    if (loadError) return (
+        <main className="app-loader">
+            <Alert severity="error">We couldn’t load your workspace. Please try again.</Alert>
+            <Button variant="contained" onClick={() => setLoadAttempt(attempt => attempt + 1)}>Try again</Button>
+            {signOut && <Button onClick={signOut}>Sign out</Button>}
+        </main>
+    );
 
     if (!userData) return <Register setUserData={setUserData}/>
 
