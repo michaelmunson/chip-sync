@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from '@mui/material/styles';
@@ -6,6 +6,7 @@ import Theme from './utils/theme';
 import reportWebVitals from './reportWebVitals';
 import { Amplify } from 'aws-amplify';
 import { loadAmplifyOutputs } from './utils/amplifyOutputs';
+import { resolveLandingRoute } from './utils/landing';
 import "@aws-amplify/ui-react/styles.css";
 import "./css/tokens.css";
 import "./css/animations.css";
@@ -22,9 +23,20 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+// chipsync.co (plus www. / get., and /landing-page on localhost) serves the marketing site; every other host, including app.chipsync.co, gets the app.
+// It's lazy-loaded so the app bundle doesn't carry it, and it never mounts the authenticator.
+const landingRoute = resolveLandingRoute(window.location.hostname, window.location.pathname);
+const LandingApp = landingRoute ? React.lazy(() => import('./components/landing/LandingApp')) : null;
+
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={Theme.light}><App /></ThemeProvider>
+    {landingRoute && LandingApp ? (
+      <Suspense fallback={null}>
+        <LandingApp initialRoute={landingRoute} />
+      </Suspense>
+    ) : (
+      <ThemeProvider theme={Theme.light}><App /></ThemeProvider>
+    )}
   </React.StrictMode>
 );
 
